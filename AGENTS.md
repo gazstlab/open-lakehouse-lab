@@ -126,6 +126,9 @@ PRs should be small and stage-oriented. A PR should normally target one issue or
 - Apache Iceberg is the table format for Silver and Gold.
 - DuckDB is the SQL execution engine for dbt.
 - dbt should own structured transformations from Raw to Silver and Silver to Gold.
+- Initialize the dbt project with `dbt-core` using `dbt init`; do not hand-roll the initial dbt project scaffold unless a later issue explicitly requires a custom layout.
+- Airflow project scaffolding and local Airflow workflows should use Astro CLI.
+- Use Astronomer Cosmos to integrate dbt with Airflow DAGs instead of manually wiring every dbt model as custom Airflow tasks.
 - The MVP should avoid `MERGE INTO`, `ALTER TABLE`, `UPDATE` and `DELETE` on Iceberg tables unless a later issue explicitly introduces safe support.
 - Prefer full-refresh idempotent behavior in the initial implementation.
 

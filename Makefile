@@ -50,7 +50,7 @@ lint-yaml:
 
 lint-dbt:
 	@if [ -d $(DBT_DIR) ]; then \
-		sqlfluff lint $(DBT_DIR)/models --dialect duckdb --templater dbt; \
+		cd $(DBT_DIR) && sqlfluff lint models --dialect duckdb --templater dbt; \
 	else \
 		echo "No dbt directory found. Skipping SQLFluff."; \
 	fi

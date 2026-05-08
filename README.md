@@ -2,6 +2,29 @@
 
 Open Lakehouse Lab is a 100% open source study project for modern data lakehouse engineering.
 
+## Project structure
+
+The Stage 01 layout separates the local lakehouse into explicit implementation areas:
+
+```text
+airflow/              Astro CLI Airflow project scaffold.
+airflow/dags/         Airflow DAG definitions.
+ingestion/common/     Shared ingestion utilities.
+ingestion/open_meteo/ Open-Meteo extractor code.
+ingestion/usgs/       USGS earthquake extractor code.
+ingestion/bcb/        Banco Central do Brasil SGS extractor code.
+dbt/                  dbt Core project initialized with dbt init.
+dbt/models/           Raw source, staging, Silver, intermediate and marts models.
+docker/               Local runtime Dockerfiles.
+k8s/                  kind, MinIO, Polaris, Airflow, monitoring and RBAC manifests.
+metadata/             Pipeline, quality, catalog, Iceberg and freshness artifacts.
+docs/adr/             Architecture decision records.
+docs/runbooks/        Operational runbooks.
+docs/architecture/    Architecture documentation.
+```
+
+The Airflow scaffold is managed with Astro CLI. The Airflow runtime requirements include Astronomer Cosmos with the dbt DuckDB extra so later stages can orchestrate dbt models from Airflow without hand-wiring each model as a custom task.
+
 ## Development quality checks
 
 Install development dependencies:

@@ -16,3 +16,5 @@ ignore: |
   target/
   .ruff_cache/
   node_modules/
+  airflow/airflow_settings.yaml
+  dbt/.user.yml

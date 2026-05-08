@@ -1,0 +1,8 @@
+---
+open_lakehouse_lab:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../tmp/open_lakehouse_lab.duckdb
+      threads: 4
