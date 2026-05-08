@@ -88,3 +88,34 @@ jobs:
             echo "Example: feat(k8s): add kind cluster configuration"
             exit 1
           fi
+
+  conventions:
+    name: Conventions
+    runs-on: ubuntu-latest
+    needs:
+      - validate-pr-title
+      - validate-commit-messages
+    if: always()
+
+    steps:
+      - name: Validate previous convention jobs
+        env:
+          PR_TITLE_RESULT: ${{ needs.validate-pr-title.result }}
+          COMMIT_MESSAGES_RESULT: ${{ needs.validate-commit-messages.result }}
+        run: |
+          set -euo pipefail
+
+          echo "Validate PR title result: ${PR_TITLE_RESULT}"
+          echo "Validate commit messages result: ${COMMIT_MESSAGES_RESULT}"
+
+          if [[ "${PR_TITLE_RESULT}" != "success" ]]; then
+            echo "PR title validation failed."
+            exit 1
+          fi
+
+          if [[ "${COMMIT_MESSAGES_RESULT}" != "success" ]]; then
+            echo "Commit message validation failed."
+            exit 1
+          fi
+
+          echo "All convention checks passed."
