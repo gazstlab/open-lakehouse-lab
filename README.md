@@ -31,6 +31,12 @@ Stage 02 provisions a local kind cluster and the base `data-platform` namespace.
 See `docs/runbooks/local-kind-cluster.md` for prerequisites, lifecycle commands
 and validation steps.
 
+## Local Object Storage
+
+Stage 03 deploys MinIO in the local Kubernetes cluster and initializes the
+`lakehouse` bucket. See `docs/runbooks/minio-object-storage.md` for deployment,
+port-forward and path conventions.
+
 ## Development quality checks
 
 Install development dependencies:

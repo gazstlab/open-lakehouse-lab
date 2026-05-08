@@ -1,10 +1,13 @@
-.PHONY: help install-dev check-requirements cluster-create cluster-delete kubectl-context cluster-status lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
+.PHONY: help install-dev check-requirements cluster-create cluster-delete kubectl-context cluster-status deploy-minio delete-minio minio-status port-forward-minio lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
 
 PYTHON_DIRS := ingestion airflow transformations tests scripts
 EXISTING_PYTHON_DIRS := $(wildcard $(PYTHON_DIRS))
 K8S_DIR := k8s
 KIND_CONFIG := $(K8S_DIR)/kind/kind-config.yaml
 K8S_NAMESPACE_MANIFEST := $(K8S_DIR)/namespaces/data-platform.yaml
+MINIO_DIR := $(K8S_DIR)/minio
+MINIO_NAMESPACE ?= data-platform
+MINIO_SERVICE ?= minio
 K8S_MANIFEST_DIRS := \
 	$(K8S_DIR)/namespaces \
 	$(K8S_DIR)/minio \
@@ -30,6 +33,10 @@ help:
 	@echo "  make cluster-delete    Delete the local kind cluster"
 	@echo "  make kubectl-context   Select the local kind kubectl context"
 	@echo "  make cluster-status    Show local kind nodes and base namespace"
+	@echo "  make deploy-minio      Deploy MinIO and create the lakehouse bucket"
+	@echo "  make delete-minio      Delete MinIO manifests"
+	@echo "  make minio-status      Show MinIO pods, service and bucket job"
+	@echo "  make port-forward-minio Forward MinIO API and console ports"
 	@echo "  make lint-python       Run Ruff lint"
 	@echo "  make test-python       Run pytest when tests exist"
 	@echo "  make lint-yaml         Run yamllint"
@@ -60,6 +67,29 @@ kubectl-context:
 cluster-status:
 	kubectl --context $(KUBECTL_CONTEXT) get nodes
 	kubectl --context $(KUBECTL_CONTEXT) get namespace data-platform
+
+deploy-minio:
+	kubectl apply -f $(MINIO_DIR)/secret.yaml
+	kubectl apply -f $(MINIO_DIR)/deployment.yaml
+	kubectl apply -f $(MINIO_DIR)/service.yaml
+	kubectl -n $(MINIO_NAMESPACE) rollout status deployment/minio --timeout=180s
+	kubectl -n $(MINIO_NAMESPACE) delete job minio-create-bucket --ignore-not-found
+	kubectl apply -f $(MINIO_DIR)/job-create-bucket.yaml
+	kubectl -n $(MINIO_NAMESPACE) wait --for=condition=complete job/minio-create-bucket --timeout=180s
+
+delete-minio:
+	kubectl delete -f $(MINIO_DIR)/job-create-bucket.yaml --ignore-not-found
+	kubectl delete -f $(MINIO_DIR)/service.yaml --ignore-not-found
+	kubectl delete -f $(MINIO_DIR)/deployment.yaml --ignore-not-found
+	kubectl delete -f $(MINIO_DIR)/secret.yaml --ignore-not-found
+
+minio-status:
+	kubectl -n $(MINIO_NAMESPACE) get pods -l app.kubernetes.io/name=minio
+	kubectl -n $(MINIO_NAMESPACE) get service $(MINIO_SERVICE)
+	kubectl -n $(MINIO_NAMESPACE) get job minio-create-bucket
+
+port-forward-minio:
+	kubectl -n $(MINIO_NAMESPACE) port-forward svc/$(MINIO_SERVICE) 9000:9000 9001:9001
 
 lint-python:
 	@if [ -n "$(EXISTING_PYTHON_DIRS)" ]; then \
