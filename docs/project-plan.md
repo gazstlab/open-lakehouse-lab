@@ -4,7 +4,7 @@
 
 O **Open Lakehouse Lab** e um projeto de estudo 100% open source para demonstrar uma arquitetura lakehouse moderna executada localmente, sem dependencia de servicos cloud pagos.
 
-A proposta e criar um laboratorio compartilhavel para estudar engenharia de dados moderna com Kubernetes, Airflow, MinIO, Apache Iceberg, Apache Polaris, DuckDB e dbt.
+A proposta e criar um laboratorio compartilhavel para estudar engenharia de dados moderna com Kubernetes, Airflow, MinIO, Apache Iceberg, Apache Polaris, DuckDB, dbt, Prometheus e Grafana.
 
 ## Objetivos
 
@@ -18,7 +18,9 @@ A proposta e criar um laboratorio compartilhavel para estudar engenharia de dado
 - Usar DuckDB como engine SQL local.
 - Usar dbt-duckdb para transformar Raw em Silver e Silver em Gold.
 - Consumir APIs publicas com atualizacao diaria ou superior.
-- Criar dashboards visuais para demonstracao educacional.
+- Usar Prometheus para coleta de metricas operacionais.
+- Usar Grafana para paineis de observabilidade da infraestrutura e dos pipelines.
+- Documentar a arquitetura, os contratos de dados, os runbooks e as decisoes tecnicas.
 
 ## Stack principal
 
@@ -33,7 +35,12 @@ A proposta e criar um laboratorio compartilhavel para estudar engenharia de dado
 | Engine SQL | DuckDB |
 | Transformacao | dbt-duckdb |
 | Ingestao | Python |
-| Dashboard | Next.js |
+| Metricas | Prometheus |
+| Observabilidade operacional | Grafana |
+| Estado do Kubernetes | kube-state-metrics |
+| Metricas dos nos | Node Exporter |
+| Metricas do Airflow | StatsD Exporter |
+| Documentacao | Markdown |
 
 ## Arquitetura
 
@@ -49,8 +56,10 @@ Public APIs
   -> Silver Iceberg Tables
   -> dbt-duckdb Pod
   -> Gold Iceberg Tables
-  -> Dashboard Publisher
-  -> Next.js Dashboard
+  -> Metadata Collection
+  -> Prometheus Metrics
+  -> Grafana Operational Panels
+  -> Documentation Artifacts
 ```
 
 ## Camadas do lakehouse
@@ -107,10 +116,10 @@ gold.pipeline_health_daily
 Responsabilidades:
 
 - agregacoes analiticas;
-- metricas para dashboards;
-- modelos finais de consumo;
+- metricas consolidadas para consumo por consultas;
+- modelos finais de estudo;
 - testes dbt;
-- exposicao para o site.
+- suporte a exploracao tecnica via DuckDB, Polaris e metadados Iceberg.
 
 ## Fontes publicas iniciais
 
@@ -153,7 +162,6 @@ Na primeira versao, sera usada uma estrategia de full refresh idempotente. O MVP
 
 ```text
 open-lakehouse-lab/
-├── apps/website/
 ├── airflow/dags/
 ├── ingestion/
 ├── dbt/
@@ -169,6 +177,7 @@ open-lakehouse-lab/
 │   ├── minio/
 │   ├── polaris/
 │   ├── airflow/
+│   ├── monitoring/
 │   └── rbac/
 ├── metadata/
 ├── docs/
@@ -194,31 +203,13 @@ start
   -> dbt_test_silver
   -> dbt_run_intermediate_gold
   -> dbt_test_gold
-  -> export_dashboard_json
   -> collect_iceberg_metadata
+  -> update_data_catalog
+  -> publish_pipeline_metrics
   -> end
 ```
 
-## Dashboards educacionais
-
-Paginas sugeridas:
-
-```text
-Home
-Architecture
-Lakehouse Layers
-Iceberg Catalog Explorer
-Snapshot Timeline
-Pipeline Monitor
-Data Catalog
-Climate Dashboard
-Earthquake Dashboard
-Macro Indicators Dashboard
-dbt Lineage
-Technical Decisions
-```
-
-## Observabilidade
+## Observabilidade e catalogacao
 
 Metadados a serem coletados:
 
@@ -229,7 +220,92 @@ Metadados a serem coletados:
 - freshness por dataset;
 - snapshots Iceberg;
 - qualidade por camada;
-- catalogo de dados.
+- catalogo de dados;
+- schemas das tabelas;
+- localizacao fisica das tabelas no MinIO;
+- historico de execucoes da DAG.
+
+Artefatos sugeridos:
+
+```text
+metadata/pipeline-runs/
+metadata/data-quality-results/
+metadata/data-catalog/
+metadata/iceberg-snapshots/
+metadata/source-freshness/
+```
+
+## Observabilidade com Prometheus e Grafana
+
+O projeto deve incluir uma stack de observabilidade operacional para monitorar a infraestrutura local e os pipelines.
+
+Componentes:
+
+- Prometheus;
+- Grafana;
+- kube-state-metrics;
+- Node Exporter;
+- StatsD Exporter;
+- ServiceMonitors, quando aplicavel.
+
+Instalacao recomendada:
+
+```text
+kube-prometheus-stack via Helm
+```
+
+Metricas do Kubernetes:
+
+- pods em execucao;
+- pods com falha;
+- restarts de containers;
+- uso de CPU;
+- uso de memoria;
+- uso por namespace;
+- status dos deployments e statefulsets.
+
+Metricas do Airflow:
+
+- DAG runs;
+- task duration;
+- task failures;
+- scheduler heartbeat;
+- numero de tasks em sucesso, falha e retry.
+
+Metricas dos pipelines:
+
+- registros ingeridos por fonte;
+- registros rejeitados;
+- duracao por etapa;
+- freshness por dataset;
+- status da ultima execucao;
+- quantidade de snapshots Iceberg gerados.
+
+Metricas do MinIO e Polaris:
+
+- disponibilidade dos servicos;
+- uso de storage;
+- quantidade de objetos;
+- latencia ou erros, quando expostos;
+- saude do catalogo Polaris.
+
+Estrutura sugerida:
+
+```text
+k8s/monitoring/
+├── values.yaml
+├── servicemonitors/
+├── prometheus-rules/
+└── grafana-panels/
+```
+
+Comandos sugeridos no Makefile:
+
+```text
+deploy-monitoring
+port-forward-prometheus
+port-forward-grafana
+```
 
 ## Documentacao obrigatoria
 
@@ -245,7 +321,7 @@ Metadados a serem coletados:
 007-dbt-duckdb-for-raw-to-gold.md
 008-custom-dbt-iceberg-materialization.md
 009-full-refresh-strategy.md
-010-educational-dashboard-experience.md
+010-operational-observability-with-prometheus-grafana.md
 ```
 
 ### Runbooks
@@ -258,6 +334,8 @@ rebuild-gold-layer.md
 inspect-iceberg-snapshots.md
 reset-local-environment.md
 validate-data-quality.md
+investigate-prometheus-target-down.md
+investigate-airflow-metric-failure.md
 ```
 
 ## Fases de implementacao
@@ -300,21 +378,34 @@ validate-data-quality.md
 - Aplicar testes dbt.
 - Publicar Gold como Iceberg.
 
-### Fase 6 - Dashboard
+### Fase 6 - Observabilidade e catalogacao
 
-- Criar site Next.js.
-- Criar Architecture Explorer.
-- Criar Iceberg Catalog Explorer.
-- Criar Snapshot Timeline.
-- Criar dashboards de clima, terremotos e indicadores macro.
+- Coletar metadados de execucao.
+- Coletar snapshots Iceberg.
+- Gerar data catalog.
+- Registrar freshness por fonte.
+- Registrar resultados de qualidade.
+- Documentar exemplos de consultas tecnicas.
 
-### Fase 7 - Documentacao
+### Fase 7 - Prometheus e Grafana
+
+- Instalar kube-prometheus-stack.
+- Configurar Prometheus.
+- Configurar Grafana.
+- Configurar kube-state-metrics.
+- Configurar Node Exporter.
+- Configurar StatsD Exporter para metricas do Airflow.
+- Criar paineis operacionais para Kubernetes, Airflow, MinIO, Polaris e pipelines.
+- Criar regras de alerta para falhas criticas.
+
+### Fase 8 - Documentacao
 
 - Completar README.
 - Criar ADRs.
 - Criar runbooks.
 - Criar contratos de dados.
-- Adicionar screenshots e diagramas.
+- Adicionar diagramas de arquitetura.
+- Documentar limitacoes e proximos passos.
 
 ## Limitacoes conhecidas
 
@@ -322,23 +413,24 @@ validate-data-quality.md
 - O MVP usara full refresh, nao merge incremental.
 - Mudancas de schema serao tratadas por recriacao controlada da tabela.
 - MinIO sera usado como object storage local para estudo.
+- Prometheus e Grafana serao usados para observabilidade operacional local.
 
 ## Evolucoes futuras
 
 - Adicionar GDELT.
 - Adicionar manutencao e compactacao Iceberg.
-- Adicionar time travel visual.
+- Adicionar exemplos de time travel.
 - Adicionar Spark como engine complementar.
 - Adicionar Trino para consulta multi-engine.
 - Adicionar OpenLineage ou Marquez.
-- Adicionar Prometheus e Grafana.
+- Expandir Prometheus e Grafana com alertas e SLOs.
 
 ## Mensagem central
 
 O **Open Lakehouse Lab** demonstra como estudar e construir uma arquitetura lakehouse moderna, 100% open source, usando:
 
 ```text
-Kubernetes + Airflow + MinIO + Apache Iceberg + Polaris + DuckDB + dbt
+Kubernetes + Airflow + MinIO + Apache Iceberg + Polaris + DuckDB + dbt + Prometheus + Grafana
 ```
 
 A arquitetura foi pensada para ser executada localmente, sem custo cloud, e servir como base educacional para evolucao futura para stacks em nuvem.
