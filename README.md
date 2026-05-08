@@ -25,6 +25,12 @@ docs/architecture/    Architecture documentation.
 
 The Airflow scaffold is managed with Astro CLI. The Airflow runtime requirements include Astronomer Cosmos with the dbt DuckDB extra so later stages can orchestrate dbt models from Airflow without hand-wiring each model as a custom task.
 
+## Local Kubernetes cluster
+
+Stage 02 provisions a local kind cluster and the base `data-platform` namespace.
+See `docs/runbooks/local-kind-cluster.md` for prerequisites, lifecycle commands
+and validation steps.
+
 ## Development quality checks
 
 Install development dependencies:

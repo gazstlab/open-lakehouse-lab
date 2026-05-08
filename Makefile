@@ -1,8 +1,20 @@
-.PHONY: help install-dev check-requirements lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
+.PHONY: help install-dev check-requirements cluster-create cluster-delete kubectl-context cluster-status lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
 
 PYTHON_DIRS := ingestion airflow transformations tests scripts
 EXISTING_PYTHON_DIRS := $(wildcard $(PYTHON_DIRS))
 K8S_DIR := k8s
+KIND_CONFIG := $(K8S_DIR)/kind/kind-config.yaml
+K8S_NAMESPACE_MANIFEST := $(K8S_DIR)/namespaces/data-platform.yaml
+K8S_MANIFEST_DIRS := \
+	$(K8S_DIR)/namespaces \
+	$(K8S_DIR)/minio \
+	$(K8S_DIR)/polaris \
+	$(K8S_DIR)/airflow \
+	$(K8S_DIR)/monitoring \
+	$(K8S_DIR)/rbac
+EXISTING_K8S_MANIFEST_DIRS := $(wildcard $(K8S_MANIFEST_DIRS))
+KIND_CLUSTER_NAME ?= open-lakehouse-lab
+KUBECTL_CONTEXT ?= kind-$(KIND_CLUSTER_NAME)
 DOCKER_DIR := docker
 DBT_DIR := dbt
 DOCS_DIR := docs
@@ -14,6 +26,10 @@ help:
 	@echo "  make ci-pr             Run the same checks used by GitHub Actions"
 	@echo "  make pre-push          Run checks before pushing"
 	@echo "  make check-requirements Validate requirements files against pyproject.toml"
+	@echo "  make cluster-create    Create the local kind cluster and base namespace"
+	@echo "  make cluster-delete    Delete the local kind cluster"
+	@echo "  make kubectl-context   Select the local kind kubectl context"
+	@echo "  make cluster-status    Show local kind nodes and base namespace"
 	@echo "  make lint-python       Run Ruff lint"
 	@echo "  make test-python       Run pytest when tests exist"
 	@echo "  make lint-yaml         Run yamllint"
@@ -30,6 +46,20 @@ install-dev:
 
 check-requirements:
 	$(PYTHON) scripts/check_requirements_sync.py
+
+cluster-create:
+	kind create cluster --name $(KIND_CLUSTER_NAME) --config $(KIND_CONFIG)
+	kubectl apply -f $(K8S_NAMESPACE_MANIFEST)
+
+cluster-delete:
+	kind delete cluster --name $(KIND_CLUSTER_NAME)
+
+kubectl-context:
+	kubectl config use-context $(KUBECTL_CONTEXT)
+
+cluster-status:
+	kubectl --context $(KUBECTL_CONTEXT) get nodes
+	kubectl --context $(KUBECTL_CONTEXT) get namespace data-platform
 
 lint-python:
 	@if [ -n "$(EXISTING_PYTHON_DIRS)" ]; then \
@@ -77,14 +107,14 @@ dbt-test:
 	fi
 
 validate-k8s:
-	@if [ -d $(K8S_DIR) ]; then \
+	@if [ -n "$(EXISTING_K8S_MANIFEST_DIRS)" ]; then \
 		if command -v kubeconform >/dev/null 2>&1; then \
-			kubeconform -summary -strict $(K8S_DIR); \
+			kubeconform -summary -strict $(EXISTING_K8S_MANIFEST_DIRS); \
 		else \
 			echo "kubeconform not installed. Skipping Kubernetes validation."; \
 		fi; \
 	else \
-		echo "No k8s directory found. Skipping Kubernetes validation."; \
+		echo "No Kubernetes manifest directories found. Skipping Kubernetes validation."; \
 	fi
 
 lint-docker:
