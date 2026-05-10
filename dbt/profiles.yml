@@ -1,8 +1,19 @@
 ---
 open_lakehouse_lab:
-  target: dev
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
   outputs:
     dev:
       type: duckdb
-      path: open_lakehouse_lab.duckdb
-      threads: 4
+      path: "{{ env_var('DBT_DUCKDB_PATH', 'target/open_lakehouse_lab.duckdb') }}"
+      threads: "{{ env_var('DBT_THREADS', '4') | int }}"
+      extensions:
+        - httpfs
+        - parquet
+        - iceberg
+      settings:
+        s3_region: "{{ env_var('AWS_REGION', 'us-east-1') }}"
+        s3_endpoint: "{{ env_var('DBT_S3_ENDPOINT', 'localhost:9000') }}"
+        s3_url_style: path
+        s3_use_ssl: false
+        s3_access_key_id: "{{ env_var('AWS_ACCESS_KEY_ID', 'minioadmin') }}"
+        s3_secret_access_key: "{{ env_var('AWS_SECRET_ACCESS_KEY', 'minioadmin123') }}"
