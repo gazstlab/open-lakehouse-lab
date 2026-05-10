@@ -20,10 +20,20 @@ spec:
         open-lakehouse-lab/stage: "04"
     spec:
       restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: bootstrap-catalog
           image: curlimages/curl:8.11.1
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
           env:
             - name: POLARIS_ROOT_CLIENT_ID
               valueFrom:
@@ -111,3 +121,9 @@ spec:
               echo "Failed to create Polaris catalog. HTTP ${HTTP_STATUS}."
               cat /tmp/create-catalog-response.json || true
               exit 1
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
