@@ -68,7 +68,7 @@ Expected internal endpoints:
 
 ```text
 Catalog API:    http://polaris.data-platform.svc.cluster.local:8181
-Management API: http://polaris.data-platform.svc.cluster.local:8182
+Management API: http://polaris.data-platform.svc.cluster.local:8181
 Health check:   http://polaris.data-platform.svc.cluster.local:8182/q/health/ready
 ```
 
@@ -84,7 +84,7 @@ Local endpoints:
 
 ```text
 Catalog API:    http://localhost:8181
-Management API: http://localhost:8182
+Management API: http://localhost:8181
 Health check:   http://localhost:8182/q/health/ready
 ```
 

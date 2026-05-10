@@ -24,7 +24,10 @@ spec:
         open-lakehouse-lab/stage: "04"
     spec:
       securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
         runAsNonRoot: true
+        runAsUser: 1000
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -63,6 +66,8 @@ spec:
               value: in-memory
             - name: QUARKUS_OTEL_SDK_DISABLED
               value: "true"
+            - name: QUARKUS_LOG_FILE_ENABLE
+              value: "false"
             - name: AWS_REGION
               value: us-east-1
             - name: AWS_ACCESS_KEY_ID

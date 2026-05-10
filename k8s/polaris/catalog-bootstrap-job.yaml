@@ -21,7 +21,10 @@ spec:
     spec:
       restartPolicy: OnFailure
       securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
         runAsNonRoot: true
+        runAsUser: 1000
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -56,6 +59,8 @@ spec:
                   name: polaris-local-credentials
                   key: AWS_SECRET_ACCESS_KEY
             - name: POLARIS_MANAGEMENT_URL
+              value: http://polaris.data-platform.svc.cluster.local:8181
+            - name: POLARIS_HEALTH_URL
               value: http://polaris.data-platform.svc.cluster.local:8182
             - name: CATALOG_NAME
               value: lakehouse
@@ -69,7 +74,7 @@ spec:
           args:
             - |
               echo "Waiting for Polaris management API..."
-              until curl -fsS "${POLARIS_MANAGEMENT_URL}/q/health/ready" >/dev/null; do
+              until curl -fsS "${POLARIS_HEALTH_URL}/q/health/ready" >/dev/null; do
                 sleep 5
               done
 
