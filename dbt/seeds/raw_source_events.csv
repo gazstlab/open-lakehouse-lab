@@ -1,0 +1,4 @@
+source,dataset,ingestion_date,loaded_at,payload
+fixture,weather_sample,2026-05-10,2026-05-10T00:00:00Z,"{""city"":""Tubarão"",""temperature_celsius"":22.5,""observed_at"":""2026-05-10T00:00:00Z""}"
+fixture,earthquake_sample,2026-05-10,2026-05-10T00:01:00Z,"{""place"":""sample location"",""magnitude"":4.2,""observed_at"":""2026-05-10T00:01:00Z""}"
+fixture,macro_indicator_sample,2026-05-10,2026-05-10T00:02:00Z,"{""indicator"":""sample_rate"",""value"":10.75,""observed_at"":""2026-05-10T00:02:00Z""}"
