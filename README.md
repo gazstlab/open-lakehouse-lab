@@ -25,6 +25,21 @@ docs/architecture/    Architecture documentation.
 
 The Airflow scaffold is managed with Astro CLI. The Airflow runtime requirements include Astronomer Cosmos with the dbt DuckDB extra so later stages can orchestrate dbt models from Airflow without hand-wiring each model as a custom task.
 
+## Implementation order
+
+The lakehouse foundation is intentionally implemented before concrete source
+adapters. The current architectural order is:
+
+```text
+MinIO -> Polaris -> Airflow -> dbt + DuckDB + Polaris -> Raw contract
+  -> generic source adapters -> public API adapters -> Silver -> Gold
+```
+
+This keeps the core lakehouse independent from Open-Meteo, USGS, Banco Central
+or any other specific source. Source adapters write to a generic Raw contract
+that dbt can consume, and the dbt foundation must compile with local fixtures
+before real ingestion is required.
+
 ## Local Kubernetes cluster
 
 Stage 02 provisions a local kind cluster and the base `data-platform` namespace.

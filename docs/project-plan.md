@@ -17,7 +17,8 @@ A proposta e criar um laboratorio compartilhavel para estudar engenharia de dado
 - Usar Apache Polaris como Iceberg REST Catalog.
 - Usar DuckDB como engine SQL local.
 - Usar dbt-duckdb para transformar Raw em Silver e Silver em Gold.
-- Consumir APIs publicas com atualizacao diaria ou superior.
+- Definir a fundacao dbt + DuckDB + Polaris antes das fontes concretas.
+- Consumir APIs publicas com atualizacao diaria ou superior como adapters plugaveis.
 - Usar Prometheus para coleta de metricas operacionais.
 - Usar Grafana para paineis de observabilidade da infraestrutura e dos pipelines.
 - Documentar a arquitetura, os contratos de dados, os runbooks e as decisoes tecnicas.
@@ -34,7 +35,8 @@ A proposta e criar um laboratorio compartilhavel para estudar engenharia de dado
 | Catalogo Iceberg | Apache Polaris |
 | Engine SQL | DuckDB |
 | Transformacao | dbt-duckdb |
-| Ingestao | Python |
+| Contrato Raw | Paths e schemas genericos consumidos pelo dbt |
+| Ingestao | Source adapters Python plugaveis |
 | Metricas | Prometheus |
 | Observabilidade operacional | Grafana |
 | Estado do Kubernetes | kube-state-metrics |
@@ -45,11 +47,12 @@ A proposta e criar um laboratorio compartilhavel para estudar engenharia de dado
 ## Arquitetura
 
 ```text
-Public APIs
+Source adapters
+  -> API HTTP, arquivo local, fixture, object storage ou futuras fontes batch/stream
   -> Airflow DAG
   -> KubernetesPodOperator
-  -> Python Extractor Pods
-  -> MinIO Raw Zone
+  -> Source Adapter Pods
+  -> MinIO Raw Zone contract
   -> dbt-duckdb Pod
   -> DuckDB Iceberg Extension
   -> Apache Polaris REST Catalog
@@ -66,14 +69,18 @@ Public APIs
 
 ### Raw
 
-A Raw armazena os dados brutos exatamente como vieram das APIs publicas.
+A Raw armazena os dados brutos exatamente como vieram das fontes, sem acoplar o
+core lakehouse a um tipo especifico de origem.
+
+O contrato Raw deve ser definido antes dos adapters concretos. Assim, o dbt pode
+compilar e validar a fundacao lakehouse com fixtures locais, enquanto APIs
+publicas entram depois como uma implementacao de fonte.
 
 Exemplo:
 
 ```text
-s3://lakehouse/raw/source=open_meteo/ingestion_date=YYYY-MM-DD/data.json
-s3://lakehouse/raw/source=usgs/ingestion_date=YYYY-MM-DD/data.json
-s3://lakehouse/raw/source=bcb/ingestion_date=YYYY-MM-DD/data.json
+s3://lakehouse/raw/source=<source>/dataset=<dataset>/ingestion_date=YYYY-MM-DD/data.json
+s3://lakehouse/raw/source=<source>/dataset=<dataset>/ingestion_date=YYYY-MM-DD/metadata.json
 ```
 
 ### Silver
@@ -121,6 +128,21 @@ Responsabilidades:
 - testes dbt;
 - suporte a exploracao tecnica via DuckDB, Polaris e metadados Iceberg.
 
+## Source adapters
+
+Adapters de fonte sao uma camada plugavel acima do contrato Raw.
+
+Tipos de fonte previstos:
+
+- API HTTP;
+- arquivo local;
+- fixture deterministica para testes;
+- object storage;
+- futuras fontes batch ou stream.
+
+As fontes publicas iniciais continuam fazendo parte do MVP, mas nao devem ser
+pre-requisito para criar a fundacao dbt + DuckDB + Polaris.
+
 ## Fontes publicas iniciais
 
 ### Open-Meteo
@@ -137,7 +159,8 @@ Series temporais economicas e financeiras publicas.
 
 ## dbt + DuckDB + Polaris
 
-O projeto usara o caminho mais avancado:
+O projeto usara o caminho mais avancado como fundacao lakehouse desacoplada de
+ingestao:
 
 ```text
 dbt-duckdb
@@ -155,6 +178,11 @@ raw_sources
   -> intermediate
   -> marts
 ```
+
+`raw_sources` deve representar o contrato Raw generico, nao uma lista fixa de
+APIs. As primeiras validacoes tecnicas devem funcionar com fixture local para que
+`dbt parse` e `dbt compile` nao dependam de extractors Python, Airflow DAGs de
+ingestao ou disponibilidade externa de APIs.
 
 Na primeira versao, sera usada uma estrategia de full refresh idempotente. O MVP deve evitar `MERGE INTO`, `ALTER TABLE`, `UPDATE` e `DELETE` em tabelas Iceberg.
 
@@ -196,9 +224,7 @@ Fluxo:
 
 ```text
 start
-  -> extract_open_meteo
-  -> extract_usgs
-  -> extract_bcb
+  -> source_adapter_tasks
   -> dbt_run_staging_silver
   -> dbt_test_silver
   -> dbt_run_intermediate_gold
@@ -350,20 +376,30 @@ investigate-airflow-metric-failure.md
 - Configurar RBAC.
 - Validar DAG hello-world com `KubernetesPodOperator`.
 
-### Fase 2 - Raw
-
-- Criar extratores Python.
-- Gravar dados brutos no MinIO.
-- Registrar metadados de ingestao.
-
-### Fase 3 - dbt + DuckDB + Polaris
+### Fase 2 - dbt + DuckDB + Polaris
 
 - Criar projeto dbt.
 - Configurar DuckDB com `httpfs`, `parquet` e `iceberg`.
 - Criar macro para anexar Polaris.
 - Criar materializacao customizada `iceberg_table`.
+- Criar contrato Raw generico consumido pelo dbt.
+- Criar fixture local minima para validacao sem ingestao.
 
-### Fase 4 - Silver Iceberg
+### Fase 3 - Raw plugavel
+
+- Criar runtime generico de source adapters.
+- Criar abstracoes comuns para adapters de fonte.
+- Criar adapter de fixture/local file para testes sem rede externa.
+- Gravar dados brutos no MinIO seguindo o contrato Raw.
+- Registrar metadados de ingestao.
+
+### Fase 4 - Fontes publicas
+
+- Implementar adapters Open-Meteo, USGS e Banco Central SGS.
+- Criar tasks Airflow para cada adapter.
+- Garantir que testes rapidos usem fixtures e nao dependam de APIs reais.
+
+### Fase 5 - Silver Iceberg
 
 - Criar staging models.
 - Criar modelos Silver.
@@ -371,14 +407,14 @@ investigate-airflow-metric-failure.md
 - Aplicar testes dbt.
 - Publicar Silver como Iceberg.
 
-### Fase 5 - Gold Iceberg
+### Fase 6 - Gold Iceberg
 
 - Criar modelos intermediate.
 - Criar marts Gold.
 - Aplicar testes dbt.
 - Publicar Gold como Iceberg.
 
-### Fase 6 - Observabilidade e catalogacao
+### Fase 7 - Observabilidade e catalogacao
 
 - Coletar metadados de execucao.
 - Coletar snapshots Iceberg.
@@ -387,7 +423,7 @@ investigate-airflow-metric-failure.md
 - Registrar resultados de qualidade.
 - Documentar exemplos de consultas tecnicas.
 
-### Fase 7 - Prometheus e Grafana
+### Fase 8 - Prometheus e Grafana
 
 - Instalar kube-prometheus-stack.
 - Configurar Prometheus.
@@ -398,7 +434,7 @@ investigate-airflow-metric-failure.md
 - Criar paineis operacionais para Kubernetes, Airflow, MinIO, Polaris e pipelines.
 - Criar regras de alerta para falhas criticas.
 
-### Fase 8 - Documentacao
+### Fase 9 - Documentacao
 
 - Completar README.
 - Criar ADRs.
