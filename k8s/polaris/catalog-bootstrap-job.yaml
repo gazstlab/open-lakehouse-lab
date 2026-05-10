@@ -1,0 +1,113 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: polaris-bootstrap-catalog
+  namespace: data-platform
+  labels:
+    app.kubernetes.io/name: polaris
+    app.kubernetes.io/component: catalog-bootstrap
+    app.kubernetes.io/part-of: open-lakehouse-lab
+    open-lakehouse-lab/stage: "04"
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: polaris
+        app.kubernetes.io/component: catalog-bootstrap
+        app.kubernetes.io/part-of: open-lakehouse-lab
+        open-lakehouse-lab/stage: "04"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: bootstrap-catalog
+          image: curlimages/curl:8.11.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POLARIS_ROOT_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: polaris-local-credentials
+                  key: POLARIS_ROOT_CLIENT_ID
+            - name: POLARIS_ROOT_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: polaris-local-credentials
+                  key: POLARIS_ROOT_CLIENT_SECRET
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: polaris-local-credentials
+                  key: AWS_ACCESS_KEY_ID
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: polaris-local-credentials
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: POLARIS_MANAGEMENT_URL
+              value: http://polaris.data-platform.svc.cluster.local:8182
+            - name: CATALOG_NAME
+              value: lakehouse
+            - name: WAREHOUSE_LOCATION
+              value: s3://lakehouse/warehouse
+            - name: MINIO_ENDPOINT
+              value: http://minio.data-platform.svc.cluster.local:9000
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - |
+              echo "Waiting for Polaris management API..."
+              until curl -fsS "${POLARIS_MANAGEMENT_URL}/q/health/ready" >/dev/null; do
+                sleep 5
+              done
+
+              echo "Requesting Polaris access token..."
+              TOKEN_RESPONSE="$(curl -fsS -X POST "${POLARIS_MANAGEMENT_URL}/api/catalog/v1/oauth/tokens" \
+                -H "Content-Type: application/x-www-form-urlencoded" \
+                -d "grant_type=client_credentials" \
+                -d "client_id=${POLARIS_ROOT_CLIENT_ID}" \
+                -d "client_secret=${POLARIS_ROOT_CLIENT_SECRET}" \
+                -d "scope=PRINCIPAL_ROLE:ALL")"
+
+              ACCESS_TOKEN="$(echo "${TOKEN_RESPONSE}" | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p')"
+
+              if [ -z "${ACCESS_TOKEN}" ]; then
+                echo "Unable to parse Polaris access token response."
+                echo "${TOKEN_RESPONSE}"
+                exit 1
+              fi
+
+              echo "Creating Polaris catalog ${CATALOG_NAME} backed by MinIO..."
+              HTTP_STATUS="$(curl -sS -o /tmp/create-catalog-response.json -w "%{http_code}" \
+                -X POST "${POLARIS_MANAGEMENT_URL}/api/management/v1/catalogs" \
+                -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"catalog\": {
+                    \"name\": \"${CATALOG_NAME}\",
+                    \"type\": \"INTERNAL\",
+                    \"readOnly\": false,
+                    \"properties\": {
+                      \"default-base-location\": \"${WAREHOUSE_LOCATION}\"
+                    },
+                    \"storageConfigInfo\": {
+                      \"storageType\": \"S3\",
+                      \"roleArn\": \"arn:aws:iam::000000000000:role/open-lakehouse-lab\",
+                      \"allowedLocations\": [\"${WAREHOUSE_LOCATION}\"],
+                      \"endpoint\": \"${MINIO_ENDPOINT}\",
+                      \"pathStyleAccess\": true
+                    }
+                  }
+                }")"
+
+              if [ "${HTTP_STATUS}" = "200" ] || [ "${HTTP_STATUS}" = "201" ] || [ "${HTTP_STATUS}" = "409" ]; then
+                echo "Polaris catalog ${CATALOG_NAME} is ready. HTTP ${HTTP_STATUS}."
+                cat /tmp/create-catalog-response.json || true
+                exit 0
+              fi
+
+              echo "Failed to create Polaris catalog. HTTP ${HTTP_STATUS}."
+              cat /tmp/create-catalog-response.json || true
+              exit 1
