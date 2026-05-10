@@ -44,6 +44,13 @@ the `lakehouse` catalog backed by the MinIO warehouse path.
 See `docs/runbooks/polaris-rest-catalog.md` for credentials, deployment,
 health checks and endpoint conventions.
 
+## Local Airflow Orchestration
+
+Stage 05 deploys Airflow with the Apache Airflow Helm chart and validates
+`KubernetesPodOperator` pod launching in the local `data-platform` namespace.
+See `docs/runbooks/airflow-kubernetes-pod-operator.md` for image build, deploy,
+UI access and smoke DAG validation steps.
+
 ## Development quality checks
 
 Install development dependencies:

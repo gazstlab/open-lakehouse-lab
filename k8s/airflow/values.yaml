@@ -1,0 +1,106 @@
+---
+executor: LocalExecutor
+
+defaultAirflowRepository: open-lakehouse-lab-airflow
+defaultAirflowTag: local
+
+images:
+  airflow:
+    pullPolicy: Never
+
+airflowVersion: "3.2.1"
+airflowHome: /usr/local/airflow
+
+rbac:
+  create: true
+
+allowPodLaunching: true
+
+config:
+  core:
+    dags_are_paused_at_creation: "False"
+    dags_folder: /usr/local/airflow/dags
+    load_examples: "False"
+  kubernetes:
+    namespace: data-platform
+    delete_worker_pods: "True"
+  logging:
+    base_log_folder: /usr/local/airflow/logs
+    remote_logging: "False"
+
+env:
+  - name: AIRFLOW__CORE__LOAD_EXAMPLES
+    value: "False"
+  - name: AIRFLOW__CORE__DAGS_FOLDER
+    value: /usr/local/airflow/dags
+  - name: AIRFLOW__LOGGING__BASE_LOG_FOLDER
+    value: /usr/local/airflow/logs
+  - name: AIRFLOW__KUBERNETES__NAMESPACE
+    value: data-platform
+
+dags:
+  persistence:
+    enabled: false
+  gitSync:
+    enabled: false
+
+logs:
+  persistence:
+    enabled: false
+
+apiServer:
+  service:
+    type: ClusterIP
+
+scheduler:
+  replicas: 1
+  logGroomerSidecar:
+    enabled: false
+  serviceAccount:
+    create: true
+    name: airflow-scheduler
+    automountServiceAccountToken: true
+
+dagProcessor:
+  replicas: 1
+  logGroomerSidecar:
+    enabled: false
+
+triggerer:
+  enabled: false
+
+workers:
+  persistence:
+    enabled: false
+
+redis:
+  enabled: false
+
+postgresql:
+  enabled: true
+  primary:
+    persistence:
+      enabled: false
+
+statsd:
+  enabled: false
+
+createUserJob:
+  defaultUser:
+    enabled: true
+    role: Admin
+    username: admin
+    email: admin@example.com
+    firstName: Local
+    lastName: Admin
+    password: admin
+
+webserver:
+  defaultUser:
+    enabled: true
+    role: Admin
+    username: admin
+    email: admin@example.com
+    firstName: Local
+    lastName: Admin
+    password: admin

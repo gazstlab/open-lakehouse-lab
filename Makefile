@@ -1,4 +1,4 @@
-.PHONY: help install-dev check-requirements cluster-create cluster-delete kubectl-context cluster-status deploy-minio delete-minio minio-status port-forward-minio deploy-polaris delete-polaris polaris-status polaris-health port-forward-polaris lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
+.PHONY: help install-dev check-requirements cluster-create cluster-delete kubectl-context cluster-status deploy-minio delete-minio minio-status port-forward-minio deploy-polaris delete-polaris polaris-status polaris-health port-forward-polaris build-airflow-image load-airflow-image deploy-airflow delete-airflow airflow-status port-forward-airflow trigger-airflow-hello lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
 
 PYTHON_DIRS := ingestion airflow transformations tests scripts
 EXISTING_PYTHON_DIRS := $(wildcard $(PYTHON_DIRS))
@@ -11,19 +11,34 @@ MINIO_SERVICE ?= minio
 POLARIS_DIR := $(K8S_DIR)/polaris
 POLARIS_NAMESPACE ?= data-platform
 POLARIS_SERVICE ?= polaris
+AIRFLOW_DIR := airflow
+AIRFLOW_K8S_DIR := $(K8S_DIR)/airflow
+AIRFLOW_NAMESPACE ?= data-platform
+AIRFLOW_RELEASE ?= airflow
+AIRFLOW_IMAGE_REPOSITORY ?= open-lakehouse-lab-airflow
+AIRFLOW_IMAGE_TAG ?= local
+AIRFLOW_IMAGE := $(AIRFLOW_IMAGE_REPOSITORY):$(AIRFLOW_IMAGE_TAG)
+AIRFLOW_CHART_REPO_NAME ?= apache-airflow
+AIRFLOW_CHART_REPO_URL ?= https://airflow.apache.org
+AIRFLOW_CHART ?= $(AIRFLOW_CHART_REPO_NAME)/airflow
+AIRFLOW_CHART_VERSION ?= 1.20.0
+AIRFLOW_VALUES := $(AIRFLOW_K8S_DIR)/values.yaml
+AIRFLOW_API_SERVICE ?= $(AIRFLOW_RELEASE)-api-server
 K8S_MANIFEST_DIRS := $(wildcard $(K8S_DIR)/namespaces $(K8S_DIR)/minio $(K8S_DIR)/polaris $(K8S_DIR)/airflow $(K8S_DIR)/monitoring $(K8S_DIR)/rbac)
+K8S_MANIFEST_FILES := $(shell find $(K8S_MANIFEST_DIRS) -type f \( -name "*.yaml" -o -name "*.yml" \) ! -name "values.yaml" 2>/dev/null)
 KIND_CLUSTER_NAME ?= open-lakehouse-lab
 KUBECTL_CONTEXT ?= kind-$(KIND_CLUSTER_NAME)
 DOCKER_DIR := docker
+DOCKERFILES := $(wildcard $(DOCKER_DIR)/*Dockerfile $(AIRFLOW_DIR)/Dockerfile)
 DBT_DIR := dbt
 DOCS_DIR := docs
 PYTHON ?= python3
 
 help:
 	@echo "Open Lakehouse Lab commands"
-	@echo "  make cluster-create | deploy-minio | deploy-polaris"
-	@echo "  make minio-status | polaris-status | polaris-health"
-	@echo "  make port-forward-minio | port-forward-polaris"
+	@echo "  make cluster-create | deploy-minio | deploy-polaris | deploy-airflow"
+	@echo "  make minio-status | polaris-status | polaris-health | airflow-status"
+	@echo "  make port-forward-minio | port-forward-polaris | port-forward-airflow"
 	@echo "  make ci-pr | pre-push"
 
 install-dev:
@@ -105,6 +120,37 @@ polaris-health:
 port-forward-polaris:
 	kubectl -n $(POLARIS_NAMESPACE) port-forward svc/$(POLARIS_SERVICE) 8181:8181 8182:8182
 
+build-airflow-image:
+	docker build -t $(AIRFLOW_IMAGE) $(AIRFLOW_DIR)
+
+load-airflow-image:
+	kind load docker-image $(AIRFLOW_IMAGE) --name $(KIND_CLUSTER_NAME)
+
+deploy-airflow:
+	helm repo add $(AIRFLOW_CHART_REPO_NAME) $(AIRFLOW_CHART_REPO_URL) --force-update
+	helm repo update $(AIRFLOW_CHART_REPO_NAME)
+	kubectl apply -f $(AIRFLOW_K8S_DIR)/pod-launcher-rbac.yaml
+	helm upgrade --install $(AIRFLOW_RELEASE) $(AIRFLOW_CHART) \
+		--version $(AIRFLOW_CHART_VERSION) \
+		--namespace $(AIRFLOW_NAMESPACE) \
+		--values $(AIRFLOW_VALUES)
+	kubectl -n $(AIRFLOW_NAMESPACE) rollout status deployment/$(AIRFLOW_RELEASE)-api-server --timeout=300s
+	kubectl -n $(AIRFLOW_NAMESPACE) rollout status deployment/$(AIRFLOW_RELEASE)-scheduler --timeout=300s
+
+delete-airflow:
+	helm uninstall $(AIRFLOW_RELEASE) --namespace $(AIRFLOW_NAMESPACE) --ignore-not-found
+	kubectl delete -f $(AIRFLOW_K8S_DIR)/pod-launcher-rbac.yaml --ignore-not-found
+
+airflow-status:
+	kubectl -n $(AIRFLOW_NAMESPACE) get pods -l release=$(AIRFLOW_RELEASE)
+	kubectl -n $(AIRFLOW_NAMESPACE) get service $(AIRFLOW_API_SERVICE)
+
+port-forward-airflow:
+	kubectl -n $(AIRFLOW_NAMESPACE) port-forward svc/$(AIRFLOW_API_SERVICE) 8080:8080
+
+trigger-airflow-hello:
+	kubectl -n $(AIRFLOW_NAMESPACE) exec deployment/$(AIRFLOW_RELEASE)-scheduler -- airflow dags trigger hello_kubernetes_pod
+
 lint-python:
 	@if [ -n "$(EXISTING_PYTHON_DIRS)" ]; then ruff check $(EXISTING_PYTHON_DIRS); else echo "No Python source directories found. Skipping Ruff."; fi
 
@@ -127,13 +173,13 @@ dbt-test:
 	@if [ -d $(DBT_DIR) ]; then cd $(DBT_DIR) && dbt test --profiles-dir .; else echo "No dbt directory found. Skipping dbt test."; fi
 
 validate-k8s:
-	@if [ -n "$(K8S_MANIFEST_DIRS)" ]; then \
-		if command -v kubeconform >/dev/null 2>&1; then kubeconform -summary -strict $(K8S_MANIFEST_DIRS); else echo "kubeconform not installed. Skipping Kubernetes validation."; fi; \
+	@if [ -n "$(K8S_MANIFEST_FILES)" ]; then \
+		if command -v kubeconform >/dev/null 2>&1; then kubeconform -summary -strict $(K8S_MANIFEST_FILES); else echo "kubeconform not installed. Skipping Kubernetes validation."; fi; \
 	else echo "No Kubernetes manifest directories found. Skipping Kubernetes validation."; fi
 
 lint-docker:
-	@if [ -d $(DOCKER_DIR) ] && ls $(DOCKER_DIR)/*Dockerfile >/dev/null 2>&1; then \
-		if command -v hadolint >/dev/null 2>&1; then hadolint $(DOCKER_DIR)/*Dockerfile; else echo "hadolint not installed. Skipping Dockerfile lint."; fi; \
+	@if [ -n "$(DOCKERFILES)" ]; then \
+		if command -v hadolint >/dev/null 2>&1; then hadolint $(DOCKERFILES); else echo "hadolint not installed. Skipping Dockerfile lint."; fi; \
 	else echo "No Dockerfiles found. Skipping Dockerfile lint."; fi
 
 security-scan:
@@ -143,7 +189,7 @@ security-scan:
 docs-check:
 	@if [ -d $(DOCS_DIR) ]; then find $(DOCS_DIR) -name "*.md" -print -quit | grep -q . && echo "Documentation files found." || echo "No markdown docs found."; else echo "No docs directory found. Skipping docs check."; fi
 
-docker-build:
+docker-build: build-airflow-image
 	@if [ -d $(DOCKER_DIR) ] && ls $(DOCKER_DIR)/*Dockerfile >/dev/null 2>&1; then \
 		for file in $(DOCKER_DIR)/*Dockerfile; do image_name=$$(basename $$file | tr '[:upper:]' '[:lower:]' | sed 's/.dockerfile//'); docker build -f $$file -t open-lakehouse-lab-$$image_name:ci .; done; \
 	else echo "No Dockerfiles found. Skipping Docker build."; fi
