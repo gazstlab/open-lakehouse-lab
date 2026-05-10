@@ -8,6 +8,8 @@ Stage 08 configures a dbt project that uses DuckDB as the local SQL engine and A
 
 The goal is to make the lakehouse transformation foundation independent from ingestion. Source adapters can be implemented later as long as they write data following the Raw contract.
 
+This stage validates project structure, configuration and compilation. It intentionally does not require public API extractors or live public network calls.
+
 ## Raw contract
 
 The generic Raw contract uses these columns:
