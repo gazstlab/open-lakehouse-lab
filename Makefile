@@ -1,4 +1,4 @@
-.PHONY: help install-dev check-requirements cluster-create cluster-delete kubectl-context cluster-status deploy-minio delete-minio minio-status port-forward-minio deploy-polaris delete-polaris polaris-status polaris-health port-forward-polaris build-airflow-image load-airflow-image deploy-airflow delete-airflow airflow-status port-forward-airflow trigger-airflow-hello lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
+.PHONY: help install-dev check-requirements cluster-create cluster-delete kubectl-context cluster-status deploy-minio delete-minio minio-status port-forward-minio deploy-polaris delete-polaris polaris-status polaris-health port-forward-polaris build-airflow-image load-airflow-image deploy-airflow delete-airflow airflow-status port-forward-airflow trigger-airflow-hello build-dbt-image load-dbt-image dbt-seed dbt-run-foundation lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
 
 PYTHON_DIRS := ingestion airflow transformations tests scripts
 EXISTING_PYTHON_DIRS := $(wildcard $(PYTHON_DIRS))
@@ -31,6 +31,7 @@ KUBECTL_CONTEXT ?= kind-$(KIND_CLUSTER_NAME)
 DOCKER_DIR := docker
 DOCKERFILES := $(wildcard $(DOCKER_DIR)/*Dockerfile $(AIRFLOW_DIR)/Dockerfile)
 DBT_DIR := dbt
+DBT_IMAGE ?= open-lakehouse-lab-dbt-duckdb-polaris:local
 DOCS_DIR := docs
 PYTHON ?= python3
 
@@ -39,6 +40,7 @@ help:
 	@echo "  make cluster-create | deploy-minio | deploy-polaris | deploy-airflow"
 	@echo "  make minio-status | polaris-status | polaris-health | airflow-status"
 	@echo "  make port-forward-minio | port-forward-polaris | port-forward-airflow"
+	@echo "  make build-dbt-image | load-dbt-image | dbt-seed | dbt-run-foundation"
 	@echo "  make ci-pr | pre-push"
 
 install-dev:
@@ -151,6 +153,18 @@ port-forward-airflow:
 trigger-airflow-hello:
 	kubectl -n $(AIRFLOW_NAMESPACE) exec deployment/$(AIRFLOW_RELEASE)-scheduler -- airflow dags trigger hello_kubernetes_pod
 
+build-dbt-image:
+	docker build -f $(DOCKER_DIR)/dbt-duckdb-polaris.Dockerfile -t $(DBT_IMAGE) .
+
+load-dbt-image:
+	kind load docker-image $(DBT_IMAGE) --name $(KIND_CLUSTER_NAME)
+
+dbt-seed:
+	cd $(DBT_DIR) && dbt seed --profiles-dir .
+
+dbt-run-foundation:
+	cd $(DBT_DIR) && dbt run --select raw_sources --profiles-dir .
+
 lint-python:
 	@if [ -n "$(EXISTING_PYTHON_DIRS)" ]; then ruff check $(EXISTING_PYTHON_DIRS); else echo "No Python source directories found. Skipping Ruff."; fi
 
@@ -189,7 +203,7 @@ security-scan:
 docs-check:
 	@if [ -d $(DOCS_DIR) ]; then find $(DOCS_DIR) -name "*.md" -print -quit | grep -q . && echo "Documentation files found." || echo "No markdown docs found."; else echo "No docs directory found. Skipping docs check."; fi
 
-docker-build: build-airflow-image
+docker-build: build-airflow-image build-dbt-image
 	@if [ -d $(DOCKER_DIR) ] && ls $(DOCKER_DIR)/*Dockerfile >/dev/null 2>&1; then \
 		for file in $(DOCKER_DIR)/*Dockerfile; do image_name=$$(basename $$file | tr '[:upper:]' '[:lower:]' | sed 's/.dockerfile//'); docker build -f $$file -t open-lakehouse-lab-$$image_name:ci .; done; \
 	else echo "No Dockerfiles found. Skipping Docker build."; fi
