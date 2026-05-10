@@ -23,10 +23,20 @@ spec:
         app.kubernetes.io/part-of: open-lakehouse-lab
         open-lakehouse-lab/stage: "04"
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: polaris
           image: apache/polaris:1.4.1
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
           ports:
             - name: catalog-api
               containerPort: 8181
@@ -79,6 +89,9 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 20
             failureThreshold: 6
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           resources:
             requests:
               cpu: 250m
@@ -86,3 +99,6 @@ spec:
             limits:
               cpu: "1"
               memory: 1Gi
+      volumes:
+        - name: tmp
+          emptyDir: {}
