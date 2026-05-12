@@ -19,6 +19,15 @@ with source_events as (
 metric_observations as (
 
     select
+        source,
+        dataset,
+        observed_at,
+        ingestion_date,
+        metric_name,
+        metric_value,
+        location_name,
+        loaded_at,
+        record_hash,
         md5(
             concat_ws(
                 '||',
@@ -28,20 +37,12 @@ metric_observations as (
                 cast(observed_at as varchar),
                 coalesce(location_name, '')
             )
-        ) as observation_id,
-        source,
-        dataset,
-        observed_at,
-        ingestion_date,
-        metric_name,
-        metric_value,
-        location_name,
-        loaded_at,
-        record_hash
+        ) as observation_id
     from source_events
-    where metric_name is not null
-      and metric_value is not null
-      and observed_at is not null
+    where
+        metric_name is not null
+        and metric_value is not null
+        and observed_at is not null
 
 )
 
