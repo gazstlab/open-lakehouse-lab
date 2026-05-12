@@ -73,6 +73,13 @@ Polaris and Apache Iceberg without depending on public API ingestion. See
 `docs/runbooks/dbt-duckdb-polaris.md` for the generic Raw contract, dbt commands,
 Docker runtime and known limitations.
 
+## Silver layer
+
+Stage 10 builds generic Silver dbt models from the canonical staging contract.
+The Silver layer currently provides deduplicated source events, metric
+observations and dataset freshness metrics without depending on public API
+adapters. See `docs/runbooks/silver-layer.md` for execution and validation.
+
 ## Development quality checks
 
 Install development dependencies:
