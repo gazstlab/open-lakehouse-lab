@@ -12,14 +12,15 @@ This stage validates project structure, configuration and compilation. It intent
 
 ## Raw contract
 
-The generic Raw contract uses these columns:
+The generic Raw contract uses these minimum technical columns:
 
 ```text
 source
 dataset
 ingestion_date
 loaded_at
-payload
+record_hash
+raw_payload
 ```
 
 Responsibilities:
@@ -28,7 +29,11 @@ Responsibilities:
 - `dataset`: dataset produced by the source adapter.
 - `ingestion_date`: date partition associated with the Raw landing event.
 - `loaded_at`: timestamp when the event was loaded.
-- `payload`: original payload serialized as JSON text.
+- `record_hash`: stable technical key for the Raw record.
+- `raw_payload`: original payload preserved when useful for audit or replay.
+
+The current canonical Raw format is Parquet. The local seed fixture simulates
+that tabular shape until source adapters write Parquet files to MinIO.
 
 ## Files
 
@@ -42,6 +47,7 @@ dbt/macros/materializations/iceberg_table.sql
 dbt/seeds/raw_source_events.csv
 dbt/models/raw_sources/generic_raw_contract.sql
 dbt/models/raw_sources/schema.yml
+dbt/models/raw_sources/sources.yml
 docker/dbt-duckdb-polaris.Dockerfile
 ```
 
