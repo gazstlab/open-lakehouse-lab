@@ -1,0 +1,105 @@
+---
+version: 2
+
+models:
+  - name: silver_source_events
+    description: Deduplicated Silver table for canonical source events.
+    columns:
+      - name: source
+        description: Logical source adapter name.
+        tests:
+          - not_null
+      - name: dataset
+        description: Logical dataset produced by the source adapter.
+        tests:
+          - not_null
+      - name: ingestion_date
+        description: Date partition associated with the Raw record.
+        tests:
+          - not_null
+      - name: loaded_at
+        description: Timestamp when the record was loaded into Raw.
+        tests:
+          - not_null
+      - name: record_hash
+        description: Stable technical key used for deduplication and traceability.
+        tests:
+          - not_null
+          - unique
+      - name: raw_payload
+        description: Original payload preserved for audit and replay.
+        tests:
+          - not_null
+      - name: observed_at
+        description: Timestamp represented by the source record.
+        tests:
+          - not_null
+      - name: metric_name
+        description: Metric name extracted from the canonical staging contract.
+        tests:
+          - not_null
+      - name: metric_value
+        description: Metric value extracted from the canonical staging contract.
+        tests:
+          - not_null
+
+  - name: silver_metric_observations
+    description: Generic analytical Silver table for metric observations.
+    columns:
+      - name: observation_id
+        description: Stable identifier for one metric observation.
+        tests:
+          - not_null
+          - unique
+      - name: source
+        description: Logical source adapter name.
+        tests:
+          - not_null
+      - name: dataset
+        description: Logical dataset produced by the source adapter.
+        tests:
+          - not_null
+      - name: observed_at
+        description: Timestamp represented by the metric observation.
+        tests:
+          - not_null
+      - name: metric_name
+        description: Metric name.
+        tests:
+          - not_null
+      - name: metric_value
+        description: Metric value.
+        tests:
+          - not_null
+      - name: record_hash
+        description: Original source event hash used for traceability.
+        tests:
+          - not_null
+
+  - name: silver_dataset_freshness
+    description: Silver table with dataset-level freshness and volume metrics.
+    columns:
+      - name: source
+        description: Logical source adapter name.
+        tests:
+          - not_null
+      - name: dataset
+        description: Logical dataset produced by the source adapter.
+        tests:
+          - not_null
+      - name: latest_observed_at
+        description: Most recent observed timestamp for this source and dataset.
+        tests:
+          - not_null
+      - name: latest_loaded_at
+        description: Most recent load timestamp for this source and dataset.
+        tests:
+          - not_null
+      - name: records_count
+        description: Total number of Silver source events for this source and dataset.
+        tests:
+          - not_null
+      - name: unique_records_count
+        description: Total number of unique record hashes for this source and dataset.
+        tests:
+          - not_null
