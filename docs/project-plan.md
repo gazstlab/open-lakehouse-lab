@@ -35,7 +35,7 @@ A proposta e criar um laboratorio compartilhavel para estudar engenharia de dado
 | Catalogo Iceberg | Apache Polaris |
 | Engine SQL | DuckDB |
 | Transformacao | dbt-duckdb |
-| Contrato Raw | Paths e schemas genericos consumidos pelo dbt |
+| Contrato Raw | Parquet canonico com paths e schemas genericos consumidos pelo dbt |
 | Ingestao | Source adapters Python plugaveis |
 | Metricas | Prometheus |
 | Observabilidade operacional | Grafana |
@@ -52,7 +52,7 @@ Source adapters
   -> Airflow DAG
   -> KubernetesPodOperator
   -> Source Adapter Pods
-  -> MinIO Raw Zone contract
+  -> MinIO Raw Zone contract em Parquet canonico
   -> dbt-duckdb Pod
   -> DuckDB Iceberg Extension
   -> Apache Polaris REST Catalog
@@ -69,19 +69,35 @@ Source adapters
 
 ### Raw
 
-A Raw armazena os dados brutos exatamente como vieram das fontes, sem acoplar o
-core lakehouse a um tipo especifico de origem.
+A Raw armazena uma versao canonica e tabular dos dados brutos em Parquet, sem
+acoplar o core lakehouse a um tipo especifico de origem.
 
 O contrato Raw deve ser definido antes dos adapters concretos. Assim, o dbt pode
 compilar e validar a fundacao lakehouse com fixtures locais, enquanto APIs
 publicas entram depois como uma implementacao de fonte.
 
-Exemplo:
+Formato canonico atual:
 
 ```text
-s3://lakehouse/raw/source=<source>/dataset=<dataset>/ingestion_date=YYYY-MM-DD/data.json
-s3://lakehouse/raw/source=<source>/dataset=<dataset>/ingestion_date=YYYY-MM-DD/metadata.json
+s3://lakehouse/raw/source=<source>/dataset=<dataset>/ingestion_date=YYYY-MM-DD/*.parquet
 ```
+
+Colunas tecnicas minimas:
+
+```text
+source
+dataset
+ingestion_date
+loaded_at
+record_hash
+raw_payload
+```
+
+`raw_payload` preserva o conteudo original quando isso for util para auditoria,
+reprocessamento ou estudo. Campos conhecidos e estaveis da fonte devem ser
+gravados como colunas do Parquet sempre que possivel. Formatos como CSV e JSON
+podem ser adicionados posteriormente por adapters ou macros de leitura DuckDB,
+mas nao fazem parte do contrato canonico inicial.
 
 ### Silver
 
@@ -179,10 +195,10 @@ raw_sources
   -> marts
 ```
 
-`raw_sources` deve representar o contrato Raw generico, nao uma lista fixa de
-APIs. As primeiras validacoes tecnicas devem funcionar com fixture local para que
-`dbt parse` e `dbt compile` nao dependam de extractors Python, Airflow DAGs de
-ingestao ou disponibilidade externa de APIs.
+`raw_sources` deve representar o contrato Raw generico em Parquet, nao uma lista
+fixa de APIs. As primeiras validacoes tecnicas devem funcionar com fixture local
+para que `dbt parse` e `dbt compile` nao dependam de extractors Python, Airflow
+DAGs de ingestao ou disponibilidade externa de APIs.
 
 Na primeira versao, sera usada uma estrategia de full refresh idempotente. O MVP deve evitar `MERGE INTO`, `ALTER TABLE`, `UPDATE` e `DELETE` em tabelas Iceberg.
 
@@ -382,7 +398,7 @@ investigate-airflow-metric-failure.md
 - Configurar DuckDB com `httpfs`, `parquet` e `iceberg`.
 - Criar macro para anexar Polaris.
 - Criar materializacao customizada `iceberg_table`.
-- Criar contrato Raw generico consumido pelo dbt.
+- Criar contrato Raw generico em Parquet consumido pelo dbt.
 - Criar fixture local minima para validacao sem ingestao.
 
 ### Fase 3 - Raw plugavel
@@ -390,7 +406,7 @@ investigate-airflow-metric-failure.md
 - Criar runtime generico de source adapters.
 - Criar abstracoes comuns para adapters de fonte.
 - Criar adapter de fixture/local file para testes sem rede externa.
-- Gravar dados brutos no MinIO seguindo o contrato Raw.
+- Gravar dados brutos no MinIO seguindo o contrato Raw canonico em Parquet.
 - Registrar metadados de ingestao.
 
 ### Fase 4 - Fontes publicas

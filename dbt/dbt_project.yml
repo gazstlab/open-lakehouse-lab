@@ -32,7 +32,8 @@ vars:
     - dataset
     - ingestion_date
     - loaded_at
-    - payload
+    - record_hash
+    - raw_payload
 
 models:
   open_lakehouse_lab:

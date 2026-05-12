@@ -1,0 +1,44 @@
+---
+version: 2
+
+models:
+  - name: stg_raw_source_events
+    description: Generic staging model for canonical Raw records expected from future Raw Parquet inputs.
+    columns:
+      - name: source
+        description: Logical source adapter name.
+        tests:
+          - not_null
+      - name: dataset
+        description: Logical dataset produced by the source adapter.
+        tests:
+          - not_null
+      - name: ingestion_date
+        description: Date partition associated with the Raw record.
+        tests:
+          - not_null
+      - name: loaded_at
+        description: Timestamp when the record was loaded into Raw.
+        tests:
+          - not_null
+      - name: record_hash
+        description: Stable technical key for deduplication and traceability.
+        tests:
+          - not_null
+          - unique
+      - name: raw_payload
+        description: Original payload preserved when useful for audit and replay.
+        tests:
+          - not_null
+      - name: observed_at
+        description: Timestamp represented by the source record.
+        tests:
+          - not_null
+      - name: metric_name
+        description: Controlled fixture metric name.
+        tests:
+          - not_null
+      - name: metric_value
+        description: Controlled fixture metric value.
+        tests:
+          - not_null

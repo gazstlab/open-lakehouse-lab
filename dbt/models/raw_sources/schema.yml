@@ -18,17 +18,34 @@ models:
         tests:
           - not_null
       - name: loaded_at
-        description: Timestamp when the payload was loaded into the Raw contract.
+        description: Timestamp when the event was loaded into the Raw contract.
         tests:
           - not_null
-      - name: payload
-        description: Original payload serialized as JSON text.
+      - name: record_hash
+        description: Stable technical key for the Raw record.
+        tests:
+          - not_null
+          - unique
+      - name: raw_payload
+        description: Original payload preserved when useful for audit and replay.
+        tests:
+          - not_null
+      - name: observed_at
+        description: Event timestamp extracted from the controlled fixture payload.
+        tests:
+          - not_null
+      - name: metric_name
+        description: Controlled fixture metric name.
+        tests:
+          - not_null
+      - name: metric_value
+        description: Controlled fixture metric value.
         tests:
           - not_null
 
 seeds:
   - name: raw_source_events
-    description: Local fixture that validates the generic Raw contract without external ingestion.
+    description: Local fixture that simulates canonical Raw Parquet rows without external ingestion.
     columns:
       - name: source
         tests:
@@ -42,6 +59,19 @@ seeds:
       - name: loaded_at
         tests:
           - not_null
-      - name: payload
+      - name: record_hash
+        tests:
+          - not_null
+          - unique
+      - name: raw_payload
+        tests:
+          - not_null
+      - name: observed_at
+        tests:
+          - not_null
+      - name: metric_name
+        tests:
+          - not_null
+      - name: metric_value
         tests:
           - not_null

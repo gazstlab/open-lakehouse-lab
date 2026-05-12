@@ -1,4 +1,4 @@
-source,dataset,ingestion_date,loaded_at,payload
-fixture,weather_sample,2026-05-10,2026-05-10T00:00:00Z,"{""city"":""Tubarão"",""temperature_celsius"":22.5,""observed_at"":""2026-05-10T00:00:00Z""}"
-fixture,earthquake_sample,2026-05-10,2026-05-10T00:01:00Z,"{""place"":""sample location"",""magnitude"":4.2,""observed_at"":""2026-05-10T00:01:00Z""}"
-fixture,macro_indicator_sample,2026-05-10,2026-05-10T00:02:00Z,"{""indicator"":""sample_rate"",""value"":10.75,""observed_at"":""2026-05-10T00:02:00Z""}"
+source,dataset,ingestion_date,loaded_at,record_hash,raw_payload,observed_at,metric_name,metric_value,location_name
+fixture,weather_sample,2026-05-10,2026-05-10T00:00:00Z,fixture_weather_sample_20260510_000000,"{""city"":""Tubarao"",""temperature_celsius"":22.5,""observed_at"":""2026-05-10T00:00:00Z""}",2026-05-10T00:00:00Z,temperature_celsius,22.5,Tubarao
+fixture,earthquake_sample,2026-05-10,2026-05-10T00:01:00Z,fixture_earthquake_sample_20260510_000100,"{""place"":""sample location"",""magnitude"":4.2,""observed_at"":""2026-05-10T00:01:00Z""}",2026-05-10T00:01:00Z,magnitude,4.2,sample location
+fixture,macro_indicator_sample,2026-05-10,2026-05-10T00:02:00Z,fixture_macro_indicator_sample_20260510_000200,"{""indicator"":""sample_rate"",""value"":10.75,""observed_at"":""2026-05-10T00:02:00Z""}",2026-05-10T00:02:00Z,sample_rate,10.75,fixture economy
