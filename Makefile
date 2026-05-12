@@ -1,4 +1,4 @@
-.PHONY: help install-dev check-requirements cluster-create cluster-delete kubectl-context cluster-status deploy-minio delete-minio minio-status port-forward-minio deploy-polaris delete-polaris polaris-status polaris-health port-forward-polaris build-airflow-image load-airflow-image deploy-airflow delete-airflow airflow-status port-forward-airflow trigger-airflow-hello build-dbt-image load-dbt-image dbt-seed dbt-run-foundation dbt-run-staging lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
+.PHONY: help install-dev check-requirements cluster-create cluster-delete kubectl-context cluster-status deploy-minio delete-minio minio-status port-forward-minio deploy-polaris delete-polaris polaris-status polaris-health port-forward-polaris build-airflow-image load-airflow-image deploy-airflow delete-airflow airflow-status port-forward-airflow trigger-airflow-hello build-dbt-image load-dbt-image dbt-seed dbt-run-foundation dbt-run-staging dbt-run-silver dbt-test-silver lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
 
 PYTHON_DIRS := ingestion airflow transformations tests scripts
 EXISTING_PYTHON_DIRS := $(wildcard $(PYTHON_DIRS))
@@ -40,8 +40,8 @@ help:
 	@echo "  make cluster-create | deploy-minio | deploy-polaris | deploy-airflow"
 	@echo "  make minio-status | polaris-status | polaris-health | airflow-status"
 	@echo "  make port-forward-minio | port-forward-polaris | port-forward-airflow"
-	@echo "  make build-dbt-image | load-dbt-image | dbt-seed | dbt-run-foundation | dbt-run-staging"
-	@echo "  make ci-pr | pre-push"
+	@echo "  make build-dbt-image | load-dbt-image | dbt-seed | dbt-run-foundation | dbt-run-staging | dbt-run-silver"
+	@echo "  make dbt-test-silver | ci-pr | pre-push"
 
 install-dev:
 	$(PYTHON) -m pip install --upgrade pip
@@ -167,6 +167,12 @@ dbt-run-foundation:
 
 dbt-run-staging:
 	cd $(DBT_DIR) && dbt run --select staging --profiles-dir .
+
+dbt-run-silver:
+	cd $(DBT_DIR) && dbt run --select silver --profiles-dir .
+
+dbt-test-silver:
+	cd $(DBT_DIR) && dbt test --select silver --profiles-dir .
 
 lint-python:
 	@if [ -n "$(EXISTING_PYTHON_DIRS)" ]; then ruff check $(EXISTING_PYTHON_DIRS); else echo "No Python source directories found. Skipping Ruff."; fi
