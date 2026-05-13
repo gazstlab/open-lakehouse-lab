@@ -1,4 +1,4 @@
-.PHONY: help install-dev check-requirements cluster-create cluster-delete kubectl-context cluster-status deploy-minio delete-minio minio-status port-forward-minio deploy-polaris delete-polaris polaris-status polaris-health port-forward-polaris build-airflow-image load-airflow-image deploy-airflow delete-airflow airflow-status port-forward-airflow trigger-airflow-hello build-dbt-image load-dbt-image dbt-seed dbt-run-foundation dbt-run-staging dbt-run-silver dbt-test-silver lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
+.PHONY: help install-dev check-requirements cluster-create cluster-delete kubectl-context cluster-status deploy-minio delete-minio minio-status port-forward-minio deploy-polaris delete-polaris polaris-status polaris-health port-forward-polaris build-airflow-image load-airflow-image deploy-airflow delete-airflow airflow-status port-forward-airflow trigger-airflow-hello trigger-airflow-dbt airflow-dbt-pods build-dbt-image load-dbt-image dbt-seed dbt-run-foundation dbt-run-staging dbt-run-silver dbt-test-silver lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
 
 PYTHON_DIRS := ingestion airflow transformations tests scripts
 EXISTING_PYTHON_DIRS := $(wildcard $(PYTHON_DIRS))
@@ -41,6 +41,7 @@ help:
 	@echo "  make minio-status | polaris-status | polaris-health | airflow-status"
 	@echo "  make port-forward-minio | port-forward-polaris | port-forward-airflow"
 	@echo "  make build-dbt-image | load-dbt-image | dbt-seed | dbt-run-foundation | dbt-run-staging | dbt-run-silver"
+	@echo "  make trigger-airflow-hello | trigger-airflow-dbt | airflow-dbt-pods"
 	@echo "  make dbt-test-silver | ci-pr | pre-push"
 
 install-dev:
@@ -132,6 +133,7 @@ deploy-airflow:
 	helm repo add $(AIRFLOW_CHART_REPO_NAME) $(AIRFLOW_CHART_REPO_URL) --force-update
 	helm repo update $(AIRFLOW_CHART_REPO_NAME)
 	kubectl apply -f $(AIRFLOW_K8S_DIR)/pod-launcher-rbac.yaml
+	kubectl apply -f $(AIRFLOW_K8S_DIR)/dbt-workload-pvc.yaml
 	helm upgrade --install $(AIRFLOW_RELEASE) $(AIRFLOW_CHART) \
 		--version $(AIRFLOW_CHART_VERSION) \
 		--namespace $(AIRFLOW_NAMESPACE) \
@@ -141,6 +143,7 @@ deploy-airflow:
 
 delete-airflow:
 	helm uninstall $(AIRFLOW_RELEASE) --namespace $(AIRFLOW_NAMESPACE) --ignore-not-found
+	kubectl delete -f $(AIRFLOW_K8S_DIR)/dbt-workload-pvc.yaml --ignore-not-found
 	kubectl delete -f $(AIRFLOW_K8S_DIR)/pod-launcher-rbac.yaml --ignore-not-found
 
 airflow-status:
@@ -152,6 +155,12 @@ port-forward-airflow:
 
 trigger-airflow-hello:
 	kubectl -n $(AIRFLOW_NAMESPACE) exec deployment/$(AIRFLOW_RELEASE)-scheduler -- airflow dags trigger hello_kubernetes_pod
+
+trigger-airflow-dbt:
+	kubectl -n $(AIRFLOW_NAMESPACE) exec deployment/$(AIRFLOW_RELEASE)-scheduler -- airflow dags trigger open_lakehouse_lab_daily
+
+airflow-dbt-pods:
+	kubectl -n $(AIRFLOW_NAMESPACE) get pods -l app.kubernetes.io/component=dbt-workload
 
 build-dbt-image:
 	docker build -f $(DOCKER_DIR)/dbt-duckdb-polaris.Dockerfile -t $(DBT_IMAGE) .

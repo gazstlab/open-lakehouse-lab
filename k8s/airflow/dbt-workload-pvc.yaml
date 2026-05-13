@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dbt-workload-target
+  namespace: data-platform
+  labels:
+    app.kubernetes.io/name: dbt-duckdb
+    app.kubernetes.io/component: dbt-workload-state
+    app.kubernetes.io/part-of: open-lakehouse-lab
+    open-lakehouse-lab/stage: "12"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

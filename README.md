@@ -66,6 +66,11 @@ Stage 05 deploys Airflow with the Apache Airflow Helm chart and validates
 See `docs/runbooks/airflow-kubernetes-pod-operator.md` for image build, deploy,
 UI access and smoke DAG validation steps.
 
+Stage 12 adds the main `open_lakehouse_lab_daily` DAG. It runs dbt workloads in
+ephemeral Kubernetes pods using the local `dbt + duckdb` image and keeps the
+DuckDB target state in a small local PVC. See
+`docs/runbooks/airflow-dbt-orchestration.md` for the full local test flow.
+
 ## dbt + DuckDB foundation
 
 Stage 08 configures dbt with DuckDB and prepares integration points for Apache

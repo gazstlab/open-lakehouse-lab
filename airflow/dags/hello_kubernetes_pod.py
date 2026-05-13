@@ -1,15 +1,16 @@
 """Stage 05 smoke DAG for KubernetesPodOperator pod launching."""
 
+# ruff: noqa: I001
+
 from __future__ import annotations
 
 import pendulum
-from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 
 try:
     from airflow.sdk import DAG
 except ImportError:  # pragma: no cover - Airflow 2 compatibility.
     from airflow import DAG
-
+from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 
 with DAG(
     dag_id="hello_kubernetes_pod",

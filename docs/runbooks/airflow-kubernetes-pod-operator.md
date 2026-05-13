@@ -152,5 +152,6 @@ make cluster-delete
 ## Notes
 
 - The chart version is pinned in the Makefile through `AIRFLOW_CHART_VERSION`.
-- This stage validates Airflow pod launching only.
-- Raw extractors, dbt orchestration and Cosmos DAGs are later-stage scope.
+- Stage 05 validates Airflow pod launching only.
+- Stage 12 adds the `open_lakehouse_lab_daily` DAG for dbt workloads running in
+  Kubernetes pods. See `docs/runbooks/airflow-dbt-orchestration.md`.

@@ -13,7 +13,7 @@ RUN useradd --create-home --shell /usr/sbin/nologin dbt \
         dbt-duckdb==1.9.6 \
         duckdb==1.4.2
 
-COPY dbt/ /app/dbt/
+COPY --chown=dbt:dbt dbt/ /app/dbt/
 
 USER dbt
 

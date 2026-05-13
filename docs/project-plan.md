@@ -371,6 +371,7 @@ port-forward-grafana
 ```text
 reprocess-a-date.md
 investigate-dag-failure.md
+airflow-dbt-orchestration.md
 rebuild-silver-layer.md
 rebuild-gold-layer.md
 inspect-iceberg-snapshots.md
@@ -430,7 +431,15 @@ investigate-airflow-metric-failure.md
 - Aplicar testes dbt.
 - Publicar Gold como Iceberg.
 
-### Fase 7 - Observabilidade e catalogacao
+### Fase 7 - Orquestracao dbt no Airflow
+
+- Criar DAG principal `open_lakehouse_lab_daily`.
+- Executar comandos dbt em pods efemeros via `KubernetesPodOperator`.
+- Usar a imagem local `dbt + duckdb` carregada no kind.
+- Validar logs, remocao dos pods e acionamento pela Airflow UI.
+- Manter a orquestracao desacoplada dos adapters concretos de ingestao.
+
+### Fase 8 - Observabilidade e catalogacao
 
 - Coletar metadados de execucao.
 - Coletar snapshots Iceberg.
@@ -439,7 +448,7 @@ investigate-airflow-metric-failure.md
 - Registrar resultados de qualidade.
 - Documentar exemplos de consultas tecnicas.
 
-### Fase 8 - Prometheus e Grafana
+### Fase 9 - Prometheus e Grafana
 
 - Instalar kube-prometheus-stack.
 - Configurar Prometheus.
