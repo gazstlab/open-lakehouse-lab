@@ -3,7 +3,7 @@ version: 2
 
 models:
   - name: generic_raw_contract
-    description: Generic Raw contract used by dbt before concrete source adapters are implemented.
+    description: Generic Raw contract read from canonical Parquet files in MinIO.
     columns:
       - name: source
         description: Logical source adapter name.
@@ -40,38 +40,5 @@ models:
           - not_null
       - name: metric_value
         description: Controlled fixture metric value.
-        tests:
-          - not_null
-
-seeds:
-  - name: raw_source_events
-    description: Local fixture that simulates canonical Raw Parquet rows without external ingestion.
-    columns:
-      - name: source
-        tests:
-          - not_null
-      - name: dataset
-        tests:
-          - not_null
-      - name: ingestion_date
-        tests:
-          - not_null
-      - name: loaded_at
-        tests:
-          - not_null
-      - name: record_hash
-        tests:
-          - not_null
-          - unique
-      - name: raw_payload
-        tests:
-          - not_null
-      - name: observed_at
-        tests:
-          - not_null
-      - name: metric_name
-        tests:
-          - not_null
-      - name: metric_value
         tests:
           - not_null

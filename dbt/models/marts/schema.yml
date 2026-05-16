@@ -1,0 +1,83 @@
+---
+version: 2
+
+models:
+  - name: gold_environment_city_daily
+    description: Gold daily environment metrics by city.
+    columns:
+      - name: environment_city_daily_id
+        tests:
+          - not_null
+          - unique
+      - name: source
+        tests:
+          - not_null
+      - name: dataset
+        tests:
+          - not_null
+      - name: metric_date
+        tests:
+          - not_null
+      - name: observations_count
+        tests:
+          - not_null
+
+  - name: gold_earthquake_summary_daily
+    description: Gold daily earthquake summary metrics.
+    columns:
+      - name: earthquake_summary_daily_id
+        tests:
+          - not_null
+          - unique
+      - name: source
+        tests:
+          - not_null
+      - name: dataset
+        tests:
+          - not_null
+      - name: event_date
+        tests:
+          - not_null
+      - name: events_count
+        tests:
+          - not_null
+
+  - name: gold_macro_indicators_daily
+    description: Gold daily macro indicator metrics.
+    columns:
+      - name: macro_indicators_daily_id
+        tests:
+          - not_null
+          - unique
+      - name: source
+        tests:
+          - not_null
+      - name: dataset
+        tests:
+          - not_null
+      - name: metric_date
+        tests:
+          - not_null
+      - name: metric_name
+        tests:
+          - not_null
+
+  - name: gold_pipeline_health_daily
+    description: Gold daily pipeline health metrics from Silver freshness.
+    columns:
+      - name: pipeline_health_daily_id
+        tests:
+          - not_null
+          - unique
+      - name: source
+        tests:
+          - not_null
+      - name: dataset
+        tests:
+          - not_null
+      - name: health_date
+        tests:
+          - not_null
+      - name: records_count
+        tests:
+          - not_null

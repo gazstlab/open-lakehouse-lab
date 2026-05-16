@@ -26,21 +26,25 @@ DBT_TARGET_PVC = "dbt-workload-target"
 
 DBT_ENV = {
     "AWS_REGION": "us-east-1",
-    "DBT_DUCKDB_EXTENSION_DIRECTORY": "target/duckdb_extensions",
+    "DBT_DUCKDB_EXTENSION_DIRECTORY": "/home/dbt/.duckdb/extensions",
     "DBT_DUCKDB_PATH": "target/open_lakehouse_lab.duckdb",
+    "DBT_ENABLE_POLARIS_ATTACH": "true",
     "DBT_POLARIS_CATALOG_NAME": "lakehouse",
-    "DBT_POLARIS_ENDPOINT": "http://polaris.data-platform.svc.cluster.local:8181",
-    "DBT_POLARIS_WAREHOUSE": "s3://lakehouse/warehouse",
+    "DBT_POLARIS_ENDPOINT": "http://polaris.data-platform.svc.cluster.local:8181/api/catalog",
+    "DBT_POLARIS_WAREHOUSE": "lakehouse",
     "DBT_PROFILES_DIR": "/app/dbt",
+    "DBT_RAW_FIXTURE_ROOT": "s3://lakehouse/raw",
+    "DBT_RAW_SOURCE_EVENTS_PATH": "s3://lakehouse/raw/source=*/dataset=*/ingestion_date=*/*.parquet",
     "DBT_S3_ENDPOINT": "minio.data-platform.svc.cluster.local:9000",
     "DBT_TARGET": "dev",
+    "DBT_THREADS": "1",
 }
 
 DBT_LABELS = {
     "app.kubernetes.io/name": "dbt-duckdb",
     "app.kubernetes.io/component": "dbt-workload",
     "app.kubernetes.io/part-of": "open-lakehouse-lab",
-    "open-lakehouse-lab/stage": "12",
+    "open-lakehouse-lab/stage": "13",
 }
 
 DBT_TARGET_VOLUME = k8s.V1Volume(
@@ -103,34 +107,47 @@ with DAG(
     end = EmptyOperator(task_id="end")
 
     with TaskGroup(group_id="dbt_workloads") as dbt_workloads:
-        dbt_seed = dbt_pod_task(
-            task_id="dbt_seed",
-            pod_name="dbt-seed",
-            dbt_command="dbt deps && dbt seed --profiles-dir .",
+        dbt_publish_raw_fixture = dbt_pod_task(
+            task_id="dbt_publish_raw_fixture",
+            pod_name="dbt-publish-raw-fixture",
+            dbt_command=(
+                "dbt deps && "
+                "dbt run-operation publish_raw_fixture_parquet --profiles-dir ."
+            ),
         )
         dbt_run_foundation_staging_silver = dbt_pod_task(
             task_id="dbt_run_foundation_staging_silver",
             pod_name="dbt-run-foundation-staging-silver",
-            dbt_command="dbt run --select raw_sources staging silver --profiles-dir .",
+            dbt_command=(
+                "dbt run --no-populate-cache "
+                "--select raw_sources staging silver --profiles-dir ."
+            ),
         )
         dbt_test_silver = dbt_pod_task(
             task_id="dbt_test_silver",
             pod_name="dbt-test-silver",
-            dbt_command="dbt test --select silver --profiles-dir .",
+            dbt_command=(
+                "dbt test --no-populate-cache --select silver --profiles-dir ."
+            ),
         )
         dbt_run_intermediate_gold = dbt_pod_task(
             task_id="dbt_run_intermediate_gold",
             pod_name="dbt-run-intermediate-gold",
-            dbt_command="dbt run --select intermediate marts --profiles-dir .",
+            dbt_command=(
+                "dbt run --no-populate-cache "
+                "--select intermediate marts --profiles-dir ."
+            ),
         )
         dbt_test_gold = dbt_pod_task(
             task_id="dbt_test_gold",
             pod_name="dbt-test-gold",
-            dbt_command="dbt test --select marts --profiles-dir .",
+            dbt_command=(
+                "dbt test --no-populate-cache --select marts --profiles-dir ."
+            ),
         )
 
         (
-            dbt_seed
+            dbt_publish_raw_fixture
             >> dbt_run_foundation_staging_silver
             >> dbt_test_silver
             >> dbt_run_intermediate_gold

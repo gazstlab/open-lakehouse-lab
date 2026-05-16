@@ -1,0 +1,89 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dbt-publish-raw-fixture
+  namespace: data-platform
+  labels:
+    app.kubernetes.io/name: dbt-duckdb
+    app.kubernetes.io/component: raw-fixture-publisher
+    app.kubernetes.io/part-of: open-lakehouse-lab
+    open-lakehouse-lab/stage: "13"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dbt-duckdb
+        app.kubernetes.io/component: raw-fixture-publisher
+        app.kubernetes.io/part-of: open-lakehouse-lab
+        open-lakehouse-lab/stage: "13"
+    spec:
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: dbt-publish-raw-fixture
+          image: open-lakehouse-lab-dbt-duckdb-polaris:local
+          imagePullPolicy: Never
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - |
+              echo "Publishing the deterministic Raw Parquet fixture to MinIO."
+              echo "This runs: dbt run-operation publish_raw_fixture_parquet --profiles-dir ."
+              dbt run-operation publish_raw_fixture_parquet --profiles-dir .
+          env:
+            - name: AWS_REGION
+              value: us-east-1
+            - name: DBT_DUCKDB_EXTENSION_DIRECTORY
+              value: /home/dbt/.duckdb/extensions
+            - name: DBT_DUCKDB_PATH
+              value: target/open_lakehouse_lab.duckdb
+            - name: DBT_POLARIS_CATALOG_NAME
+              value: lakehouse
+            - name: DBT_POLARIS_ENDPOINT
+              value: http://polaris.data-platform.svc.cluster.local:8181/api/catalog
+            - name: DBT_POLARIS_WAREHOUSE
+              value: lakehouse
+            - name: DBT_PROFILES_DIR
+              value: /app/dbt
+            - name: DBT_RAW_FIXTURE_ROOT
+              value: s3://lakehouse/raw
+            - name: DBT_RAW_SOURCE_EVENTS_PATH
+              value: s3://lakehouse/raw/source=*/dataset=*/ingestion_date=*/*.parquet
+            - name: DBT_S3_ENDPOINT
+              value: minio.data-platform.svc.cluster.local:9000
+            - name: DBT_TARGET
+              value: dev
+            - name: DBT_THREADS
+              value: "1"
+          envFrom:
+            - secretRef:
+                name: polaris-local-credentials
+                optional: true
+          volumeMounts:
+            - name: dbt-target
+              mountPath: /app/dbt/target
+            - name: dbt-logs
+              mountPath: /app/dbt/logs
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: dbt-target
+          emptyDir: {}
+        - name: dbt-logs
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

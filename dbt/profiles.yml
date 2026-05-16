@@ -10,7 +10,6 @@ open_lakehouse_lab:
         extension_directory: "{{ env_var('DBT_DUCKDB_EXTENSION_DIRECTORY', 'target/duckdb_extensions') }}"
       extensions:
         - httpfs
-        - parquet
         - iceberg
       settings:
         s3_region: "{{ env_var('AWS_REGION', 'us-east-1') }}"

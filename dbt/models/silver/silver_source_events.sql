@@ -1,4 +1,7 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='iceberg_table',
+    database=var('polaris_catalog_name')
+) }}
 
 with staged_events as (
 

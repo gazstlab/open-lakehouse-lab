@@ -25,8 +25,10 @@ clean-targets:
 
 vars:
   polaris_catalog_name: "{{ env_var('DBT_POLARIS_CATALOG_NAME', 'lakehouse') }}"
-  polaris_endpoint: "{{ env_var('DBT_POLARIS_ENDPOINT', 'http://localhost:8181') }}"
-  polaris_warehouse: "{{ env_var('DBT_POLARIS_WAREHOUSE', 's3://lakehouse/warehouse') }}"
+  polaris_endpoint: "{{ env_var('DBT_POLARIS_ENDPOINT', 'http://localhost:8181/api/catalog') }}"
+  polaris_warehouse: "{{ env_var('DBT_POLARIS_WAREHOUSE', env_var('DBT_POLARIS_CATALOG_NAME', 'lakehouse')) }}"
+  raw_fixture_root: "{{ env_var('DBT_RAW_FIXTURE_ROOT', 's3://lakehouse/raw') }}"
+  raw_source_events_path: "{{ env_var('DBT_RAW_SOURCE_EVENTS_PATH', 's3://lakehouse/raw/*/*/*/*.parquet') }}"
   raw_contract_columns:
     - source
     - dataset
@@ -48,6 +50,9 @@ models:
       +schema: intermediate
     marts:
       +schema: marts
+
+on-run-start:
+  - "{{ attach_polaris_catalog() }}"
 
 seeds:
   open_lakehouse_lab:

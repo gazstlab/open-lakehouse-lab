@@ -67,7 +67,7 @@ kubectl -n data-platform logs job/polaris-bootstrap-catalog
 Expected internal endpoints:
 
 ```text
-Catalog API:    http://polaris.data-platform.svc.cluster.local:8181
+Catalog API:    http://polaris.data-platform.svc.cluster.local:8181/api/catalog
 Management API: http://polaris.data-platform.svc.cluster.local:8181
 Health check:   http://polaris.data-platform.svc.cluster.local:8182/q/health/ready
 ```
@@ -83,7 +83,7 @@ make port-forward-polaris
 Local endpoints:
 
 ```text
-Catalog API:    http://localhost:8181
+Catalog API:    http://localhost:8181/api/catalog
 Management API: http://localhost:8181
 Health check:   http://localhost:8182/q/health/ready
 ```
@@ -111,13 +111,13 @@ http://minio.data-platform.svc.cluster.local:9000
 The future dbt + DuckDB stage should use the internal catalog endpoint when running inside Kubernetes:
 
 ```text
-http://polaris.data-platform.svc.cluster.local:8181
+http://polaris.data-platform.svc.cluster.local:8181/api/catalog
 ```
 
 When running from the host machine through port-forward, use:
 
 ```text
-http://localhost:8181
+http://localhost:8181/api/catalog
 ```
 
 ## Delete Polaris

@@ -32,8 +32,8 @@ Responsibilities:
 - `record_hash`: stable technical key for the Raw record.
 - `raw_payload`: original payload preserved when useful for audit or replay.
 
-The current canonical Raw format is Parquet. The local seed fixture simulates
-that tabular shape until source adapters write Parquet files to MinIO.
+The current canonical Raw format is Parquet. Stage 13 writes and reads the
+fixture through MinIO; the local seed remains only as a study fallback.
 
 ## Files
 
@@ -53,13 +53,14 @@ docker/dbt-duckdb-polaris.Dockerfile
 
 ## Local environment
 
-Default local settings assume MinIO and Polaris are available from the host through port-forwarding:
+Default local settings assume MinIO and Polaris are available from the host
+through port-forwarding:
 
 ```bash
 export DBT_S3_ENDPOINT="localhost:9000"
-export DBT_POLARIS_ENDPOINT="http://localhost:8181"
+export DBT_POLARIS_ENDPOINT="http://localhost:8181/api/catalog"
 export DBT_POLARIS_CATALOG_NAME="lakehouse"
-export DBT_POLARIS_WAREHOUSE="s3://lakehouse/warehouse"
+export DBT_POLARIS_WAREHOUSE="lakehouse"
 export AWS_REGION="us-east-1"
 ```
 
@@ -81,10 +82,10 @@ make dbt-parse
 make dbt-compile
 ```
 
-To load the fixture seed and build the Raw contract model:
+To publish the Raw fixture to MinIO and build the Raw contract model:
 
 ```bash
-make dbt-seed
+make dbt-publish-raw-fixture
 make dbt-run-foundation
 ```
 
@@ -102,12 +103,16 @@ make load-dbt-image
 
 ## Polaris macro
 
-The macro `attach_polaris_catalog` is intentionally isolated. It can be reused by future stages from:
+The macro `attach_polaris_catalog` is intentionally isolated. It can be reused
+by future stages from:
 
 - `dbt run-operation`;
 - dbt hooks;
 - custom Iceberg materializations;
 - Airflow tasks running dbt in Kubernetes.
+
+DuckDB expects the Polaris REST Catalog endpoint, including `/api/catalog`, and
+the Polaris catalog name as the warehouse value.
 
 ## Iceberg materialization
 
@@ -119,11 +124,14 @@ The initial `iceberg_table` materialization is deliberately conservative:
 - no `DELETE`;
 - no `ALTER TABLE`.
 
-This keeps the MVP easy to reason about. Later stages can evolve this once table health, metadata collection and compaction strategies exist.
+This keeps the MVP easy to reason about. Later stages can evolve this once
+table health, metadata collection and compaction strategies exist.
 
 ## Known limitations
 
-- Stage 08 validates the dbt foundation and Raw contract, but does not require public APIs.
+- Stage 08 validates the dbt foundation and Raw contract, but does not require
+  public APIs.
 - Concrete source adapters are implemented later.
-- The first materialization is a skeleton for controlled full-refresh table creation.
+- Stage 13 completes the MinIO + Polaris execution path. See
+  `docs/runbooks/dbt-minio-polaris-backbone.md`.
 - Running against a live Polaris catalog requires Stage 04 services to be available.

@@ -1,0 +1,12 @@
+---
+version: 2
+
+models:
+  - name: int_environment_city_daily
+    description: Reusable daily weather aggregation used by the Gold environment mart.
+
+  - name: int_earthquake_summary_daily
+    description: Reusable daily earthquake aggregation used by the Gold earthquake mart.
+
+  - name: int_macro_indicators_daily
+    description: Reusable daily macro indicator aggregation used by the Gold macro mart.

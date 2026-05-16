@@ -396,7 +396,7 @@ investigate-airflow-metric-failure.md
 ### Fase 2 - dbt + DuckDB + Polaris
 
 - Criar projeto dbt.
-- Configurar DuckDB com `httpfs`, `parquet` e `iceberg`.
+- Configurar DuckDB com `httpfs`, `iceberg` e suporte nativo a Parquet.
 - Criar macro para anexar Polaris.
 - Criar materializacao customizada `iceberg_table`.
 - Criar contrato Raw generico em Parquet consumido pelo dbt.

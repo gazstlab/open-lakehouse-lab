@@ -8,16 +8,25 @@
   #}
 
   {% set target_relation = this %}
-  {% set full_refresh_mode = should_full_refresh() %}
+
+  {% if target_relation.database is none %}
+    {% do exceptions.raise_compiler_error('iceberg_table materialization requires a database/catalog config.') %}
+  {% endif %}
 
   {{ run_hooks(pre_hooks) }}
 
-  {% if full_refresh_mode %}
-    {% do adapter.drop_relation(target_relation) %}
-  {% endif %}
+  {% do attach_polaris_catalog(force=true) %}
+
+  {% call statement('create_schema') %}
+    create schema if not exists {{ adapter.quote(target_relation.database) }}.{{ adapter.quote(target_relation.schema) }}
+  {% endcall %}
+
+  {% call statement('drop_existing_table') %}
+    drop table if exists {{ target_relation }}
+  {% endcall %}
 
   {% call statement('main') %}
-    create or replace table {{ target_relation }} as (
+    create table {{ target_relation }} as (
       {{ sql }}
     )
   {% endcall %}

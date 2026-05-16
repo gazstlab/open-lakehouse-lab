@@ -3,34 +3,23 @@ version: 2
 
 sources:
   - name: raw_sources
-    description: Generic Raw source contract backed by a local fixture that simulates canonical Raw Parquet rows.
+    description: >
+      Optional local seed fallback kept for study and troubleshooting. The main path reads Raw Parquet
+      from MinIO through generic_raw_contract.
     schema: "{{ target.schema }}_raw_sources"
     tables:
       - name: raw_source_events
-        description: Canonical Raw source events with technical metadata and controlled sample columns.
+        description: Legacy seed-backed Raw source events. Not used by the Stage 13 default pipeline.
         columns:
           - name: source
             description: Logical source adapter name.
-            tests:
-              - not_null
           - name: dataset
             description: Logical dataset produced by the source adapter.
-            tests:
-              - not_null
           - name: ingestion_date
             description: Date partition associated with the Raw landing event.
-            tests:
-              - not_null
           - name: loaded_at
             description: Timestamp when the event was loaded into Raw.
-            tests:
-              - not_null
           - name: record_hash
             description: Stable technical key for the Raw record.
-            tests:
-              - not_null
-              - unique
           - name: raw_payload
             description: Original payload preserved when useful for audit and replay.
-            tests:
-              - not_null

@@ -1,4 +1,4 @@
-.PHONY: help install-dev check-requirements cluster-create cluster-delete kubectl-context cluster-status deploy-minio delete-minio minio-status port-forward-minio deploy-polaris delete-polaris polaris-status polaris-health port-forward-polaris build-airflow-image load-airflow-image deploy-airflow delete-airflow airflow-status port-forward-airflow trigger-airflow-hello trigger-airflow-dbt airflow-dbt-pods build-dbt-image load-dbt-image dbt-seed dbt-run-foundation dbt-run-staging dbt-run-silver dbt-test-silver lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
+.PHONY: help install-dev check-requirements cluster-create cluster-delete kubectl-context cluster-status deploy-minio delete-minio minio-status port-forward-minio deploy-polaris delete-polaris polaris-status polaris-health port-forward-polaris publish-raw-fixture-parquet build-airflow-image load-airflow-image deploy-airflow delete-airflow airflow-status port-forward-airflow trigger-airflow-hello trigger-airflow-dbt airflow-dbt-pods build-dbt-image load-dbt-image dbt-publish-raw-fixture dbt-seed dbt-run-foundation dbt-run-staging dbt-run-silver dbt-run-gold dbt-test-silver dbt-test-gold lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
 
 PYTHON_DIRS := ingestion airflow transformations tests scripts
 EXISTING_PYTHON_DIRS := $(wildcard $(PYTHON_DIRS))
@@ -24,7 +24,8 @@ AIRFLOW_CHART ?= $(AIRFLOW_CHART_REPO_NAME)/airflow
 AIRFLOW_CHART_VERSION ?= 1.20.0
 AIRFLOW_VALUES := $(AIRFLOW_K8S_DIR)/values.yaml
 AIRFLOW_API_SERVICE ?= $(AIRFLOW_RELEASE)-api-server
-K8S_MANIFEST_DIRS := $(wildcard $(K8S_DIR)/namespaces $(K8S_DIR)/minio $(K8S_DIR)/polaris $(K8S_DIR)/airflow $(K8S_DIR)/monitoring $(K8S_DIR)/rbac)
+DBT_K8S_DIR := $(K8S_DIR)/dbt
+K8S_MANIFEST_DIRS := $(wildcard $(K8S_DIR)/namespaces $(K8S_DIR)/minio $(K8S_DIR)/polaris $(K8S_DIR)/airflow $(K8S_DIR)/dbt $(K8S_DIR)/monitoring $(K8S_DIR)/rbac)
 K8S_MANIFEST_FILES := $(shell find $(K8S_MANIFEST_DIRS) -type f \( -name "*.yaml" -o -name "*.yml" \) ! -name "values.yaml" 2>/dev/null)
 KIND_CLUSTER_NAME ?= open-lakehouse-lab
 KUBECTL_CONTEXT ?= kind-$(KIND_CLUSTER_NAME)
@@ -40,9 +41,10 @@ help:
 	@echo "  make cluster-create | deploy-minio | deploy-polaris | deploy-airflow"
 	@echo "  make minio-status | polaris-status | polaris-health | airflow-status"
 	@echo "  make port-forward-minio | port-forward-polaris | port-forward-airflow"
-	@echo "  make build-dbt-image | load-dbt-image | dbt-seed | dbt-run-foundation | dbt-run-staging | dbt-run-silver"
+	@echo "  make build-dbt-image | load-dbt-image | publish-raw-fixture-parquet"
+	@echo "  make dbt-publish-raw-fixture | dbt-run-foundation | dbt-run-staging | dbt-run-silver | dbt-run-gold"
 	@echo "  make trigger-airflow-hello | trigger-airflow-dbt | airflow-dbt-pods"
-	@echo "  make dbt-test-silver | ci-pr | pre-push"
+	@echo "  make dbt-test-silver | dbt-test-gold | ci-pr | pre-push"
 
 install-dev:
 	$(PYTHON) -m pip install --upgrade pip
@@ -123,6 +125,11 @@ polaris-health:
 port-forward-polaris:
 	kubectl -n $(POLARIS_NAMESPACE) port-forward svc/$(POLARIS_SERVICE) 8181:8181 8182:8182
 
+publish-raw-fixture-parquet:
+	kubectl -n $(MINIO_NAMESPACE) delete job dbt-publish-raw-fixture --ignore-not-found
+	kubectl apply -f $(DBT_K8S_DIR)/publish-raw-fixture-job.yaml
+	kubectl -n $(MINIO_NAMESPACE) wait --for=condition=complete job/dbt-publish-raw-fixture --timeout=180s
+
 build-airflow-image:
 	docker build -t $(AIRFLOW_IMAGE) $(AIRFLOW_DIR)
 
@@ -168,6 +175,9 @@ build-dbt-image:
 load-dbt-image:
 	kind load docker-image $(DBT_IMAGE) --name $(KIND_CLUSTER_NAME)
 
+dbt-publish-raw-fixture:
+	cd $(DBT_DIR) && dbt run-operation publish_raw_fixture_parquet --profiles-dir .
+
 dbt-seed:
 	cd $(DBT_DIR) && dbt seed --profiles-dir .
 
@@ -178,10 +188,16 @@ dbt-run-staging:
 	cd $(DBT_DIR) && dbt run --select staging --profiles-dir .
 
 dbt-run-silver:
-	cd $(DBT_DIR) && dbt run --select silver --profiles-dir .
+	cd $(DBT_DIR) && DBT_ENABLE_POLARIS_ATTACH=true DBT_THREADS=1 dbt run --no-populate-cache --select silver --profiles-dir .
+
+dbt-run-gold:
+	cd $(DBT_DIR) && DBT_ENABLE_POLARIS_ATTACH=true DBT_THREADS=1 dbt run --no-populate-cache --select intermediate marts --profiles-dir .
 
 dbt-test-silver:
-	cd $(DBT_DIR) && dbt test --select silver --profiles-dir .
+	cd $(DBT_DIR) && DBT_ENABLE_POLARIS_ATTACH=true DBT_THREADS=1 dbt test --no-populate-cache --select silver --profiles-dir .
+
+dbt-test-gold:
+	cd $(DBT_DIR) && DBT_ENABLE_POLARIS_ATTACH=true DBT_THREADS=1 dbt test --no-populate-cache --select marts --profiles-dir .
 
 lint-python:
 	@if [ -n "$(EXISTING_PYTHON_DIRS)" ]; then ruff check $(EXISTING_PYTHON_DIRS); else echo "No Python source directories found. Skipping Ruff."; fi

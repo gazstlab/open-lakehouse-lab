@@ -68,10 +68,10 @@ Metrics:
 
 ## Run locally
 
-From the repository root, execute the full local dbt chain:
+From the repository root, run the Stage 13 MinIO/Polaris path:
 
 ```bash
-make dbt-seed
+make dbt-publish-raw-fixture
 make dbt-run-foundation
 make dbt-run-staging
 make dbt-run-silver
@@ -92,12 +92,12 @@ make ci-pr
 
 - Silver is generic first; source-specific models are deferred until real source adapters exist.
 - Deduplication uses `record_hash`, which is the stable technical key from the Raw/Staging contract.
-- The first implementation uses dbt `table` materialization for deterministic local validation.
-- Iceberg-specific table publication remains compatible with future materialization improvements.
+- Stage 13 publishes Silver as Iceberg tables through the custom
+  `iceberg_table` materialization.
 
 ## Known limitations
 
 - Stage 10 does not consume public APIs directly.
 - Stage 10 does not require source adapter runtime images.
-- Stage 10 does not yet validate tables inside Polaris as physical Iceberg snapshots.
-- Future stages may switch selected Silver models to the custom `iceberg_table` materialization after the runtime path is fully validated.
+- Stage 10 did not validate tables inside Polaris as physical Iceberg snapshots;
+  Stage 13 adds that backbone.

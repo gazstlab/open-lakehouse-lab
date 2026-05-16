@@ -14,7 +14,7 @@ adapter, DuckDB extensions and project files live in the dbt image.
 
 ```text
 start
-  -> dbt_workloads.dbt_seed
+  -> dbt_workloads.dbt_publish_raw_fixture
   -> dbt_workloads.dbt_run_foundation_staging_silver
   -> dbt_workloads.dbt_test_silver
   -> dbt_workloads.dbt_run_intermediate_gold
@@ -38,7 +38,7 @@ the dbt image. A later refinement can replace the explicit tasks with Cosmos
 Kubernetes execution mode once the dbt model graph and Iceberg materialization
 are stable enough to benefit from model-level task rendering.
 
-## Shared DuckDB state
+## DuckDB execution state
 
 The local dbt profile writes DuckDB state to:
 
@@ -53,9 +53,10 @@ PVC at `/app/dbt/target`:
 dbt-workload-target
 ```
 
-This PVC is local development state only. It exists so sequential dbt tasks can
-share the same DuckDB database while the project is still using local DuckDB
-tables for deterministic validation.
+This PVC is local development state only. It exists for dbt artifacts, local
+views and temporary DuckDB state. It is not the source of truth. Stage 13 stores
+Raw Parquet and Iceberg table data in MinIO, with Silver and Gold registered in
+Polaris.
 
 ## Prerequisites
 
@@ -98,6 +99,13 @@ Build and load the dbt image into kind:
 ```bash
 make build-dbt-image
 make load-dbt-image
+```
+
+Optionally publish the deterministic Raw Parquet fixture before deploying
+Airflow:
+
+```bash
+make publish-raw-fixture-parquet
 ```
 
 Build, load and deploy Airflow:
@@ -200,30 +208,19 @@ http://localhost:8182/q/health/ready
 
 ## Validate with SQL
 
-The dbt pods write the DuckDB database inside the PVC, not on your host. To
-inspect host-side dbt output, run the same dbt sequence locally:
+The full path writes Raw Parquet and Iceberg data to MinIO. For host-side
+inspection, keep MinIO and Polaris port-forwards running and use the Stage 13
+runbook:
 
 ```bash
-make dbt-seed
-make dbt-run-foundation
-make dbt-run-staging
-make dbt-run-silver
-make dbt-test-silver
+make port-forward-minio
+make port-forward-polaris
 ```
 
-Then open DuckDB locally:
+See:
 
-```bash
-duckdb dbt/target/open_lakehouse_lab.duckdb
-```
-
-Example queries:
-
-```sql
-show schemas;
-select * from main_silver.silver_source_events;
-select * from main_silver.silver_metric_observations;
-select * from main_silver.silver_dataset_freshness;
+```text
+docs/runbooks/dbt-minio-polaris-backbone.md
 ```
 
 If you keep DuckDB CLI, DuckDB UI or a VS Code extension connected to the same
@@ -246,11 +243,10 @@ make cluster-delete
 
 ## Limitations
 
-- This stage orchestrates the current dbt chain; it does not add source adapter
-  ingestion tasks.
-- The Gold commands are included in the DAG so the orchestration contract is
-  ready for Stage 11 outputs. If no Gold models exist in a local checkout yet,
-  dbt reports that there is nothing to run or test for that selector.
+- This stage orchestrates the current dbt chain; it does not add public source
+  adapter ingestion tasks.
+- The Raw fixture publication is a deterministic shortcut for study. The
+  command is logged by the dbt pod before execution.
 - The current implementation keeps explicit `KubernetesPodOperator` tasks. This
   is compatible with the project requirement to run workloads in pods and leaves
   room to adopt Cosmos Kubernetes task rendering after the model graph matures.

@@ -2,7 +2,8 @@ FROM python:3.13-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    DBT_PROFILES_DIR=/app/dbt
+    DBT_PROFILES_DIR=/app/dbt \
+    DBT_DUCKDB_EXTENSION_DIRECTORY=/home/dbt/.duckdb/extensions
 
 WORKDIR /app
 
@@ -13,9 +14,11 @@ RUN useradd --create-home --shell /usr/sbin/nologin dbt \
         dbt-duckdb==1.9.6 \
         duckdb==1.4.2
 
-COPY --chown=dbt:dbt dbt/ /app/dbt/
-
 USER dbt
+
+RUN python -c "import duckdb; con = duckdb.connect(':memory:'); con.execute('INSTALL httpfs'); con.execute('INSTALL avro'); con.execute('INSTALL iceberg')"
+
+COPY --chown=dbt:dbt dbt/ /app/dbt/
 
 WORKDIR /app/dbt
 
