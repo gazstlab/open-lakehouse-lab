@@ -1,4 +1,4 @@
-"""Validate requirements files against pyproject dependency declarations."""
+"""Valida arquivos requirements contra declaracoes de dependencias do pyproject."""
 
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ def check_requirements(
     expected_name: str,
 ) -> bool:
     if not requirements_path.exists():
-        print(f"{requirements_path.name} does not exist.", file=sys.stderr)
+        print(f"{requirements_path.name} nao existe.", file=sys.stderr)
         return False
 
     actual = load_requirements(requirements_path)
@@ -56,7 +56,7 @@ def check_requirements(
         return True
 
     print(
-        f"{requirements_path.name} is not synchronized with {expected_name}.",
+        f"{requirements_path.name} nao esta sincronizado com {expected_name}.",
         file=sys.stderr,
     )
     diff = format_diff(

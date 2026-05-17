@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open Lakehouse Lab - Documento</title>
+    <link rel="stylesheet" href="../assets/site.css" />
+  </head>
+  <body class="doc-page">
+    <div class="layout doc-layout">
+      <aside class="sidebar" aria-label="Navegação principal">
+        <div class="brand">
+          <strong>Open Lakehouse Lab</strong>
+          <span>Documentação estática em português para estudo local de lakehouse.</span>
+        </div>
+        <nav>
+          <div class="nav-group">
+            <h2>INÍCIO</h2>
+            <a href="../index.html#visao-geral">Visão geral</a>
+            <a href="../index.html#arquitetura">Arquitetura</a>
+            <a href="../index.html#estrutura">Estrutura do projeto</a>
+            <a href="../index.html#exemplos">Exemplos</a>
+          </div>
+          <div class="nav-group">
+            <h2>Lições</h2>
+            <a href="doc.html?doc=lesson-kind">Kubernetes local</a>
+            <a href="doc.html?doc=lesson-minio">MinIO Raw</a>
+            <a href="doc.html?doc=lesson-polaris">Polaris</a>
+            <a href="doc.html?doc=lesson-dbt">dbt e DuckDB</a>
+            <a href="doc.html?doc=lesson-airflow">Airflow</a>
+            <a href="doc.html?doc=lesson-e2e">Ponta a ponta</a>
+          </div>
+          <div class="nav-group">
+            <h2>Guias</h2>
+            <a href="doc.html?doc=learning-path">Trilha completa</a>
+            <a href="doc.html?doc=customization">Customização</a>
+            <a href="doc.html?doc=troubleshooting">Troubleshooting</a>
+          </div>
+        </nav>
+      </aside>
+
+      <main>
+        <div class="content">
+          <div class="doc-top">
+            <a class="crumb" href="../index.html">Voltar para a página inicial</a>
+            <article class="doc-hero">
+              <span class="doc-category" id="doc-category">Documento</span>
+              <h1 id="doc-title">Carregando...</h1>
+              <p class="lead" id="doc-summary"></p>
+              <div class="tags" id="doc-tags"></div>
+            </article>
+          </div>
+
+          <div class="doc-grid">
+            <div class="doc-main" id="doc-sections"></div>
+            <aside class="doc-aside">
+              <div class="side-panel">
+                <h2>Nesta página</h2>
+                <div class="toc-list" id="doc-toc"></div>
+              </div>
+            </aside>
+          </div>
+
+          <section class="doc-command-section" id="doc-command-section">
+            <div>
+              <span class="doc-command-label">Execução local</span>
+              <h2>Comandos da lição</h2>
+              <p>Use esta sequência no terminal para praticar o que a página acabou de explicar.</p>
+            </div>
+            <div class="command-list" id="doc-commands"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script src="../assets/docs-data.js"></script>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const key = params.get("doc") || "overview";
+      const docs = window.OPEN_LAKEHOUSE_DOCS || {};
+      const doc = docs[key] || docs.overview;
+      const escapeHtml = (value) =>
+        String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+
+      document.title = `Open Lakehouse Lab - ${doc.title}`;
+      document.getElementById("doc-category").textContent = doc.category;
+      document.getElementById("doc-title").textContent = doc.title;
+      document.getElementById("doc-summary").textContent = doc.summary;
+
+      const tags = document.getElementById("doc-tags");
+      tags.innerHTML = (doc.tags || [])
+        .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`)
+        .join("");
+
+      const sections = document.getElementById("doc-sections");
+      const toc = document.getElementById("doc-toc");
+      sections.innerHTML = (doc.sections || [])
+        .map((section, index) => {
+          const id = `sec-${index + 1}`;
+          const step = String(index + 1).padStart(2, "0");
+          return `<section class="doc-section" id="${id}"><span class="doc-step">${step}</span><div class="doc-section-copy"><h2>${escapeHtml(section.title)}</h2><p>${escapeHtml(section.body)}</p></div></section>`;
+        })
+        .join("");
+      toc.innerHTML = (doc.sections || [])
+        .map((section, index) => `<a href="#sec-${index + 1}">${escapeHtml(section.title)}</a>`)
+        .join("");
+
+      const commands = document.getElementById("doc-commands");
+      const commandSection = document.getElementById("doc-command-section");
+      const commandItems = doc.commands || [];
+      commandSection.hidden = commandItems.length === 0;
+      commands.innerHTML = commandItems
+        .map(
+          (command, index) =>
+            `<div class="command-card"><span>Comando ${String(index + 1).padStart(2, "0")}</span><pre><button class="copy" type="button">copiar</button><code>${escapeHtml(command)}</code></pre></div>`,
+        )
+        .join("");
+    </script>
+    <script src="../assets/site.js"></script>
+  </body>
+</html>

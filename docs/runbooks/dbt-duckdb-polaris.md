@@ -1,18 +1,23 @@
-# dbt + DuckDB + Polaris foundation
+# Fundação dbt + DuckDB + Polaris
 
-This runbook describes the Stage 08 dbt foundation for Open Lakehouse Lab.
+Este runbook descreve a fundação dbt da etapa 08 para o Open Lakehouse Lab.
 
-## Scope
+## Escopo
 
-Stage 08 configures a dbt project that uses DuckDB as the local SQL engine and Apache Polaris as the future Iceberg REST Catalog target.
+A etapa 08 configura um projeto dbt que usa DuckDB como engine SQL local e
+Apache Polaris como alvo futuro de Iceberg REST Catalog.
 
-The goal is to make the lakehouse transformation foundation independent from ingestion. Source adapters can be implemented later as long as they write data following the Raw contract.
+O objetivo é tornar a fundação de transformação lakehouse independente da
+ingestão. Adapters de fonte podem ser implementados depois, desde que escrevam
+dados seguindo o contrato Raw.
 
-This stage validates project structure, configuration and compilation. It intentionally does not require public API extractors or live public network calls.
+Esta etapa valida estrutura do projeto, configuração e compilação. Ela
+intencionalmente não exige extractors de APIs públicas nem chamadas externas em
+tempo real.
 
-## Raw contract
+## Contrato Raw
 
-The generic Raw contract uses these minimum technical columns:
+O contrato Raw genérico usa estas colunas técnicas mínimas:
 
 ```text
 source
@@ -23,21 +28,21 @@ record_hash
 raw_payload
 ```
 
-Responsibilities:
+Responsabilidades:
 
-- `source`: logical source adapter name.
-- `dataset`: dataset produced by the source adapter.
-- `ingestion_date`: date partition associated with the Raw landing event.
-- `loaded_at`: timestamp when the event was loaded.
-- `record_hash`: stable technical key for the Raw record.
-- `raw_payload`: original payload preserved when useful for audit or replay.
+- `source`: nome logico do adapter de fonte.
+- `dataset`: dataset produzido pelo adapter de fonte.
+- `ingestion_date`: particao de data associada ao evento landing da Raw.
+- `loaded_at`: timestamp em que o evento foi carregado.
+- `record_hash`: chave técnica estável do registro Raw.
+- `raw_payload`: payload original preservado quando for útil para auditoria ou replay.
 
-The current canonical Raw format is Parquet. Stage 13 writes and reads the
-fixture through MinIO; the local seed remains only as a study fallback.
+O formato Raw canônico atual é Parquet. A etapa 13 escreve e lê a fixture pelo
+MinIO; o seed local permanece apenas como fallback de estudo.
 
-## Files
+## Arquivos
 
-Main files introduced or updated by this stage:
+Arquivos principais criados ou atualizados por esta etapa:
 
 ```text
 dbt/dbt_project.yml
@@ -51,10 +56,10 @@ dbt/models/raw_sources/sources.yml
 docker/dbt-duckdb-polaris.Dockerfile
 ```
 
-## Local environment
+## Ambiente local
 
-Default local settings assume MinIO and Polaris are available from the host
-through port-forwarding:
+As configurações locais padrão assumem que MinIO e Polaris estão disponíveis a
+partir do host por port-forward:
 
 ```bash
 export DBT_S3_ENDPOINT="localhost:9000"
@@ -64,74 +69,77 @@ export DBT_POLARIS_WAREHOUSE="lakehouse"
 export AWS_REGION="us-east-1"
 ```
 
-For a local educational setup, MinIO credentials can be provided through environment variables:
+Para uma configuração educacional local, as credenciais do MinIO podem ser fornecidas
+por variáveis de ambiente:
 
 ```bash
 export AWS_ACCESS_KEY_ID="<local-minio-access-key>"
 export AWS_SECRET_ACCESS_KEY="<local-minio-secret-key>"
 ```
 
-Do not commit real credentials.
+Não commite credenciais reais.
 
-## Validate dbt project
+## Validar o projeto dbt
 
-From the repository root:
+A partir da raiz do repositório:
 
 ```bash
 make dbt-parse
 make dbt-compile
 ```
 
-To publish the Raw fixture to MinIO and build the Raw contract model:
+Para publicar a fixture Raw no MinIO e construir o modelo de contrato Raw:
 
 ```bash
 make dbt-publish-raw-fixture
 make dbt-run-foundation
 ```
 
-## Build the dbt runtime image
+## Construir a imagem de execução do dbt
 
 ```bash
 make build-dbt-image
 ```
 
-Load it into kind:
+Carregue a imagem no kind:
 
 ```bash
 make load-dbt-image
 ```
 
-## Polaris macro
+## Macro Polaris
 
-The macro `attach_polaris_catalog` is intentionally isolated. It can be reused
-by future stages from:
+A macro `attach_polaris_catalog` é intencionalmente isolada. Ela pode ser
+reutilizada por stages futuras a partir de:
 
 - `dbt run-operation`;
-- dbt hooks;
-- custom Iceberg materializations;
-- Airflow tasks running dbt in Kubernetes.
+- hooks dbt;
+- materializacoes Iceberg customizadas;
+- tasks Airflow executando dbt no Kubernetes.
 
-DuckDB expects the Polaris REST Catalog endpoint, including `/api/catalog`, and
-the Polaris catalog name as the warehouse value.
+DuckDB espera o endpoint do Polaris REST Catalog, incluindo `/api/catalog`, e o
+nome do catálogo Polaris como valor de warehouse.
 
-## Iceberg materialization
+## Materialização Iceberg
 
-The initial `iceberg_table` materialization is deliberately conservative:
+A materialização inicial `iceberg_table` é deliberadamente conservadora:
 
-- full-refresh oriented;
-- no `MERGE INTO`;
-- no `UPDATE`;
-- no `DELETE`;
-- no `ALTER TABLE`.
+- orientada a full-refresh;
+- sem `MERGE INTO`;
+- sem `UPDATE`;
+- sem `DELETE`;
+- sem `ALTER TABLE`.
 
-This keeps the MVP easy to reason about. Later stages can evolve this once
-table health, metadata collection and compaction strategies exist.
+Isso mantém o MVP facil de entender. Stages posteriores podem evoluir esse
+comportamento quando existirem saúde de tabelas, coleta de metadados e estratégias
+de compactação.
 
-## Known limitations
+## Limitações conhecidas
 
-- Stage 08 validates the dbt foundation and Raw contract, but does not require
-  public APIs.
-- Concrete source adapters are implemented later.
-- Stage 13 completes the MinIO + Polaris execution path. See
+- A etapa 08 valida a fundação dbt e o contrato Raw, mas não exige APIs
+  públicas.
+- Adapters concretos de fonte são implementados depois.
+- A etapa 13 completa o caminho de execução MinIO + Polaris. Veja
   `docs/runbooks/dbt-minio-polaris-backbone.md`.
-- Running against a live Polaris catalog requires Stage 04 services to be available.
+- Rodar contra um catálogo Polaris ativo exige que os serviços da etapa 04
+  estejam disponíveis.

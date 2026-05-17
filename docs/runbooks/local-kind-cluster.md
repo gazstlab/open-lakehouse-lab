@@ -1,31 +1,31 @@
-# Local kind cluster
+# Cluster kind local
 
-This runbook describes the Stage 02 local Kubernetes cluster bootstrap.
+Este runbook descreve o bootstrap do cluster Kubernetes local da etapa 02.
 
-## Prerequisites
+## Pre-requisitos
 
-- Docker installed and running.
-- `kind` installed and available in `PATH`.
-- `kubectl` installed and available in `PATH`.
+- Docker instalado e rodando.
+- `kind` instalado e disponível no `PATH`.
+- `kubectl` instalado e disponível no `PATH`.
 
-## Create the cluster
+## Criar o cluster
 
-From the repository root:
+A partir da raiz do repositório:
 
 ```bash
 make cluster-create
 ```
 
-The command creates a kind cluster named `open-lakehouse-lab` from
-`k8s/kind/kind-config.yaml` and applies the base `data-platform` namespace.
+O comando cria um cluster kind chamado `open-lakehouse-lab` a partir de
+`k8s/kind/kind-config.yaml` e aplica o namespace base `data-platform`.
 
-## Select the kubectl context
+## Selecionar o contexto do kubectl
 
 ```bash
 make kubectl-context
 ```
 
-## Validate connectivity
+## Validar conectividade
 
 ```bash
 make cluster-status
@@ -33,14 +33,14 @@ kubectl get nodes
 kubectl get namespace data-platform
 ```
 
-## Delete the cluster
+## Remover o cluster
 
 ```bash
 make cluster-delete
 ```
 
-## Scope
+## Escopo
 
-Stage 02 only provisions the local Kubernetes cluster and base namespace.
-Storage, catalog, Airflow, monitoring and workload manifests are introduced in
-later stages.
+A etapa 02 provisiona apenas o cluster Kubernetes local e o namespace base.
+Storage, catálogo, Airflow, monitoramento e manifests de workload entram em
+stages posteriores.

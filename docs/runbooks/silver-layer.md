@@ -1,22 +1,25 @@
-# Silver layer
+# Camada Silver
 
-This runbook describes the Stage 10 generic Silver layer for Open Lakehouse Lab.
+Este runbook descreve a camada Silver genérica da etapa 10 para o Open Lakehouse Lab.
 
-## Scope
+## Escopo
 
-Stage 10 builds generic Silver models from the canonical staging contract created in Stage 09.
+A etapa 10 cria modelos Silver genéricos a partir do contrato canônico de
+staging criado na etapa 09.
 
-The Silver layer is intentionally source-agnostic. Public APIs and future adapters should write into the Raw contract and flow through staging before reaching these Silver models.
+A camada Silver é intencionalmente agnóstica de fonte. APIs públicas e adapters
+futuros devem escrever no contrato Raw e passar por staging antes de chegar a
+esses modelos Silver.
 
-## Input model
+## Modelo de entrada
 
-Silver models read from:
+Os modelos Silver leem de:
 
 ```text
 dbt/models/staging/stg_raw_source_events.sql
 ```
 
-Expected staging columns:
+Colunas esperadas de staging:
 
 ```text
 source
@@ -31,44 +34,44 @@ metric_value
 location_name
 ```
 
-## Silver models
+## Modelos Silver
 
 ### `silver_source_events`
 
-Deduplicated source-event table.
+Tabela de eventos de fonte deduplicados.
 
-Rules:
+Regras:
 
-- one row per `record_hash`;
-- latest record wins by `loaded_at desc, observed_at desc`;
-- preserves `raw_payload` for audit and replay;
-- remains generic across source adapters.
+- uma linha por `record_hash`;
+- o registro mais recente vence por `loaded_at desc, observed_at desc`;
+- preserva `raw_payload` para auditoria e replay;
+- permanece genérica entre adapters de fonte.
 
 ### `silver_metric_observations`
 
-Analytical observation table for numeric metrics.
+Tabela analitica de observações numericas.
 
-Rules:
+Regras:
 
-- one row per stable `observation_id`;
-- requires `metric_name`, `metric_value` and `observed_at`;
-- keeps `record_hash` for traceability back to the source event.
+- uma linha por `observation_id` estável;
+- exige `metric_name`, `metric_value` e `observed_at`;
+- mantém `record_hash` para rastreabilidade até o evento de origem.
 
 ### `silver_dataset_freshness`
 
-Dataset-level freshness and volume table.
+Tabela de freshness e volume por dataset.
 
-Metrics:
+Métricas:
 
-- latest observed timestamp;
-- latest loaded timestamp;
-- first and latest ingestion date;
-- total records;
-- unique record hashes.
+- último timestamp observado;
+- último timestamp carregado;
+- primeira e última data de ingestão;
+- total de registros;
+- hashes de registros unicos.
 
-## Run locally
+## Rodar localmente
 
-From the repository root, run the Stage 13 MinIO/Polaris path:
+A partir da raiz do repositório, rode o caminho MinIO/Polaris da etapa 13:
 
 ```bash
 make dbt-publish-raw-fixture
@@ -78,7 +81,7 @@ make dbt-run-silver
 make dbt-test-silver
 ```
 
-General validation:
+Validação geral:
 
 ```bash
 make lint-dbt
@@ -88,16 +91,18 @@ make dbt-test
 make ci-pr
 ```
 
-## Design decisions
+## Decisões de design
 
-- Silver is generic first; source-specific models are deferred until real source adapters exist.
-- Deduplication uses `record_hash`, which is the stable technical key from the Raw/Staging contract.
-- Stage 13 publishes Silver as Iceberg tables through the custom
-  `iceberg_table` materialization.
+- Silver é genérica primeiro; modelos específicos de fonte ficam para quando
+  adapters reais existirem.
+- A deduplicação usa `record_hash`, que é a chave técnica estável do contrato
+  Raw/Staging.
+- A etapa 13 publica Silver como tabelas Iceberg pela materialização customizada
+  `iceberg_table`.
 
-## Known limitations
+## Limitações conhecidas
 
-- Stage 10 does not consume public APIs directly.
-- Stage 10 does not require source adapter runtime images.
-- Stage 10 did not validate tables inside Polaris as physical Iceberg snapshots;
-  Stage 13 adds that backbone.
+- A etapa 10 não consome APIs públicas diretamente.
+- A etapa 10 não exige imagens de execução de adapters de fonte.
+- A etapa 10 não validou tabelas dentro do Polaris como snapshots Iceberg
+  fisicos; a etapa 13 adiciona essa coluna dorsal.

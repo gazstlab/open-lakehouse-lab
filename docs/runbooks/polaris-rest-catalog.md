@@ -1,29 +1,35 @@
-# Apache Polaris REST Catalog
+# Apache Polaris Catálogo REST
 
-This runbook describes the Stage 04 Apache Polaris deployment for the local Open Lakehouse Lab environment.
+Este runbook descreve o deploy do Apache Polaris da etapa 04 para o ambiente
+local do Open Lakehouse Lab.
 
-## Scope
+## Escopo
 
-Stage 04 deploys Apache Polaris as the local Iceberg REST Catalog and configures a `lakehouse` catalog backed by the MinIO warehouse path:
+A etapa 04 sobe Apache Polaris como Iceberg REST Catalog local e configura o
+catálogo `lakehouse` apoiado no path de warehouse do MinIO:
 
 ```text
 s3://lakehouse/warehouse
 ```
 
-The first implementation uses Polaris in-memory persistence because this stage is focused on local catalog availability and integration with MinIO. A durable metadata backend, such as Postgres, can be introduced in a later stage if needed.
+A primeira implementação usa persistência em memória do Polaris porque esta
+etapa foca em disponibilidade local do catálogo e integração com MinIO. Um
+backend durável de metadados, como Postgres, pode ser introduzido em uma etapa
+posterior se necessário.
 
-## Prerequisites
+## Pre-requisitos
 
-- Stage 02 local kind cluster created with `make cluster-create`.
-- Stage 03 MinIO deployed with `make deploy-minio`.
-- The `lakehouse` bucket exists in MinIO.
-- `kubectl` is configured for the `kind-open-lakehouse-lab` context.
+- Cluster kind local da etapa 02 criado com `make cluster-create`.
+- MinIO da etapa 03 implantado com `make deploy-minio`.
+- Bucket `lakehouse` existente no MinIO.
+- `kubectl` configurado para o contexto `kind-open-lakehouse-lab`.
 
-## Local credentials
+## Credenciais locais
 
-Do not commit real credentials.
+Não commite credenciais reais.
 
-The deployment command creates the Kubernetes secret dynamically from environment variables:
+O comando de deploy cria o secret Kubernetes dinamicamente a partir de variáveis
+de ambiente:
 
 ```bash
 export POLARIS_ROOT_CLIENT_ID="root"
@@ -32,31 +38,32 @@ export POLARIS_MINIO_ACCESS_KEY="minioadmin"
 export POLARIS_MINIO_SECRET_KEY="minioadmin123"
 ```
 
-These values are only examples for the local educational lab. Use different values if the local MinIO deployment was customized.
+Esses valores são apenas exemplos para o laboratório educacional local. Use
+valores diferentes se o deploy local do MinIO foi customizado.
 
-A template is available at:
+Um template está disponível em:
 
 ```text
 k8s/polaris/secret.example.yaml
 ```
 
-## Deploy Polaris
+## Subir Polaris
 
-From the repository root:
+A partir da raiz do repositório:
 
 ```bash
 make deploy-polaris
 ```
 
-The command:
+O comando:
 
-1. Creates the `polaris-local-credentials` secret from environment variables.
-2. Deploys the Polaris pod.
-3. Exposes the catalog and management APIs through a ClusterIP service.
-4. Waits for the deployment rollout.
-5. Runs the bootstrap job that creates the `lakehouse` catalog.
+1. cria o secret `polaris-local-credentials` a partir das variáveis de ambiente;
+2. sobe o pod do Polaris;
+3. expõe as APIs de catálogo e gerenciamento por um service ClusterIP;
+4. aguarda o rollout do deployment;
+5. executa o job de bootstrap que cria o catálogo `lakehouse`.
 
-## Check status
+## Verificar status
 
 ```bash
 make polaris-status
@@ -64,88 +71,89 @@ make polaris-health
 kubectl -n data-platform logs job/polaris-bootstrap-catalog
 ```
 
-Expected internal endpoints:
+Endpoints internos esperados:
 
 ```text
-Catalog API:    http://polaris.data-platform.svc.cluster.local:8181/api/catalog
-Management API: http://polaris.data-platform.svc.cluster.local:8181
-Health check:   http://polaris.data-platform.svc.cluster.local:8182/q/health/ready
+API de catálogo:      http://polaris.data-platform.svc.cluster.local:8181/api/catalog
+API de gerenciamento: http://polaris.data-platform.svc.cluster.local:8181
+Check de saúde:       http://polaris.data-platform.svc.cluster.local:8182/q/health/ready
 ```
 
-## Access Polaris locally
+## Acessar Polaris localmente
 
-Start a local port-forward:
+Inicie um port-forward local:
 
 ```bash
 make port-forward-polaris
 ```
 
-Local endpoints:
+Endpoints locais:
 
 ```text
-Catalog API:    http://localhost:8181/api/catalog
-Management API: http://localhost:8181
-Health check:   http://localhost:8182/q/health/ready
+API de catálogo:      http://localhost:8181/api/catalog
+API de gerenciamento: http://localhost:8181
+Check de saúde:       http://localhost:8182/q/health/ready
 ```
 
-## Catalog configuration
+## Configuração do catálogo
 
-The bootstrap job creates the catalog:
+O job de bootstrap cria o catálogo:
 
 ```text
 lakehouse
 ```
 
-Warehouse location:
+Localizacao do warehouse:
 
 ```text
 s3://lakehouse/warehouse
 ```
 
-MinIO endpoint inside the cluster:
+Endpoint do MinIO dentro do cluster:
 
 ```text
 http://minio.data-platform.svc.cluster.local:9000
 ```
 
-The future dbt + DuckDB stage should use the internal catalog endpoint when running inside Kubernetes:
+A futura etapa dbt + DuckDB deve usar o endpoint interno do catálogo ao rodar
+dentro do Kubernetes:
 
 ```text
 http://polaris.data-platform.svc.cluster.local:8181/api/catalog
 ```
 
-When running from the host machine through port-forward, use:
+Ao rodar a partir da maquina host por port-forward, use:
 
 ```text
 http://localhost:8181/api/catalog
 ```
 
-## Delete Polaris
+## Remover Polaris
 
 ```bash
 make delete-polaris
 ```
 
-This removes:
+Isso remove:
 
-- bootstrap job;
+- job de bootstrap;
 - service;
 - deployment;
-- local credentials secret.
+- secret de credenciais locais.
 
-It does not delete MinIO or the `lakehouse` bucket.
+Isso não remove o MinIO nem o bucket `lakehouse`.
 
-## Validation checklist
+## Checklist de validação
 
-- [ ] `make deploy-polaris` completes successfully.
-- [ ] `make polaris-status` shows the Polaris pod and service.
-- [ ] `make polaris-health` returns a healthy response.
-- [ ] `kubectl -n data-platform logs job/polaris-bootstrap-catalog` confirms catalog bootstrap.
-- [ ] `make port-forward-polaris` exposes ports `8181` and `8182` locally.
+- [ ] `make deploy-polaris` conclui com sucesso.
+- [ ] `make polaris-status` mostra o pod e o service do Polaris.
+- [ ] `make polaris-health` retorna uma resposta saudavel.
+- [ ] `kubectl -n data-platform logs job/polaris-bootstrap-catalog` confirma o bootstrap do catálogo.
+- [ ] `make port-forward-polaris` expõe as portas `8181` e `8182` localmente.
 
-## Known limitations
+## Limitações conhecidas
 
-- The MVP uses in-memory Polaris persistence.
-- The local bootstrap job is intentionally simple and optimized for education, not production.
-- Durable catalog metadata storage is intentionally deferred to a future stage.
-- This stage does not create Iceberg tables; that is handled by later dbt + DuckDB stages.
+- O MVP usa persistência em memória do Polaris.
+- O job local de bootstrap é intencionalmente simples e otimizado para estudo, não para produção.
+- O armazenamento durável de metadados do catálogo fica intencionalmente para uma etapa futura.
+- Esta etapa não cria tabelas Iceberg; isso é responsabilidade das etapas dbt + DuckDB posteriores.

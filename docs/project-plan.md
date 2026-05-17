@@ -1,58 +1,58 @@
-# Open Lakehouse Lab - Project Plan
+# Open Lakehouse Lab - Plano do Projeto
 
-## Visao geral
+## Visão geral
 
-O **Open Lakehouse Lab** e um projeto de estudo 100% open source para demonstrar uma arquitetura lakehouse moderna executada localmente, sem dependencia de servicos cloud pagos.
+O **Open Lakehouse Lab** é um projeto de estudo 100% open source para demonstrar uma arquitetura lakehouse moderna executada localmente, sem dependência de serviços cloud pagos.
 
-A proposta e criar um laboratorio compartilhavel para estudar engenharia de dados moderna com Kubernetes, Airflow, MinIO, Apache Iceberg, Apache Polaris, DuckDB, dbt, Prometheus e Grafana.
+A proposta é criar um laboratório compartilhável para estudar engenharia de dados moderna com Kubernetes, Airflow, MinIO, Apache Iceberg, Apache Polaris, DuckDB, dbt, Prometheus e Grafana.
 
 ## Objetivos
 
 - Construir uma arquitetura lakehouse local e open source.
 - Usar `kind` como cluster Kubernetes local.
-- Usar Airflow para orquestracao.
+- Usar Airflow para orquestração.
 - Executar tarefas em pods via `KubernetesPodOperator`.
-- Usar MinIO como object storage compativel com S3.
+- Usar MinIO como armazenamento de objetos compatível com S3.
 - Usar Apache Iceberg como formato das tabelas Silver e Gold.
 - Usar Apache Polaris como Iceberg REST Catalog.
 - Usar DuckDB como engine SQL local.
 - Usar dbt-duckdb para transformar Raw em Silver e Silver em Gold.
-- Definir a fundacao dbt + DuckDB + Polaris antes das fontes concretas.
-- Consumir APIs publicas com atualizacao diaria ou superior como adapters plugaveis.
-- Usar Prometheus para coleta de metricas operacionais.
-- Usar Grafana para paineis de observabilidade da infraestrutura e dos pipelines.
-- Documentar a arquitetura, os contratos de dados, os runbooks e as decisoes tecnicas.
+- Definir a fundação dbt + DuckDB + Polaris antes das fontes concretas.
+- Consumir APIs públicas com atualizacao diaria ou superior como adapters plugáveis.
+- Usar Prometheus para coleta de métricas operacionais.
+- Usar Grafana para painéis de observabilidade da infraestrutura e dos pipelines.
+- Documentar a arquitetura, os contratos de dados, os runbooks e as decisões técnicas.
 
 ## Stack principal
 
 | Camada | Tecnologia |
 |---|---|
 | Kubernetes local | kind |
-| Orquestracao | Apache Airflow |
-| Execucao | KubernetesPodOperator |
+| Orquestração | Apache Airflow |
+| Execução | KubernetesPodOperator |
 | Object storage | MinIO |
 | Table format | Apache Iceberg |
-| Catalogo Iceberg | Apache Polaris |
+| Catálogo Iceberg | Apache Polaris |
 | Engine SQL | DuckDB |
-| Transformacao | dbt-duckdb |
-| Contrato Raw | Parquet canonico com paths e schemas genericos consumidos pelo dbt |
-| Ingestao | Source adapters Python plugaveis |
-| Metricas | Prometheus |
+| Transformação | dbt-duckdb |
+| Contrato Raw | Parquet canônico com caminhos e schemas genéricos consumidos pelo dbt |
+| Ingestao | Adapters de fonte Python plugáveis |
+| Métricas | Prometheus |
 | Observabilidade operacional | Grafana |
 | Estado do Kubernetes | kube-state-metrics |
-| Metricas dos nos | Node Exporter |
-| Metricas do Airflow | StatsD Exporter |
-| Documentacao | Markdown |
+| Métricas dos nós | Node Exporter |
+| Métricas do Airflow | StatsD Exporter |
+| Documentação | Markdown |
 
 ## Arquitetura
 
 ```text
-Source adapters
-  -> API HTTP, arquivo local, fixture, object storage ou futuras fontes batch/stream
+Adapters de fonte
+  -> API HTTP, arquivo local, fixture, armazenamento de objetos ou futuras fontes batch/stream
   -> Airflow DAG
   -> KubernetesPodOperator
   -> Source Adapter Pods
-  -> MinIO Raw Zone contract em Parquet canonico
+  -> MinIO Raw Zone contract em Parquet canônico
   -> dbt-duckdb Pod
   -> DuckDB Iceberg Extension
   -> Apache Polaris REST Catalog
@@ -69,20 +69,20 @@ Source adapters
 
 ### Raw
 
-A Raw armazena uma versao canonica e tabular dos dados brutos em Parquet, sem
-acoplar o core lakehouse a um tipo especifico de origem.
+A Raw armazena uma versão canônica e tabular dos dados brutos em Parquet, sem
+acoplar o core lakehouse a um tipo específico de origem.
 
 O contrato Raw deve ser definido antes dos adapters concretos. Assim, o dbt pode
-compilar e validar a fundacao lakehouse com fixtures locais, enquanto APIs
-publicas entram depois como uma implementacao de fonte.
+compilar e validar a fundação lakehouse com fixtures locais, enquanto APIs
+públicas entram depois como uma implementação de fonte.
 
-Formato canonico atual:
+Formato canônico atual:
 
 ```text
 s3://lakehouse/raw/source=<source>/dataset=<dataset>/ingestion_date=YYYY-MM-DD/*.parquet
 ```
 
-Colunas tecnicas minimas:
+Colunas técnicas mínimas:
 
 ```text
 source
@@ -93,15 +93,15 @@ record_hash
 raw_payload
 ```
 
-`raw_payload` preserva o conteudo original quando isso for util para auditoria,
-reprocessamento ou estudo. Campos conhecidos e estaveis da fonte devem ser
-gravados como colunas do Parquet sempre que possivel. Formatos como CSV e JSON
+`raw_payload` preserva o conteúdo original quando isso for útil para auditoria,
+reprocessamento ou estudo. Campos conhecidos e estáveis da fonte devem ser
+gravados como colunas do Parquet sempre que possível. Formatos como CSV e JSON
 podem ser adicionados posteriormente por adapters ou macros de leitura DuckDB,
-mas nao fazem parte do contrato canonico inicial.
+mas não fazem parte do contrato canônico inicial.
 
 ### Silver
 
-A Silver sera criada com dbt + DuckDB lendo a Raw e escrevendo tabelas Apache Iceberg via Polaris.
+A Silver será criada com dbt + DuckDB lendo a Raw e escrevendo tabelas Apache Iceberg via Polaris.
 
 Tabelas iniciais:
 
@@ -119,13 +119,13 @@ Responsabilidades:
 - cast de tipos;
 - normalizacao de timestamps;
 - padronizacao de nomes;
-- deduplicacao;
+- deduplicação;
 - validacoes basicas;
-- publicacao como Iceberg.
+- publicação como Iceberg.
 
 ### Gold
 
-A Gold tambem sera criada com dbt + DuckDB, a partir da Silver Iceberg.
+A Gold também será criada com dbt + DuckDB, a partir da Silver Iceberg.
 
 Tabelas iniciais:
 
@@ -139,44 +139,44 @@ gold.pipeline_health_daily
 Responsabilidades:
 
 - agregacoes analiticas;
-- metricas consolidadas para consumo por consultas;
+- métricas consolidadas para consumo por consultas;
 - modelos finais de estudo;
 - testes dbt;
-- suporte a exploracao tecnica via DuckDB, Polaris e metadados Iceberg.
+- suporte a exploração técnica via DuckDB, Polaris e metadados Iceberg.
 
-## Source adapters
+## Adaptadores de fonte
 
-Adapters de fonte sao uma camada plugavel acima do contrato Raw.
+Adapters de fonte são uma camada plugavel acima do contrato Raw.
 
 Tipos de fonte previstos:
 
 - API HTTP;
 - arquivo local;
-- fixture deterministica para testes;
-- object storage;
+- fixture determinística para testes;
+- armazenamento de objetos;
 - futuras fontes batch ou stream.
 
-As fontes publicas iniciais continuam fazendo parte do MVP, mas nao devem ser
-pre-requisito para criar a fundacao dbt + DuckDB + Polaris.
+As fontes públicas iniciais continuam fazendo parte do MVP, mas não devem ser
+pre-requisito para criar a fundação dbt + DuckDB + Polaris.
 
-## Fontes publicas iniciais
+## Fontes públicas iniciais
 
 ### Open-Meteo
 
-Dados de clima, temperatura, vento, chuva e previsao.
+Dados de clima, temperatura, vento, chuva e previsão.
 
-### USGS Earthquakes
+### USGS Terremotos
 
-Dados de terremotos, magnitude, profundidade, latitude, longitude e horario do evento.
+Dados de terremotos, magnitude, profundidade, latitude, longitude e horário do evento.
 
 ### Banco Central do Brasil - SGS
 
-Series temporais economicas e financeiras publicas.
+Séries temporais econômicas e financeiras públicas.
 
 ## dbt + DuckDB + Polaris
 
-O projeto usara o caminho mais avancado como fundacao lakehouse desacoplada de
-ingestao:
+O projeto usara o caminho mais avancado como fundação lakehouse desacoplada de
+ingestão:
 
 ```text
 dbt-duckdb
@@ -185,7 +185,7 @@ dbt-duckdb
   -> Silver e Gold Iceberg Tables
 ```
 
-O dbt sera responsavel por toda a modelagem estruturada:
+O dbt será responsavel por toda a modelagem estruturada:
 
 ```text
 raw_sources
@@ -195,12 +195,12 @@ raw_sources
   -> marts
 ```
 
-`raw_sources` deve representar o contrato Raw generico em Parquet, nao uma lista
-fixa de APIs. As primeiras validacoes tecnicas devem funcionar com fixture local
-para que `dbt parse` e `dbt compile` nao dependam de extractors Python, Airflow
-DAGs de ingestao ou disponibilidade externa de APIs.
+`raw_sources` deve representar o contrato Raw genérico em Parquet, não uma lista
+fixa de APIs. As primeiras validacoes técnicas devem funcionar com fixture local
+para que `dbt parse` e `dbt compile` não dependam de extractors Python, Airflow
+DAGs de ingestão ou disponibilidade externa de APIs.
 
-Na primeira versao, sera usada uma estrategia de full refresh idempotente. O MVP deve evitar `MERGE INTO`, `ALTER TABLE`, `UPDATE` e `DELETE` em tabelas Iceberg.
+Na primeira versão, será usada uma estratégia de full refresh idempotente. O MVP deve evitar `MERGE INTO`, `ALTER TABLE`, `UPDATE` e `DELETE` em tabelas Iceberg.
 
 ## Estrutura sugerida
 
@@ -251,21 +251,21 @@ start
   -> end
 ```
 
-## Observabilidade e catalogacao
+## Observabilidade e catalogação
 
 Metadados a serem coletados:
 
-- status de execucao por fonte;
+- status de execução por fonte;
 - duracao das tasks;
 - registros ingeridos;
 - registros rejeitados;
 - freshness por dataset;
 - snapshots Iceberg;
 - qualidade por camada;
-- catalogo de dados;
+- catálogo de dados;
 - schemas das tabelas;
-- localizacao fisica das tabelas no MinIO;
-- historico de execucoes da DAG.
+- localização física das tabelas no MinIO;
+- historico de execuções da DAG.
 
 Artefatos sugeridos:
 
@@ -288,7 +288,7 @@ Componentes:
 - kube-state-metrics;
 - Node Exporter;
 - StatsD Exporter;
-- ServiceMonitors, quando aplicavel.
+- ServiceMonitors, quando aplicável.
 
 Instalacao recomendada:
 
@@ -296,40 +296,40 @@ Instalacao recomendada:
 kube-prometheus-stack via Helm
 ```
 
-Metricas do Kubernetes:
+Métricas do Kubernetes:
 
-- pods em execucao;
+- pods em execução;
 - pods com falha;
 - restarts de containers;
 - uso de CPU;
-- uso de memoria;
+- uso de memória;
 - uso por namespace;
 - status dos deployments e statefulsets.
 
-Metricas do Airflow:
+Métricas do Airflow:
 
 - DAG runs;
 - task duration;
 - task failures;
 - scheduler heartbeat;
-- numero de tasks em sucesso, falha e retry.
+- número de tasks em sucesso, falha e retry.
 
-Metricas dos pipelines:
+Métricas dos pipelines:
 
 - registros ingeridos por fonte;
 - registros rejeitados;
 - duracao por etapa;
 - freshness por dataset;
-- status da ultima execucao;
+- status da última execução;
 - quantidade de snapshots Iceberg gerados.
 
-Metricas do MinIO e Polaris:
+Métricas do MinIO e Polaris:
 
-- disponibilidade dos servicos;
+- disponibilidade dos serviços;
 - uso de storage;
 - quantidade de objetos;
 - latencia ou erros, quando expostos;
-- saude do catalogo Polaris.
+- saúde do catálogo Polaris.
 
 Estrutura sugerida:
 
@@ -349,9 +349,31 @@ port-forward-prometheus
 port-forward-grafana
 ```
 
-## Documentacao obrigatoria
+## Documentação obrigatoria
 
-### ADRs
+### Trilha de aprendizado
+
+```text
+learning-path.md
+user-customization-guide.md
+lessons/01-local-kubernetes-kind.md
+lessons/02-minio-raw-storage.md
+lessons/03-polaris-iceberg-catalog.md
+lessons/04-dbt-duckdb-transformations.md
+lessons/05-airflow-kubernetes-pods.md
+lessons/06-end-to-end-pipeline.md
+troubleshooting/guided-troubleshooting.md
+```
+
+O projeto deve manter dois modos de uso:
+
+- Exemplos: atalhos `make` executam o caminho padrão rapidamente.
+- Trilha de Aprendizado: as mesmas etapas são explicadas como lições reproduziveis.
+
+Atalhos importantes devem imprimir objetivo, motivo, comandos executados,
+inspeções recomendadas e próximo passo.
+
+### Registros de decisão de arquitetura
 
 ```text
 001-open-source-stack.md
@@ -366,7 +388,7 @@ port-forward-grafana
 010-operational-observability-with-prometheus-grafana.md
 ```
 
-### Runbooks
+### Runbooks operacionais
 
 ```text
 reprocess-a-date.md
@@ -381,9 +403,9 @@ investigate-prometheus-target-down.md
 investigate-airflow-metric-failure.md
 ```
 
-## Fases de implementacao
+## Fases de implementação
 
-### Fase 1 - Fundacao
+### Fase 1 - Fundação
 
 - Criar cluster kind.
 - Criar namespace `data-platform`.
@@ -398,29 +420,29 @@ investigate-airflow-metric-failure.md
 - Criar projeto dbt.
 - Configurar DuckDB com `httpfs`, `iceberg` e suporte nativo a Parquet.
 - Criar macro para anexar Polaris.
-- Criar materializacao customizada `iceberg_table`.
-- Criar contrato Raw generico em Parquet consumido pelo dbt.
-- Criar fixture local minima para validacao sem ingestao.
+- Criar materialização customizada `iceberg_table`.
+- Criar contrato Raw genérico em Parquet consumido pelo dbt.
+- Criar fixture local mínima para validação sem ingestão.
 
 ### Fase 3 - Raw plugavel
 
-- Criar runtime generico de source adapters.
+- Criar ambiente de execução genérico de adapters de fonte.
 - Criar abstracoes comuns para adapters de fonte.
-- Criar adapter de fixture/local file para testes sem rede externa.
-- Gravar dados brutos no MinIO seguindo o contrato Raw canonico em Parquet.
-- Registrar metadados de ingestao.
+- Criar adapter de fixture/arquivo local para testes sem rede externa.
+- Gravar dados brutos no MinIO seguindo o contrato Raw canônico em Parquet.
+- Registrar metadados de ingestão.
 
-### Fase 4 - Fontes publicas
+### Fase 4 - Fontes públicas
 
 - Implementar adapters Open-Meteo, USGS e Banco Central SGS.
 - Criar tasks Airflow para cada adapter.
-- Garantir que testes rapidos usem fixtures e nao dependam de APIs reais.
+- Garantir que testes rápidos usem fixtures e não dependam de APIs reais.
 
 ### Fase 5 - Silver Iceberg
 
 - Criar staging models.
 - Criar modelos Silver.
-- Aplicar deduplicacao.
+- Aplicar deduplicação.
 - Aplicar testes dbt.
 - Publicar Silver como Iceberg.
 
@@ -431,55 +453,64 @@ investigate-airflow-metric-failure.md
 - Aplicar testes dbt.
 - Publicar Gold como Iceberg.
 
-### Fase 7 - Orquestracao dbt no Airflow
+### Fase 7 - Orquestração dbt no Airflow
 
 - Criar DAG principal `open_lakehouse_lab_daily`.
-- Executar comandos dbt em pods efemeros via `KubernetesPodOperator`.
+- Executar comandos dbt em pods efêmeros via `KubernetesPodOperator`.
 - Usar a imagem local `dbt + duckdb` carregada no kind.
-- Validar logs, remocao dos pods e acionamento pela Airflow UI.
-- Manter a orquestracao desacoplada dos adapters concretos de ingestao.
+- Validar logs, remoção dos pods e acionamento pela Airflow UI.
+- Manter a orquestração desacoplada dos adapters concretos de ingestão.
 
-### Fase 8 - Observabilidade e catalogacao
+### Fase 8 - Plataforma de estudo guiado
 
-- Coletar metadados de execucao.
+- Criar Exemplos para executar o exemplo padrão.
+- Criar Trilha de Aprendizado com lições incrementais.
+- Tornar atalhos `make` explicativos.
+- Documentar comandos manuais equivalentes.
+- Documentar como customizar dados Raw, modelos dbt e DAGs Airflow.
+- Criar DAGs didáticas para explorar Airflow sem alterar a DAG principal.
+
+### Fase 9 - Observabilidade e catalogação
+
+- Coletar metadados de execução.
 - Coletar snapshots Iceberg.
 - Gerar data catalog.
 - Registrar freshness por fonte.
 - Registrar resultados de qualidade.
-- Documentar exemplos de consultas tecnicas.
+- Documentar exemplos de consultas técnicas.
 
-### Fase 9 - Prometheus e Grafana
+### Fase 10 - Prometheus e Grafana
 
 - Instalar kube-prometheus-stack.
 - Configurar Prometheus.
 - Configurar Grafana.
 - Configurar kube-state-metrics.
 - Configurar Node Exporter.
-- Configurar StatsD Exporter para metricas do Airflow.
-- Criar paineis operacionais para Kubernetes, Airflow, MinIO, Polaris e pipelines.
+- Configurar StatsD Exporter para métricas do Airflow.
+- Criar painéis operacionais para Kubernetes, Airflow, MinIO, Polaris e pipelines.
 - Criar regras de alerta para falhas criticas.
 
-### Fase 9 - Documentacao
+### Fase 11 - Documentação
 
 - Completar README.
 - Criar ADRs.
 - Criar runbooks.
 - Criar contratos de dados.
 - Adicionar diagramas de arquitetura.
-- Documentar limitacoes e proximos passos.
+- Documentar limitações e próximos passos.
 
-## Limitacoes conhecidas
+## Limitações conhecidas
 
-- O projeto e um laboratorio local, nao uma plataforma de producao.
-- O MVP usara full refresh, nao merge incremental.
-- Mudancas de schema serao tratadas por recriacao controlada da tabela.
-- MinIO sera usado como object storage local para estudo.
-- Prometheus e Grafana serao usados para observabilidade operacional local.
+- O projeto é um laboratório local, não uma plataforma de produção.
+- O MVP usara full refresh, não merge incremental.
+- Mudancas de schema serão tratadas por recriacao controlada da tabela.
+- MinIO será usado como armazenamento de objetos local para estudo.
+- Prometheus e Grafana serão usados para observabilidade operacional local.
 
 ## Evolucoes futuras
 
 - Adicionar GDELT.
-- Adicionar manutencao e compactacao Iceberg.
+- Adicionar manutenção e compactação Iceberg.
 - Adicionar exemplos de time travel.
 - Adicionar Spark como engine complementar.
 - Adicionar Trino para consulta multi-engine.
@@ -494,4 +525,4 @@ O **Open Lakehouse Lab** demonstra como estudar e construir uma arquitetura lake
 Kubernetes + Airflow + MinIO + Apache Iceberg + Polaris + DuckDB + dbt + Prometheus + Grafana
 ```
 
-A arquitetura foi pensada para ser executada localmente, sem custo cloud, e servir como base educacional para evolucao futura para stacks em nuvem.
+A arquitetura foi pensada para ser executada localmente, sem custo cloud, e servir como base educacional para evolução futura para stacks em nuvem.

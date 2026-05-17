@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open Lakehouse Lab - Documentação</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #17202a;
+        --muted: #586272;
+        --line: #d8dee7;
+        --surface: #ffffff;
+        --page: #f6f8fb;
+        --nav: #101820;
+        --nav-muted: #a9b7c7;
+        --teal: #007c89;
+        --green: #2f7d32;
+        --amber: #a45a00;
+        --blue: #2e5aac;
+        --rose: #a83252;
+        --code: #0c1117;
+        --code-text: #e8edf4;
+        --radius: 8px;
+        --shadow: 0 10px 24px rgba(20, 32, 46, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--page);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.55;
+      }
+
+      a {
+        color: var(--teal);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 292px minmax(0, 1fr);
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        background: var(--nav);
+        color: #f7fbff;
+        border-right: 1px solid #223244;
+        padding: 24px 18px;
+      }
+
+      .brand {
+        margin-bottom: 22px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid #2a3b4d;
+      }
+
+      .brand strong {
+        display: block;
+        font-size: 1.08rem;
+        line-height: 1.25;
+      }
+
+      .brand span {
+        display: block;
+        margin-top: 7px;
+        color: var(--nav-muted);
+        font-size: 0.88rem;
+      }
+
+      .nav-group {
+        margin: 0 0 18px;
+      }
+
+      .nav-group h2 {
+        margin: 0 0 8px;
+        color: #dce8f5;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      .nav-group a {
+        display: block;
+        padding: 6px 8px;
+        border-radius: 6px;
+        color: var(--nav-muted);
+        font-size: 0.91rem;
+      }
+
+      .nav-group a:hover,
+      .nav-group a:focus {
+        background: #1b2a38;
+        color: #ffffff;
+        text-decoration: none;
+      }
+
+      main {
+        min-width: 0;
+      }
+
+      .content {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 28px 72px;
+      }
+
+      .topbar {
+        display: none;
+        background: var(--nav);
+        color: #fff;
+        padding: 14px 18px;
+      }
+
+      .topbar strong {
+        font-size: 1rem;
+      }
+
+      .intro {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 28px;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--teal);
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        letter-spacing: 0;
+        line-height: 1.2;
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 900px;
+        font-size: clamp(2.1rem, 4vw, 4rem);
+      }
+
+      h2 {
+        margin: 0 0 18px;
+        font-size: 1.78rem;
+      }
+
+      h3 {
+        margin: 0 0 10px;
+        font-size: 1.15rem;
+      }
+
+      h4 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+      }
+
+      p {
+        margin: 0 0 14px;
+      }
+
+      .lead {
+        max-width: 880px;
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 1.08rem;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 24px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        min-height: 40px;
+        padding: 9px 14px;
+        border: 1px solid var(--teal);
+        border-radius: 6px;
+        background: var(--teal);
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .button.secondary {
+        background: #ffffff;
+        color: var(--teal);
+      }
+
+      .button:hover {
+        text-decoration: none;
+        filter: brightness(0.96);
+      }
+
+      section {
+        margin-top: 28px;
+        padding: 26px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .tile {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 16px;
+        background: #fbfcfe;
+      }
+
+      .tile p:last-child {
+        margin-bottom: 0;
+      }
+
+      .metric {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 44px;
+      }
+
+      .mark {
+        display: inline-grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 0.84rem;
+        font-weight: 800;
+        flex: 0 0 auto;
+      }
+
+      .mark.teal {
+        background: var(--teal);
+      }
+
+      .mark.green {
+        background: var(--green);
+      }
+
+      .mark.amber {
+        background: var(--amber);
+      }
+
+      .mark.blue {
+        background: var(--blue);
+      }
+
+      .mark.rose {
+        background: var(--rose);
+      }
+
+      .pipeline {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(118px, 1fr));
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .node {
+        position: relative;
+        min-height: 104px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fbfcfe;
+        padding: 14px;
+      }
+
+      .node::after {
+        content: ">";
+        position: absolute;
+        right: -10px;
+        top: 38px;
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .node:last-child::after {
+        content: "";
+      }
+
+      .node b {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .node span {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      code {
+        border-radius: 5px;
+        background: #eef2f6;
+        padding: 1px 5px;
+        color: #152033;
+        font-family:
+          "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 0.92em;
+      }
+
+      pre {
+        position: relative;
+        overflow-x: auto;
+        margin: 12px 0 0;
+        border-radius: var(--radius);
+        background: var(--code);
+        color: var(--code-text);
+        padding: 16px;
+      }
+
+      pre code {
+        background: transparent;
+        color: inherit;
+        padding: 0;
+        font-size: 0.9rem;
+      }
+
+      .copy {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        border: 1px solid #485465;
+        border-radius: 6px;
+        background: #17202a;
+        color: #e8edf4;
+        cursor: pointer;
+        font-size: 0.78rem;
+        min-height: 30px;
+        padding: 4px 8px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+        font-size: 0.95rem;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        padding: 10px 8px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: #243142;
+        background: #f1f5f9;
+      }
+
+      .path-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .path-row {
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 12px;
+        background: #fbfcfe;
+      }
+
+      .step-number {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        place-items: center;
+        border-radius: 50%;
+        background: #e2f2f4;
+        color: var(--teal);
+        font-weight: 800;
+      }
+
+      details {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fbfcfe;
+        padding: 0;
+      }
+
+      details + details {
+        margin-top: 10px;
+      }
+
+      summary {
+        cursor: pointer;
+        padding: 14px 16px;
+        font-weight: 800;
+      }
+
+      details > div {
+        border-top: 1px solid var(--line);
+        padding: 16px;
+      }
+
+      .note {
+        border-left: 4px solid var(--teal);
+        background: #edf8fa;
+        padding: 12px 14px;
+        color: #20313d;
+      }
+
+      .warn {
+        border-left-color: var(--amber);
+        background: #fff7ea;
+      }
+
+      .file-list {
+        columns: 2;
+        column-gap: 30px;
+        padding-left: 18px;
+      }
+
+      .file-list li {
+        break-inside: avoid;
+        margin-bottom: 6px;
+      }
+
+      .footer {
+        margin: 34px 0 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      @media (max-width: 980px) {
+        .layout {
+          display: block;
+        }
+
+        .sidebar {
+          position: static;
+          height: auto;
+          padding: 18px;
+        }
+
+        .topbar {
+          display: block;
+        }
+
+        .content {
+          padding: 20px 14px 48px;
+        }
+
+        .grid,
+        .grid.two,
+        .pipeline {
+          grid-template-columns: 1fr;
+        }
+
+        .node::after {
+          content: "v";
+          right: 18px;
+          top: auto;
+          bottom: -18px;
+        }
+
+        .file-list {
+          columns: 1;
+        }
+      }
+
+      @media print {
+        .sidebar,
+        .topbar,
+        .copy,
+        .actions {
+          display: none;
+        }
+
+        .layout {
+          display: block;
+        }
+
+        body {
+          background: #fff;
+        }
+
+        section,
+        .intro {
+          box-shadow: none;
+          break-inside: avoid;
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="assets/site.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar" aria-label="Navegação principal">
+        <div class="brand">
+          <strong>Open Lakehouse Lab</strong>
+          <span>Documentação estática em português para estudo local de lakehouse.</span>
+        </div>
+        <nav>
+          <div class="nav-group">
+            <h2>INÍCIO</h2>
+            <a href="#visao-geral">Visão geral</a>
+            <a href="#arquitetura">Arquitetura</a>
+            <a href="#estrutura">Estrutura do projeto</a>
+            <a href="#exemplos">Exemplos</a>
+            <a href="#trilha">Trilha de Aprendizado</a>
+          </div>
+          <div class="nav-group">
+            <h2>Uso local</h2>
+            <a href="#interfaces">Interfaces locais</a>
+            <a href="#sql">Consulta SQL</a>
+            <a href="#customizacao">Customização</a>
+            <a href="#airflow">Airflow</a>
+          </div>
+          <div class="nav-group">
+            <h2>Referências</h2>
+            <a href="#runbooks">Runbooks</a>
+            <a href="#troubleshooting">Troubleshooting</a>
+            <a href="#qualidade">Qualidade</a>
+            <a href="#arquivos">Arquivos</a>
+          </div>
+        </nav>
+      </aside>
+
+      <main>
+        <div class="topbar"><strong>Open Lakehouse Lab</strong></div>
+        <div class="content">
+          <header class="intro" id="visao-geral">
+            <p class="eyebrow">Laboratório open source para engenharia de dados</p>
+            <h1>Documentação do Open Lakehouse Lab</h1>
+            <p class="lead">
+              Uma página estática para estudar a arquitetura local com kind, Kubernetes,
+              Airflow, MinIO, Apache Iceberg, Apache Polaris, DuckDB, dbt, Prometheus e
+              Grafana. O projeto é educacional, reproduzível localmente e focado na
+              comunidade brasileira de engenharia de dados.
+            </p>
+            <div class="actions">
+              <a class="button" href="#exemplos">Executar exemplos</a>
+              <a class="button secondary" href="#trilha">Seguir lições</a>
+              <a class="button secondary" href="#customizacao">Criar pipeline próprio</a>
+            </div>
+            <div class="mission-board" aria-label="Missões de aprendizado">
+              <div class="mission">
+                <span class="mission-code">M1</span>
+                <b>Subir a plataforma</b>
+                <span>kind, MinIO, Polaris e Airflow rodando localmente.</span>
+              </div>
+              <div class="mission">
+                <span class="mission-code">M2</span>
+                <b>Publicar dados Raw</b>
+                <span>Fixture Parquet gravada no bucket lakehouse.</span>
+              </div>
+              <div class="mission">
+                <span class="mission-code">M3</span>
+                <b>Transformar com dbt</b>
+                <span>DuckDB processando Raw, Silver e Gold.</span>
+              </div>
+              <div class="mission">
+                <span class="mission-code">M4</span>
+                <b>Orquestrar no Airflow</b>
+                <span>DAGs criando pods efêmeros no cluster kind.</span>
+              </div>
+            </div>
+          </header>
+
+          <section id="arquitetura">
+            <h2>Arquitetura</h2>
+            <p>
+              O caminho padrão valida a coluna dorsal do projeto antes de introduzir
+              adapters concretos de fonte. DuckDB é a engine SQL de processamento; MinIO
+              armazena dados persistentes; Polaris registra tabelas Iceberg; Airflow
+              orquestra workloads em pods Kubernetes.
+            </p>
+            <div class="pipeline" aria-label="Fluxo principal da plataforma">
+              <div class="node"><b>Raw Parquet</b><span>Arquivos canonicos no MinIO.</span></div>
+              <div class="node"><b>dbt</b><span>Modelagem Raw, staging, Silver e Gold.</span></div>
+              <div class="node"><b>DuckDB</b><span>Engine SQL local e em pods.</span></div>
+              <div class="node"><b>Iceberg</b><span>Tabelas Silver e Gold.</span></div>
+              <div class="node"><b>Polaris</b><span>Catálogo REST Iceberg.</span></div>
+              <div class="node"><b>Airflow</b><span>Orquestração com KubernetesPodOperator.</span></div>
+            </div>
+
+            <div class="grid" style="margin-top: 18px">
+              <div class="tile metric">
+                <span class="mark teal">1</span>
+                <div><b>Local-first</b><br /><span>Sem cloud paga ou SaaS obrigatorio.</span></div>
+              </div>
+              <div class="tile metric">
+                <span class="mark green">2</span>
+                <div><b>Didatico</b><br /><span>Atalhos explicam o que executam.</span></div>
+              </div>
+              <div class="tile metric">
+                <span class="mark amber">3</span>
+                <div><b>Modular</b><br /><span>Core desacoplado das fontes reais.</span></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="estrutura">
+            <h2>Estrutura do projeto</h2>
+            <p>
+              Cada diretório representa uma parte do laboratório. A ideia é que você
+              consiga navegar pelo código como se fosse um mapa da plataforma.
+            </p>
+            <div class="project-map">
+              <div class="dir-card">
+                <code>airflow/</code>
+                <p>Projeto Airflow criado com Astro CLI, DAGs principais e DAGs didáticas.</p>
+              </div>
+              <div class="dir-card">
+                <code>dbt/</code>
+                <p>Projeto dbt Core com modelos Raw, staging, Silver, intermediate e marts.</p>
+              </div>
+              <div class="dir-card">
+                <code>k8s/</code>
+                <p>Manifests Kubernetes, Helm values, RBAC e recursos locais da plataforma.</p>
+              </div>
+              <div class="dir-card">
+                <code>docker/</code>
+                <p>Dockerfiles das imagens locais usadas por Airflow e workloads dbt.</p>
+              </div>
+              <div class="dir-card">
+                <code>ingestion/</code>
+                <p>Espaço para adapters de fonte e utilitários de ingestão plugáveis.</p>
+              </div>
+              <div class="dir-card">
+                <code>metadata/</code>
+                <p>Artefatos previstos para catálogo, qualidade, freshness e execuções.</p>
+              </div>
+              <div class="dir-card">
+                <code>docs/</code>
+                <p>Documentação, runbooks, lições, troubleshooting e esta página estática.</p>
+              </div>
+              <div class="dir-card">
+                <code>scripts/</code>
+                <p>Automações locais, validadores e explicações didáticas dos atalhos.</p>
+              </div>
+              <div class="dir-card">
+                <code>.github/</code>
+                <p>Workflows de convenções, qualidade e automações do GitHub Actions.</p>
+              </div>
+            </div>
+            <p style="margin-top: 14px">
+              <a href="pages/doc.html?doc=overview">Abrir página de visão geral</a>
+            </p>
+          </section>
+
+          <section id="exemplos">
+            <h2>Exemplos</h2>
+            <p>
+              Rode o laboratório completo em um ambiente local limpo. Cada alvo imprime
+              seções de objetivo, motivo, comandos, inspeções e próximo passo.
+            </p>
+            <pre><button class="copy" type="button">copiar</button><code>make example</code></pre>
+
+            <h3>Execução passo a passo</h3>
+            <pre><button class="copy" type="button">copiar</button><code>make cluster-create
+make deploy-minio
+make build-dbt-image
+make load-dbt-image
+make deploy-polaris
+make polaris-health
+make publish-raw-fixture-parquet
+make build-airflow-image
+make load-airflow-image
+make deploy-airflow
+make trigger-airflow-dbt</code></pre>
+
+            <div class="note">
+              As credenciais padrão são locais: MinIO usa <code>minioadmin</code> /
+              <code>minioadmin123</code>; Airflow usa <code>admin</code> /
+              <code>admin</code>; Polaris usa variáveis locais de desenvolvimento.
+            </div>
+          </section>
+
+          <section id="trilha">
+            <h2>Trilha de Aprendizado</h2>
+            <p>
+              A trilha mostra as mesmas etapas dos exemplos como lições
+              incrementais. Cada lição tem objetivo, comandos manuais, inspeção e
+              pontos de customização.
+            </p>
+            <pre><button class="copy" type="button">copiar</button><code>make lab-learning-path</code></pre>
+
+            <div class="path-list">
+              <div class="path-row">
+                <span class="step-number">01</span>
+                <div>
+                  <b>Kubernetes local com kind</b>
+                  <p>Cria o cluster local e o namespace <code>data-platform</code>.</p>
+                  <a href="pages/doc.html?doc=lesson-kind">Abrir página</a>
+                </div>
+              </div>
+              <div class="path-row">
+                <span class="step-number">02</span>
+                <div>
+                  <b>Storage Raw com MinIO</b>
+                  <p>Sobe MinIO, cria o bucket <code>lakehouse</code> e recebe Raw Parquet.</p>
+                  <a href="pages/doc.html?doc=lesson-minio">Abrir página</a>
+                </div>
+              </div>
+              <div class="path-row">
+                <span class="step-number">03</span>
+                <div>
+                  <b>Catálogo Iceberg com Polaris</b>
+                  <p>Inicializa o catálogo <code>lakehouse</code> apontando para MinIO.</p>
+                  <a href="pages/doc.html?doc=lesson-polaris">Abrir página</a>
+                </div>
+              </div>
+              <div class="path-row">
+                <span class="step-number">04</span>
+                <div>
+                  <b>Transformações com dbt e DuckDB</b>
+                  <p>Compila, executa e testa modelos Raw, staging, Silver e Gold.</p>
+                  <a href="pages/doc.html?doc=lesson-dbt">Abrir página</a>
+                </div>
+              </div>
+              <div class="path-row">
+                <span class="step-number">05</span>
+                <div>
+                  <b>Airflow e pods Kubernetes</b>
+                  <p>Explora KubernetesPodOperator, params e retries sem alterar a DAG principal.</p>
+                  <a href="pages/doc.html?doc=lesson-airflow">Abrir página</a>
+                </div>
+              </div>
+              <div class="path-row">
+                <span class="step-number">06</span>
+                <div>
+                  <b>Pipeline ponta a ponta</b>
+                  <p>Valida MinIO, Polaris, dbt, DuckDB e Airflow juntos.</p>
+                  <a href="pages/doc.html?doc=lesson-e2e">Abrir página</a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="interfaces">
+            <h2>Interfaces locais</h2>
+            <div class="grid">
+              <div class="tile">
+                <h3>MinIO</h3>
+                <p>Console web para inspecionar bucket, paths Raw e warehouse.</p>
+                <pre><button class="copy" type="button">copiar</button><code>make port-forward-minio</code></pre>
+                <p><code>http://localhost:9001</code></p>
+              </div>
+              <div class="tile">
+                <h3>Airflow</h3>
+                <p>UI para disparar DAGs, acompanhar runs e ler logs de tasks.</p>
+                <pre><button class="copy" type="button">copiar</button><code>make port-forward-airflow</code></pre>
+                <p><code>http://localhost:8080</code></p>
+              </div>
+              <div class="tile">
+                <h3>Polaris</h3>
+                <p>API de saúde e catálogo REST usado pelo DuckDB Iceberg.</p>
+                <pre><button class="copy" type="button">copiar</button><code>make port-forward-polaris
+curl -fsS http://localhost:8182/q/health/ready</code></pre>
+              </div>
+            </div>
+          </section>
+
+          <section id="sql">
+            <h2>Consulta SQL com DuckDB</h2>
+            <p>
+              dbt usa DuckDB como engine de transformação. Para explorar o arquivo
+              local criado por dbt:
+            </p>
+            <pre><button class="copy" type="button">copiar</button><code>duckdb dbt/target/open_lakehouse_lab.duckdb</code></pre>
+            <pre><button class="copy" type="button">copiar</button><code>show schemas;
+select * from main_raw_sources.generic_raw_contract limit 10;
+select * from main_staging.stg_raw_source_events limit 10;</code></pre>
+            <div class="note warn">
+              Feche DuckDB CLI, DuckDB UI ou extensões do VS Code conectadas ao mesmo
+              arquivo antes de rodar dbt. DuckDB permite apenas um processo de escrita
+              por arquivo.
+            </div>
+          </section>
+
+          <section id="customizacao">
+            <h2>Customização de pipelines</h2>
+            <p>
+              O usuário pode usar o exemplo padrão como referência e criar o próprio
+              pipeline adicionando dados Raw, modelos dbt e, quando necessário, DAGs
+              Airflow.
+            </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Objetivo</th>
+                  <th>Arquivos</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Ler Raw Parquet</td>
+                  <td><code>dbt/models/raw_sources/generic_raw_contract.sql</code></td>
+                </tr>
+                <tr>
+                  <td>Normalizar nomes e tipos</td>
+                  <td><code>dbt/models/staging/*.sql</code></td>
+                </tr>
+                <tr>
+                  <td>Criar tabelas Silver</td>
+                  <td><code>dbt/models/silver/*.sql</code></td>
+                </tr>
+                <tr>
+                  <td>Criar tabelas Gold</td>
+                  <td><code>dbt/models/intermediate/*.sql</code> e <code>dbt/models/marts/*.sql</code></td>
+                </tr>
+                <tr>
+                  <td>Estudar Airflow</td>
+                  <td><code>airflow/dags/lab_*.py</code></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3>Contrato Raw canônico</h3>
+            <pre><button class="copy" type="button">copiar</button><code>s3://lakehouse/raw/source=&lt;source&gt;/dataset=&lt;dataset&gt;/ingestion_date=YYYY-MM-DD/*.parquet</code></pre>
+            <p>Colunas técnicas mínimas:</p>
+            <pre><button class="copy" type="button">copiar</button><code>source
+dataset
+ingestion_date
+loaded_at
+record_hash
+raw_payload</code></pre>
+            <p><a href="pages/doc.html?doc=customization">Abrir página de customização</a></p>
+          </section>
+
+          <section id="airflow">
+            <h2>Airflow</h2>
+            <div class="grid two">
+              <div class="tile">
+                <h3>DAG principal</h3>
+                <p>
+                  <code>open_lakehouse_lab_daily</code> e o exemplo padrão estável. Ela
+                  publica fixture Raw, roda dbt para Raw/staging/Silver, testa Silver,
+                  roda intermediate/marts e testa Gold.
+                </p>
+                <pre><button class="copy" type="button">copiar</button><code>make trigger-airflow-dbt
+kubectl -n data-platform exec deployment/airflow-scheduler -- \
+  airflow dags list-runs open_lakehouse_lab_daily</code></pre>
+              </div>
+              <div class="tile">
+                <h3>DAGs didáticas</h3>
+                <p>
+                  <code>lab_kubernetes_pod_operator</code> e
+                  <code>lab_params_and_retries</code> existem para estudar recursos do
+                  Airflow sem quebrar o pipeline principal.
+                </p>
+                <pre><button class="copy" type="button">copiar</button><code>kubectl -n data-platform exec deployment/airflow-scheduler -- \
+  airflow dags trigger lab_kubernetes_pod_operator
+
+kubectl -n data-platform exec deployment/airflow-scheduler -- \
+  airflow dags trigger lab_params_and_retries</code></pre>
+              </div>
+            </div>
+          </section>
+
+          <section id="runbooks">
+            <h2>Runbooks</h2>
+            <p>Os runbooks também estão disponíveis como paginas HTML internas.</p>
+            <ul class="file-list">
+              <li><a href="pages/doc.html?doc=runbook-kind">Cluster kind local</a></li>
+              <li><a href="pages/doc.html?doc=runbook-minio">Armazenamento MinIO</a></li>
+              <li><a href="pages/doc.html?doc=runbook-polaris">Catálogo Polaris</a></li>
+              <li><a href="pages/doc.html?doc=runbook-airflow-kpo">Airflow com KubernetesPodOperator</a></li>
+              <li><a href="pages/doc.html?doc=runbook-dbt-foundation">Fundação dbt + DuckDB + Polaris</a></li>
+              <li><a href="pages/doc.html?doc=runbook-raw-staging">Fontes Raw e staging</a></li>
+              <li><a href="pages/doc.html?doc=runbook-silver">Camada Silver</a></li>
+              <li><a href="pages/doc.html?doc=runbook-backbone">Coluna dorsal dbt MinIO Polaris</a></li>
+              <li><a href="pages/doc.html?doc=runbook-airflow-dbt">Orquestração dbt com Airflow</a></li>
+            </ul>
+          </section>
+
+          <section id="troubleshooting">
+            <h2>Troubleshooting</h2>
+            <details>
+              <summary>Cluster kind já existe</summary>
+              <div>
+                <pre><button class="copy" type="button">copiar</button><code>kind get clusters
+make cluster-status</code></pre>
+                <p>Se quiser recomeçar do zero, rode <code>make cluster-delete</code> e depois <code>make cluster-create</code>.</p>
+              </div>
+            </details>
+            <details>
+              <summary>Job da fixture Raw expira por timeout</summary>
+              <div>
+                <pre><button class="copy" type="button">copiar</button><code>kubectl -n data-platform get pods -l job-name=dbt-publish-raw-fixture
+kubectl -n data-platform logs job/dbt-publish-raw-fixture
+kubectl -n data-platform describe job dbt-publish-raw-fixture</code></pre>
+                <p>Confirme que MinIO, Polaris e a imagem dbt local estão prontos.</p>
+              </div>
+            </details>
+            <details>
+              <summary>UI do Airflow retorna erro de CSRF</summary>
+              <div>
+                <p>Feche o port-forward, limpe cookies de <code>localhost:8080</code> ou use janela anônima, e abra novamente.</p>
+                <pre><button class="copy" type="button">copiar</button><code>make port-forward-airflow</code></pre>
+              </div>
+            </details>
+            <details>
+              <summary>Banco DuckDB está bloqueado</summary>
+              <div>
+                <p>Feche DuckDB CLI, DuckDB UI ou extensões conectadas ao mesmo arquivo antes de rodar dbt.</p>
+              </div>
+            </details>
+            <p style="margin-top: 14px">
+              <a href="pages/doc.html?doc=troubleshooting">Abrir página de troubleshooting completo</a>
+            </p>
+          </section>
+
+          <section id="qualidade">
+            <h2>Verificações de qualidade</h2>
+            <p>Rode o gate completo antes de abrir ou atualizar PRs.</p>
+            <pre><button class="copy" type="button">copiar</button><code>make ci-pr
+make pre-push</code></pre>
+            <div class="grid">
+              <div class="tile"><b>Python</b><p>Ruff, pytest e Bandit quando aplicável.</p></div>
+              <div class="tile"><b>dbt e SQL</b><p>SQLFluff, dbt parse, dbt compile e testes dbt.</p></div>
+              <div class="tile"><b>Infra</b><p>YAML, Kubernetes, Dockerfile e scan opcional com Trivy.</p></div>
+            </div>
+          </section>
+
+          <section id="arquivos">
+            <h2>Arquivos da documentação</h2>
+            <ul class="file-list">
+              <li><a href="pages/doc.html?doc=overview">Visão geral</a></li>
+              <li><a href="pages/doc.html?doc=project-plan">Plano do projeto</a></li>
+              <li><a href="pages/doc.html?doc=learning-path">Trilha de aprendizado</a></li>
+              <li><a href="pages/doc.html?doc=customization">Guia de customização</a></li>
+              <li><a href="pages/doc.html?doc=troubleshooting">Troubleshooting guiado</a></li>
+              <li><a href="pages/doc.html?doc=lesson-kind">Lição 01 - Kubernetes local</a></li>
+              <li><a href="pages/doc.html?doc=lesson-minio">Lição 02 - MinIO Raw</a></li>
+              <li><a href="pages/doc.html?doc=lesson-polaris">Lição 03 - Polaris</a></li>
+              <li><a href="pages/doc.html?doc=lesson-dbt">Lição 04 - dbt e DuckDB</a></li>
+              <li><a href="pages/doc.html?doc=lesson-airflow">Lição 05 - Airflow</a></li>
+              <li><a href="pages/doc.html?doc=lesson-e2e">Lição 06 - Pipeline ponta a ponta</a></li>
+            </ul>
+          </section>
+
+          <p class="footer">
+            Página estática. Abra este arquivo diretamente no navegador:
+            <code>docs/site/index.html</code>.
+          </p>
+        </div>
+      </main>
+    </div>
+
+    <script src="assets/site.js"></script>
+  </body>
+</html>

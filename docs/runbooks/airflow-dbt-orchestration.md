@@ -1,16 +1,16 @@
-# Airflow dbt orchestration
+# Orquestração dbt com Airflow
 
-## Goal
+## Objetivo
 
-Stage 12 adds the main `open_lakehouse_lab_daily` DAG. The DAG runs dbt
-commands in ephemeral Kubernetes pods inside the local kind cluster, using the
-same `dbt + duckdb` image built by the project.
+A etapa 12 adiciona a DAG principal `open_lakehouse_lab_daily`. A DAG executa
+comandos dbt em pods Kubernetes efêmeros dentro do cluster kind local, usando a
+mesma imagem `dbt + duckdb` construída pelo projeto.
 
-This stage intentionally keeps dbt execution outside of the Airflow scheduler.
-Airflow only orchestrates pods and streams logs. The dbt runtime, DuckDB
-adapter, DuckDB extensions and project files live in the dbt image.
+Esta etapa mantém intencionalmente a execução dbt fora do scheduler do Airflow.
+O Airflow apenas orquestra pods e transmite logs. O ambiente de execução dbt, adapter DuckDB,
+extensões DuckDB e arquivos do projeto vivem na imagem dbt.
 
-## Current DAG
+## DAG atual
 
 ```text
 start
@@ -22,7 +22,7 @@ start
   -> end
 ```
 
-The DAG uses `KubernetesPodOperator` for each dbt task. Each pod uses:
+A DAG usa `KubernetesPodOperator` para cada task dbt. Cada pod usa:
 
 ```text
 image: open-lakehouse-lab-dbt-duckdb-polaris:local
@@ -31,36 +31,37 @@ service account: airflow-worker
 imagePullPolicy: Never
 ```
 
-`astronomer-cosmos[dbt-duckdb]` remains installed in the Airflow image. The
-current implementation uses explicit pod tasks because this stage needs a small,
-reviewable orchestration path and must keep the dbt dependency stack isolated in
-the dbt image. A later refinement can replace the explicit tasks with Cosmos
-Kubernetes execution mode once the dbt model graph and Iceberg materialization
-are stable enough to benefit from model-level task rendering.
+`astronomer-cosmos[dbt-duckdb]` continua instalado na imagem Airflow. A
+implementação atual usa tasks explícitas de pod porque esta etapa precisa de um
+caminho de orquestração pequeno, revisável e com a stack de dependências dbt
+isolada na imagem dbt. Um refinamento posterior pode substituir as tasks
+explícitas pelo modo de execução Kubernetes do Cosmos quando o grafo de modelos
+dbt e a materialização Iceberg estiverem estáveis o suficiente para aproveitar
+renderizacao de tasks por modelo.
 
-## DuckDB execution state
+## Estado de execução do DuckDB
 
-The local dbt profile writes DuckDB state to:
+O profile dbt local escreve o estado DuckDB em:
 
 ```text
 /app/dbt/target/open_lakehouse_lab.duckdb
 ```
 
-Because every dbt task runs in a different ephemeral pod, the DAG mounts a small
-PVC at `/app/dbt/target`:
+Como cada task dbt roda em um pod efemero diferente, a DAG monta um PVC pequeno
+em `/app/dbt/target`:
 
 ```text
 dbt-workload-target
 ```
 
-This PVC is local development state only. It exists for dbt artifacts, local
-views and temporary DuckDB state. It is not the source of truth. Stage 13 stores
-Raw Parquet and Iceberg table data in MinIO, with Silver and Gold registered in
-Polaris.
+Esse PVC é apenas estado de desenvolvimento local. Ele existe para artefatos
+dbt, views locais e estado temporário do DuckDB. Ele não é a fonte da verdade. A
+A etapa 13 armazena Raw Parquet e dados de tabelas Iceberg no MinIO, com Silver e
+Gold registrados no Polaris.
 
-## Prerequisites
+## Pre-requisitos
 
-Install the local tools:
+Instale as ferramentas locais:
 
 ```bash
 kind version
@@ -69,20 +70,20 @@ docker version
 helm version
 ```
 
-Create the kind cluster and namespace:
+Crie o cluster kind e o namespace:
 
 ```bash
 make cluster-create
 make kubectl-context
 ```
 
-Deploy MinIO:
+Suba MinIO:
 
 ```bash
 make deploy-minio
 ```
 
-Deploy Polaris:
+Suba Polaris:
 
 ```bash
 export POLARIS_ROOT_CLIENT_ID="root"
@@ -94,21 +95,21 @@ make deploy-polaris
 make polaris-health
 ```
 
-Build and load the dbt image into kind:
+Construa e carregue a imagem dbt no kind:
 
 ```bash
 make build-dbt-image
 make load-dbt-image
 ```
 
-Optionally publish the deterministic Raw Parquet fixture before deploying
+Opcionalmente publique a fixture Raw Parquet determinística antes de subir o
 Airflow:
 
 ```bash
 make publish-raw-fixture-parquet
 ```
 
-Build, load and deploy Airflow:
+Construa, carregue e suba o Airflow:
 
 ```bash
 make build-airflow-image
@@ -117,64 +118,64 @@ make deploy-airflow
 make airflow-status
 ```
 
-## Trigger the DAG
+## Disparar a DAG
 
-Trigger from the CLI:
+Dispare pela CLI:
 
 ```bash
 make trigger-airflow-dbt
 ```
 
-Or trigger from the Airflow UI:
+Ou dispare pela UI do Airflow:
 
 ```bash
 make port-forward-airflow
 ```
 
-Open:
+Abra:
 
 ```text
 http://localhost:8080
 ```
 
-Credentials:
+Credenciais:
 
 ```text
-username: admin
-password: admin
+usuário: admin
+senha: admin
 ```
 
-Trigger:
+Dispare:
 
 ```text
 open_lakehouse_lab_daily
 ```
 
-## Validate pod execution
+## Validar execução dos pods
 
-While the DAG is running:
+Enquanto a DAG estiver rodando:
 
 ```bash
 make airflow-dbt-pods
 ```
 
-You can also inspect the pods directly:
+Você também pode inspecionar os pods diretamente:
 
 ```bash
 kubectl -n data-platform get pods \
   -l app.kubernetes.io/component=dbt-workload
 ```
 
-Expected behavior:
+Comportamento esperado:
 
-- one dbt pod runs per task;
-- logs appear in the Airflow UI task logs;
-- pods are deleted after successful task completion;
-- the `dbt-workload-target` PVC remains for the next task and future DAG runs.
+- um pod dbt roda por task;
+- logs aparecem nos logs da task na UI do Airflow;
+- pods são removidos após a conclusão da task com sucesso;
+- o PVC `dbt-workload-target` permanece para a próxima task e futuras DAG runs.
 
-## Validate local interfaces
+## Validar interfaces locais
 
-Airflow UI:
+UI do Airflow:
 
 ```bash
 make port-forward-airflow
@@ -184,7 +185,7 @@ make port-forward-airflow
 http://localhost:8080
 ```
 
-MinIO Console:
+Console MinIO:
 
 ```bash
 make port-forward-minio
@@ -192,11 +193,11 @@ make port-forward-minio
 
 ```text
 http://localhost:9001
-username: minioadmin
-password: minioadmin123
+usuário: minioadmin
+senha: minioadmin123
 ```
 
-Polaris readiness endpoint:
+Endpoint de readiness do Polaris:
 
 ```bash
 make port-forward-polaris
@@ -206,47 +207,48 @@ make port-forward-polaris
 http://localhost:8182/q/health/ready
 ```
 
-## Validate with SQL
+## Validar com SQL
 
-The full path writes Raw Parquet and Iceberg data to MinIO. For host-side
-inspection, keep MinIO and Polaris port-forwards running and use the Stage 13
-runbook:
+O caminho completo escreve Raw Parquet e dados Iceberg no MinIO. Para inspeção a
+partir do host, mantenha os port-forwards de MinIO e Polaris rodando e use o
+runbook da etapa 13:
 
 ```bash
 make port-forward-minio
 make port-forward-polaris
 ```
 
-See:
+Veja:
 
 ```text
 docs/runbooks/dbt-minio-polaris-backbone.md
 ```
 
-If you keep DuckDB CLI, DuckDB UI or a VS Code extension connected to the same
-file, dbt may fail with a DuckDB lock error. Close the other connection before
-running dbt commands.
+Se você mantiver DuckDB CLI, DuckDB UI ou uma extensao do VS Code conectada ao
+mesmo arquivo, o dbt pode falhar com erro de lock do DuckDB. Feche a outra
+conexão antes de rodar comandos dbt.
 
-## Cleanup
+## Limpeza
 
-Remove Airflow and the dbt workload PVC:
+Remova Airflow e o PVC do workload dbt:
 
 ```bash
 make delete-airflow
 ```
 
-Remove the full local cluster:
+Remova o cluster local completo:
 
 ```bash
 make cluster-delete
 ```
 
-## Limitations
+## Limitações
 
-- This stage orchestrates the current dbt chain; it does not add public source
-  adapter ingestion tasks.
-- The Raw fixture publication is a deterministic shortcut for study. The
-  command is logged by the dbt pod before execution.
-- The current implementation keeps explicit `KubernetesPodOperator` tasks. This
-  is compatible with the project requirement to run workloads in pods and leaves
-  room to adopt Cosmos Kubernetes task rendering after the model graph matures.
+- Esta etapa orquestra a cadeia dbt atual; ela não adiciona tasks de ingestão de
+  adapters de fontes públicas.
+- A publicação da fixture Raw é um atalho deterministico para estudo. O comando
+  é logado pelo pod dbt antes da execução.
+- A implementação atual mantém tasks explícitas com `KubernetesPodOperator`. Isso
+  é compatível com o requisito do projeto de rodar workloads em pods e deixa
+  espaço para adotar renderizacao de tasks Kubernetes via Cosmos quando o grafo
+  de modelos amadurecer.

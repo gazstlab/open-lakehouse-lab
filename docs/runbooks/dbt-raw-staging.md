@@ -1,26 +1,27 @@
-# dbt Raw sources and staging
+# Fontes Raw e staging no dbt
 
-This runbook describes the Stage 09 Raw source and staging foundation.
+Este runbook descreve a fundação de fonte Raw e staging da etapa 09.
 
-## Scope
+## Escopo
 
-Stage 09 makes dbt read a generic Raw contract and build an initial staging
-model without depending on public APIs, Airflow ingestion DAGs or external
-network calls.
+A etapa 09 faz o dbt ler um contrato Raw genérico e criar um modelo inicial de
+staging sem depender de APIs públicas, DAGs de ingestão no Airflow ou chamadas
+externas de rede.
 
-The current canonical Raw format is Parquet. Stage 13 makes the default
-validation path publish and read a deterministic Raw Parquet fixture in MinIO.
-The dbt seed fixture remains only as a local study fallback.
+O formato Raw canônico atual é Parquet. A etapa 13 faz o caminho padrão de
+validação publicar e ler uma fixture Raw Parquet determinística no MinIO. A
+fixture de seed do dbt permanece apenas como fallback local de estudo.
 
-## Canonical Raw layout
+## Layout Raw canônico
 
-Future adapters should write Raw records to MinIO using this path convention:
+Adapters futuros devem escrever registros Raw no MinIO usando esta convenção de
+path:
 
 ```text
 s3://lakehouse/raw/source=<source>/dataset=<dataset>/ingestion_date=YYYY-MM-DD/*.parquet
 ```
 
-Required technical columns:
+Colunas técnicas obrigatorias:
 
 ```text
 source
@@ -31,24 +32,24 @@ record_hash
 raw_payload
 ```
 
-Responsibilities:
+Responsabilidades:
 
-- `source`: logical source adapter name.
-- `dataset`: logical dataset produced by the source adapter.
-- `ingestion_date`: Raw partition date.
-- `loaded_at`: timestamp when the record was loaded into Raw.
-- `record_hash`: stable technical key for deduplication and traceability.
-- `raw_payload`: original payload preserved when useful for audit or replay.
+- `source`: nome logico do adapter de fonte.
+- `dataset`: dataset logico produzido pelo adapter de fonte.
+- `ingestion_date`: data da particao Raw.
+- `loaded_at`: timestamp em que o registro foi carregado na Raw.
+- `record_hash`: chave técnica estável para deduplicação e rastreabilidade.
+- `raw_payload`: payload original preservado quando for útil para auditoria ou replay.
 
-Known, stable source fields should be expanded into Parquet columns when
-possible. Other formats such as CSV and JSON can be added later through source
-adapters or DuckDB read macros, but they are not part of the current canonical
-contract.
+Campos conhecidos e estáveis da fonte devem ser expandidos em colunas Parquet
+quando possível. Outros formatos, como CSV e JSON, podem ser adicionados depois
+por adapters de fonte ou macros de leitura DuckDB, mas não fazem parte do
+contrato canônico atual.
 
-## Raw fixture
+## Fixture Raw
 
-The macro `publish_raw_fixture_parquet` writes deterministic Raw Parquet files
-with controlled sample fields:
+A macro `publish_raw_fixture_parquet` escreve arquivos Raw Parquet
+determinísticos com campos de exemplo controlados:
 
 ```text
 observed_at
@@ -57,11 +58,12 @@ metric_value
 location_name
 ```
 
-This lets dbt validate casts and staging tests before real adapters exist.
+Isso permite que o dbt valide casts e testes de staging antes dos adapters reais
+existirem.
 
-## dbt models
+## Modelos dbt
 
-Stage 09 introduces:
+A etapa 09 introduz:
 
 ```text
 dbt/models/raw_sources/sources.yml
@@ -70,16 +72,16 @@ dbt/models/staging/stg_raw_source_events.sql
 dbt/models/staging/schema.yml
 ```
 
-Naming convention:
+Convencao de nomes:
 
-- Raw contract models stay under `models/raw_sources/`.
-- Staging models use the `stg_` prefix.
-- Staging models should normalize types and names, but should not create Silver
-  business tables.
+- modelos de contrato Raw ficam em `models/raw_sources/`;
+- modelos de staging usam o prefixo `stg_`;
+- modelos de staging devem normalizar tipos e nomes, mas não criar tabelas de
+  negocio Silver.
 
-## Validate locally
+## Validar localmente
 
-From the repository root:
+A partir da raiz do repositório:
 
 ```bash
 make dbt-publish-raw-fixture
@@ -90,15 +92,15 @@ make dbt-parse
 make dbt-compile
 ```
 
-Full PR validation:
+Validação completa de PR:
 
 ```bash
 make ci-pr
 ```
 
-## Known limitations
+## Limitações conhecidas
 
-- Public source adapters are still implemented later.
-- This stage does not implement Python source adapters.
-- This stage does not consume Open-Meteo, USGS or BCB.
-- Silver and Gold Iceberg tables are covered by the Stage 13 backbone.
+- Adapters de fontes públicas ainda são implementados depois.
+- Esta etapa não implementa adapters Python de fonte.
+- Esta etapa não consome Open-Meteo, USGS nem BCB.
+- Tabelas Iceberg Silver e Gold são cobertas pela coluna dorsal da etapa 13.
