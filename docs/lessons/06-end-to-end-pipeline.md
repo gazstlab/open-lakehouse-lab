@@ -5,10 +5,10 @@
 Executar o caminho completo do laboratório: Raw Parquet no MinIO, dbt + DuckDB,
 Iceberg via Polaris e orquestração pelo Airflow.
 
-## Caminho Rápido
+## Exemplos
 
 ```bash
-make lab-fast-path
+make example
 ```
 
 Esse comando é ideal para uma primeira validação em um ambiente limpo.

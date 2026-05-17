@@ -367,7 +367,7 @@ troubleshooting/guided-troubleshooting.md
 
 O projeto deve manter dois modos de uso:
 
-- Caminho Rápido: atalhos `make` executam o caminho padrão rapidamente.
+- Exemplos: atalhos `make` executam o caminho padrão rapidamente.
 - Trilha de Aprendizado: as mesmas etapas são explicadas como lições reproduziveis.
 
 Atalhos importantes devem imprimir objetivo, motivo, comandos executados,
@@ -463,7 +463,7 @@ investigate-airflow-metric-failure.md
 
 ### Fase 8 - Plataforma de estudo guiado
 
-- Criar Caminho Rápido para executar o exemplo padrão.
+- Criar Exemplos para executar o exemplo padrão.
 - Criar Trilha de Aprendizado com lições incrementais.
 - Tornar atalhos `make` explicativos.
 - Documentar comandos manuais equivalentes.

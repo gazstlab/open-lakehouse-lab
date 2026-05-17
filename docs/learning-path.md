@@ -2,13 +2,13 @@
 
 Open Lakehouse Lab tem dois modos de uso complementares.
 
-## Caminho Rápido
+## Exemplos
 
-Use o Caminho Rápido quando quiser subir o exemplo padrão rapidamente e validar
+Use os Exemplos quando quiser subir o exemplo padrão rapidamente e validar
 se a coluna dorsal do laboratório funciona.
 
 ```bash
-make lab-fast-path
+make example
 ```
 
 Esse alvo executa, em ordem:
@@ -32,7 +32,7 @@ Cada etapa imprime logs no formato:
 [next] próximo passo recomendado
 ```
 
-O Caminho Rápido usa credenciais locais padrão para Polaris e MinIO:
+Os Exemplos usam credenciais locais padrão para Polaris e MinIO:
 
 ```text
 POLARIS_ROOT_CLIENT_ID=root

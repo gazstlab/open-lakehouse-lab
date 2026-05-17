@@ -20,8 +20,8 @@ STEPS: dict[str, LabStep] = {
     "cluster-create": LabStep(
         goal="Criar o cluster Kubernetes local com kind e o namespace data-platform.",
         why=(
-            "O laboratorio executa MinIO, Polaris, Airflow e workloads dbt como "
-            "recursos Kubernetes locais, entao todos os proximos passos dependem "
+            "O laboratório executa MinIO, Polaris, Airflow e workloads dbt como "
+            "recursos Kubernetes locais, então todos os próximos passos dependem "
             "desse cluster."
         ),
         run=(
@@ -38,7 +38,7 @@ STEPS: dict[str, LabStep] = {
     "deploy-minio": LabStep(
         goal="Subir o MinIO e criar o bucket local lakehouse.",
         why=(
-            "MinIO e o armazenamento de objetos local compativel com S3. Os arquivos Raw "
+            "MinIO é o armazenamento de objetos local compatível com S3. Os arquivos Raw "
             "em Parquet e os dados do warehouse Iceberg ficam no bucket lakehouse."
         ),
         run=(
@@ -57,9 +57,9 @@ STEPS: dict[str, LabStep] = {
     "build-dbt-image": LabStep(
         goal="Construir a imagem dbt + DuckDB usada pelos workloads Kubernetes.",
         why=(
-            "Airflow e jobs de fixture executam dbt em pods efemeros, entao o "
-            "kind precisa de uma imagem local com dbt, dbt-duckdb e extensoes "
-            "DuckDB necessarias."
+            "Airflow e jobs de fixture executam dbt em pods efêmeros, então o "
+            "kind precisa de uma imagem local com dbt, dbt-duckdb e extensões "
+            "DuckDB necessárias."
         ),
         run=(
             "docker build -f docker/dbt-duckdb-polaris.Dockerfile "
@@ -71,7 +71,7 @@ STEPS: dict[str, LabStep] = {
     "load-dbt-image": LabStep(
         goal="Carregar a imagem dbt local no node do kind.",
         why=(
-            "O kind usa seu proprio ambiente de execucao de containers. Carregar a imagem "
+            "O kind usa seu próprio ambiente de execução de containers. Carregar a imagem "
             "permite usar imagePullPolicy=Never sem depender de registry."
         ),
         run=(
@@ -82,9 +82,9 @@ STEPS: dict[str, LabStep] = {
         next_step="Suba o Polaris com make deploy-polaris.",
     ),
     "deploy-polaris": LabStep(
-        goal="Subir Apache Polaris e inicializar o catalogo Iceberg lakehouse.",
+        goal="Subir Apache Polaris e inicializar o catálogo Iceberg lakehouse.",
         why=(
-            "Polaris e o Iceberg REST Catalog. dbt + DuckDB usa esse catalogo "
+            "Polaris é o Iceberg REST Catalog. dbt + DuckDB usa esse catálogo "
             "para publicar tabelas Iceberg Silver e Gold apoiadas no MinIO."
         ),
         run=(
@@ -123,7 +123,7 @@ STEPS: dict[str, LabStep] = {
         next_step="Rode dbt localmente ou dispare a DAG dbt pelo Airflow.",
     ),
     "deploy-airflow": LabStep(
-        goal="Subir Airflow no Kubernetes com permissao para criar pods de workload.",
+        goal="Subir Airflow no Kubernetes com permissão para criar pods de workload.",
         why=(
             "Airflow e a camada de orquestracao. Ele agenda o pipeline dbt de "
             "exemplo e permite estudar o comportamento do KubernetesPodOperator."
@@ -143,7 +143,7 @@ STEPS: dict[str, LabStep] = {
         next_step="Dispare open_lakehouse_lab_daily com make trigger-airflow-dbt.",
     ),
     "trigger-airflow-dbt": LabStep(
-        goal="Disparar o pipeline dbt padrao ponta a ponta pelo Airflow.",
+        goal="Disparar o pipeline dbt padrão ponta a ponta pelo Airflow.",
         why=(
             "Isso valida a coluna dorsal: Airflow cria pods dbt, dbt le Raw "
             "Parquet no MinIO, DuckDB transforma dados e Polaris cataloga "
@@ -161,10 +161,10 @@ STEPS: dict[str, LabStep] = {
         ),
         next_step="Inspecione os resultados em Airflow, MinIO, Polaris e DuckDB.",
     ),
-    "lab-fast-path": LabStep(
-        goal="Executar o caminho de referencia do laboratorio local completo.",
+    "example": LabStep(
+        goal="Executar os exemplos de referência do laboratório local completo.",
         why=(
-            "Esse e o jeito mais rapido de provar que o exemplo padrao funciona "
+            "Esse é o jeito direto de provar que o exemplo padrão funciona "
             "antes de estudar ou customizar camadas individuais."
         ),
         run=(
@@ -185,13 +185,13 @@ STEPS: dict[str, LabStep] = {
             "make airflow-status",
             "make airflow-dbt-pods",
         ),
-        next_step="Abra docs/learning-path.md e repita cada licao manualmente.",
+        next_step="Abra docs/learning-path.md e repita cada lição manualmente.",
     ),
     "lab-learning-path": LabStep(
         goal="Seguir a trilha de aprendizado guiada, uma camada por vez.",
         why=(
             "A trilha mostra a mesma arquitetura em formato de licoes, com "
-            "comandos manuais, atalhos equivalentes, validacao e troubleshooting."
+            "comandos manuais, atalhos equivalentes, validação e troubleshooting."
         ),
         run=(
             "docs/lessons/01-local-kubernetes-kind.md",
@@ -208,7 +208,7 @@ STEPS: dict[str, LabStep] = {
             "make explain-deploy-airflow",
             "make explain-dbt-orchestration",
         ),
-        next_step="Use docs/user-customization-guide.md para criar seu proprio pipeline.",
+        next_step="Use docs/user-customization-guide.md para criar seu próprio pipeline.",
     ),
 }
 

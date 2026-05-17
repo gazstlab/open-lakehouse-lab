@@ -3,14 +3,14 @@
 Open Lakehouse Lab é um projeto de estudo 100% open source para engenharia de
 dados lakehouse moderna, com foco na comunidade brasileira.
 
-## Caminho Rápido
+## Exemplos
 
-Use o Caminho Rápido para subir o caminho padrão do laboratório em um ambiente local.
+Use os Exemplos para subir o caminho padrão do laboratório em um ambiente local.
 O comando imprime o objetivo, o motivo, os comandos executados e as inspeções
 recomendadas para cada etapa.
 
 ```bash
-make lab-fast-path
+make example
 ```
 
 Esse caminho cria o cluster kind, sobe MinIO, Polaris e Airflow, publica uma
@@ -32,7 +32,7 @@ make lab-learning-path
 Documentação principal:
 
 - `docs/site/index.html`: página estática para abrir diretamente no navegador;
-- `docs/learning-path.md`: trilha guiada, Caminho Rápido, Trilha de Aprendizado e interfaces;
+- `docs/learning-path.md`: trilha guiada, Exemplos, Trilha de Aprendizado e interfaces;
 - `docs/user-customization-guide.md`: como criar pipelines próprios;
 - `docs/troubleshooting/guided-troubleshooting.md`: erros comuns e recuperação;
 - `docs/lessons/`: lições incrementais do cluster ao pipeline ponta a ponta.

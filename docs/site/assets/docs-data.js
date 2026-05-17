@@ -19,10 +19,10 @@ window.OPEN_LAKEHOUSE_DOCS = {
       {
         title: "Como estudar",
         body:
-          "Comece pelo Caminho Rápido para validar o ambiente. Depois siga a Trilha de Aprendizado para reproduzir cada etapa manualmente e entender o que acontece por baixo dos atalhos.",
+          "Comece pelos Exemplos para validar o ambiente. Depois siga a Trilha de Aprendizado para reproduzir cada etapa manualmente e entender o que acontece por baixo dos atalhos.",
       },
     ],
-    commands: ["make lab-fast-path", "make lab-learning-path", "make explain-dbt-orchestration"],
+    commands: ["make example", "make lab-learning-path", "make explain-dbt-orchestration"],
   },
   "project-plan": {
     title: "Plano do projeto",
@@ -53,13 +53,13 @@ window.OPEN_LAKEHOUSE_DOCS = {
     title: "Trilha de aprendizado",
     category: "Estudo guiado",
     summary:
-      "Guia para seguir o laboratório em modo rápido ou por lições incrementais.",
+      "Guia para seguir o laboratório pelos exemplos ou por lições incrementais.",
     tags: ["trilha", "lições", "atalhos"],
     sections: [
       {
-        title: "Caminho Rápido",
+        title: "Exemplos",
         body:
-          "Use o Caminho Rápido para subir o exemplo completo e provar que a coluna dorsal está funcional.",
+          "Use os Exemplos para subir o exemplo completo e provar que a coluna dorsal está funcional.",
       },
       {
         title: "Trilha de Aprendizado",
@@ -73,7 +73,7 @@ window.OPEN_LAKEHOUSE_DOCS = {
       },
     ],
     commands: [
-      "make lab-fast-path",
+      "make example",
       "make lab-learning-path",
       "make explain-cluster",
       "make explain-deploy-minio",
@@ -247,7 +247,7 @@ window.OPEN_LAKEHOUSE_DOCS = {
           "Adicione novos Parquet na Raw, crie modelos dbt e use Airflow para orquestrar novas etapas quando necessário.",
       },
     ],
-    commands: ["make lab-fast-path", "make trigger-airflow-dbt", "make airflow-status"],
+    commands: ["make example", "make trigger-airflow-dbt", "make airflow-status"],
   },
   "runbook-kind": {
     title: "Runbook - Cluster kind local",

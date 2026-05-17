@@ -1,4 +1,4 @@
-.PHONY: help install-dev check-requirements lab-fast-path lab-learning-path explain-cluster explain-deploy-minio explain-deploy-polaris explain-deploy-airflow explain-trigger-airflow-dbt explain-dbt-orchestration explain-publish-raw-fixture explain-build-dbt-image explain-load-dbt-image cluster-create cluster-delete kubectl-context cluster-status deploy-minio delete-minio minio-status port-forward-minio deploy-polaris delete-polaris polaris-status polaris-health port-forward-polaris publish-raw-fixture-parquet build-airflow-image load-airflow-image deploy-airflow delete-airflow airflow-status port-forward-airflow trigger-airflow-hello trigger-airflow-dbt airflow-dbt-pods build-dbt-image load-dbt-image dbt-publish-raw-fixture dbt-seed dbt-run-foundation dbt-run-staging dbt-run-silver dbt-run-gold dbt-test-silver dbt-test-gold lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
+.PHONY: help install-dev check-requirements example lab-learning-path explain-cluster explain-deploy-minio explain-deploy-polaris explain-deploy-airflow explain-trigger-airflow-dbt explain-dbt-orchestration explain-publish-raw-fixture explain-build-dbt-image explain-load-dbt-image cluster-create cluster-delete kubectl-context cluster-status deploy-minio delete-minio minio-status port-forward-minio deploy-polaris delete-polaris polaris-status polaris-health port-forward-polaris publish-raw-fixture-parquet build-airflow-image load-airflow-image deploy-airflow delete-airflow airflow-status port-forward-airflow trigger-airflow-hello trigger-airflow-dbt airflow-dbt-pods build-dbt-image load-dbt-image dbt-publish-raw-fixture dbt-seed dbt-run-foundation dbt-run-staging dbt-run-silver dbt-run-gold dbt-test-silver dbt-test-gold lint-python test-python lint-yaml lint-dbt dbt-parse dbt-compile dbt-test validate-k8s lint-docker security-scan docs-check docker-build ci-pr pre-push
 
 PYTHON_DIRS := ingestion airflow transformations tests scripts
 EXISTING_PYTHON_DIRS := $(wildcard $(PYTHON_DIRS))
@@ -48,7 +48,7 @@ export POLARIS_MINIO_SECRET_KEY
 
 help:
 	@echo "Comandos do Open Lakehouse Lab"
-	@echo "  make lab-fast-path | lab-learning-path"
+	@echo "  make example | lab-learning-path"
 	@echo "  make explain-cluster | explain-deploy-minio | explain-deploy-polaris"
 	@echo "  make explain-deploy-airflow | explain-dbt-orchestration"
 	@echo "  make cluster-create | deploy-minio | deploy-polaris | deploy-airflow"
@@ -66,8 +66,8 @@ install-dev:
 check-requirements:
 	$(PYTHON) scripts/check_requirements_sync.py
 
-lab-fast-path:
-	@$(LAB_STEP) explain lab-fast-path
+example:
+	@$(LAB_STEP) explain example
 	$(MAKE) cluster-create
 	$(MAKE) deploy-minio
 	$(MAKE) build-dbt-image
