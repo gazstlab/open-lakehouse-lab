@@ -477,10 +477,6 @@ section:nth-of-type(3n) {
   font-size: 1rem;
 }
 
-.side-heading {
-  margin-top: 18px;
-}
-
 .toc-list {
   display: grid;
   gap: 6px;
@@ -507,6 +503,44 @@ section:nth-of-type(3n) {
 .command-list {
   display: grid;
   gap: 10px;
+}
+
+.doc-command-section {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 18px;
+  border: 1px solid var(--line);
+  border-top: 4px solid #f4d9d6;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.doc-command-section[hidden] {
+  display: none;
+}
+
+.doc-command-section h2 {
+  margin: 8px 0 10px;
+  font-size: 1.35rem;
+}
+
+.doc-command-section p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.doc-command-label {
+  display: inline-flex;
+  border-radius: 999px;
+  background: #fff7ea;
+  padding: 5px 9px;
+  color: var(--amber);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .command-card {
@@ -614,6 +648,10 @@ section:nth-of-type(3n) {
   }
 
   .doc-section {
+    grid-template-columns: 1fr;
+  }
+
+  .doc-command-section {
     grid-template-columns: 1fr;
   }
 

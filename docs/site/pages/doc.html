@@ -57,11 +57,18 @@
               <div class="side-panel">
                 <h2>Nesta pagina</h2>
                 <div class="toc-list" id="doc-toc"></div>
-                <h2 class="side-heading">Comandos</h2>
-                <div class="command-list" id="doc-commands"></div>
               </div>
             </aside>
           </div>
+
+          <section class="doc-command-section" id="doc-command-section">
+            <div>
+              <span class="doc-command-label">Execucao local</span>
+              <h2>Comandos da licao</h2>
+              <p>Use esta sequencia no terminal para praticar o que a pagina acabou de explicar.</p>
+            </div>
+            <div class="command-list" id="doc-commands"></div>
+          </section>
         </div>
       </main>
     </div>
@@ -104,7 +111,10 @@
         .join("");
 
       const commands = document.getElementById("doc-commands");
-      commands.innerHTML = (doc.commands || [])
+      const commandSection = document.getElementById("doc-command-section");
+      const commandItems = doc.commands || [];
+      commandSection.hidden = commandItems.length === 0;
+      commands.innerHTML = commandItems
         .map(
           (command, index) =>
             `<div class="command-card"><span>Comando ${String(index + 1).padStart(2, "0")}</span><pre><button class="copy" type="button">copiar</button><code>${escapeHtml(command)}</code></pre></div>`,
