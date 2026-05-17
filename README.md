@@ -31,6 +31,7 @@ make lab-learning-path
 
 Documentacao principal:
 
+- `docs/site/index.html`: pagina estatica para abrir diretamente no navegador;
 - `docs/learning-path.md`: trilha guiada, Caminho Rapido, Trilha de Aprendizado e interfaces;
 - `docs/user-customization-guide.md`: como criar pipelines proprios;
 - `docs/troubleshooting/guided-troubleshooting.md`: erros comuns e recuperacao;
@@ -44,6 +45,12 @@ make explain-deploy-minio
 make explain-deploy-polaris
 make explain-deploy-airflow
 make explain-dbt-orchestration
+```
+
+Para navegar pela documentacao como uma pagina unica, abra diretamente:
+
+```text
+docs/site/index.html
 ```
 
 ## Estrutura do Projeto
