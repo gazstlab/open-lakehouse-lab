@@ -1,21 +1,21 @@
-# Airflow with KubernetesPodOperator
+# Airflow com KubernetesPodOperator
 
-## Goal
+## Objetivo
 
-Stage 05 deploys Apache Airflow in the local kind cluster and validates that the
-Airflow scheduler can launch ephemeral pods in the `data-platform` namespace
-with `KubernetesPodOperator`.
+A etapa 05 sobe Apache Airflow no cluster kind local e valida que o scheduler do
+Airflow consegue criar pods efemeros no namespace `data-platform` com
+`KubernetesPodOperator`.
 
-This stage uses:
+Esta etapa usa:
 
-- the Astro CLI project scaffold in `airflow/`;
-- the official Apache Airflow Helm chart;
-- a local Airflow image loaded into kind;
-- a least-privilege RoleBinding for the scheduler pod launcher permissions.
+- o scaffold de projeto Astro CLI em `airflow/`;
+- o Helm chart oficial do Apache Airflow;
+- uma imagem local do Airflow carregada no kind;
+- um RoleBinding de menor privilegio para permissoes de criacao de pods pelo scheduler.
 
-## Prerequisites
+## Pre-requisitos
 
-Install the local tooling:
+Instale as ferramentas locais:
 
 ```bash
 kind version
@@ -24,134 +24,134 @@ docker version
 helm version
 ```
 
-Create the local cluster:
+Crie o cluster local:
 
 ```bash
 make cluster-create
 ```
 
-Airflow does not require MinIO or Polaris for this smoke test, but those services
-can be deployed before Airflow when validating the full local platform.
+Airflow nao exige MinIO nem Polaris para este teste de smoke, mas esses servicos
+podem ser implantados antes do Airflow ao validar a plataforma local completa.
 
-## Build and load the Airflow image
+## Construir e carregar a imagem Airflow
 
-Build the Astro Runtime image with the project DAGs and Python requirements:
+Construa a imagem Astro Runtime com as DAGs do projeto e requisitos Python:
 
 ```bash
 make build-airflow-image
 ```
 
-Load the image into the kind cluster:
+Carregue a imagem no cluster kind:
 
 ```bash
 make load-airflow-image
 ```
 
-The Helm values use:
+Os valores Helm usam:
 
 ```text
 open-lakehouse-lab-airflow:local
 ```
 
-with `pullPolicy: Never`, so the image must exist inside the kind node before
-the Airflow pods are created.
+com `pullPolicy: Never`, entao a imagem precisa existir dentro do node kind
+antes da criacao dos pods do Airflow.
 
-## Deploy Airflow
+## Subir Airflow
 
-Deploy Airflow with the Apache Airflow Helm chart:
+Suba Airflow com o Helm chart do Apache Airflow:
 
 ```bash
 make deploy-airflow
 ```
 
-Check the local deployment:
+Verifique o deploy local:
 
 ```bash
 make airflow-status
 ```
 
-Expected result:
+Resultado esperado:
 
-- the API server pod is running;
-- the scheduler pod is running;
-- the PostgreSQL pod created by the chart is running;
-- the `airflow-api-server` service exists.
+- o pod do API server esta rodando;
+- o pod do scheduler esta rodando;
+- o pod PostgreSQL criado pelo chart esta rodando;
+- o service `airflow-api-server` existe.
 
-## Access the Airflow UI
+## Acessar a UI do Airflow
 
-Forward the API server service:
+Encaminhe a porta do service do API server:
 
 ```bash
 make port-forward-airflow
 ```
 
-Open:
+Abra:
 
 ```text
 http://localhost:8080
 ```
 
-Local credentials:
+Credenciais locais:
 
 ```text
-username: admin
-password: admin
+usuario: admin
+senha: admin
 ```
 
-## Run the smoke DAG
+## Rodar a DAG de teste de smoke
 
-Trigger the DAG from another terminal:
+Dispare a DAG a partir de outro terminal:
 
 ```bash
 make trigger-airflow-hello
 ```
 
-You can also trigger `hello_kubernetes_pod` from the Airflow UI.
+Voce tambem pode disparar `hello_kubernetes_pod` pela UI do Airflow.
 
-The DAG has one task:
+A DAG tem uma task:
 
 ```text
 hello_from_ephemeral_pod
 ```
 
-The task launches a `busybox:1.37.0` pod in the `data-platform` namespace,
-streams the pod logs into Airflow and deletes the pod after completion.
+A task cria um pod `busybox:1.37.0` no namespace `data-platform`, envia os logs
+do pod para o Airflow e remove o pod depois da conclusao.
 
-## Validate the ephemeral pod behavior
+## Validar o comportamento do pod efemero
 
-While the task is running:
+Enquanto a task estiver rodando:
 
 ```bash
 kubectl -n data-platform get pods \
   -l app.kubernetes.io/component=kubernetes-pod-operator-smoke
 ```
 
-After the task succeeds, the query should return no running pod because the DAG
-sets `is_delete_operator_pod=True`.
+Depois que a task concluir com sucesso, a consulta nao deve retornar pod em
+execucao porque a DAG define `is_delete_operator_pod=True`.
 
-Task logs should include:
+Os logs da task devem incluir:
 
 ```text
 hello from KubernetesPodOperator
 ```
 
-## Cleanup
+## Limpeza
 
-Remove Airflow:
+Remova o Airflow:
 
 ```bash
 make delete-airflow
 ```
 
-Remove the full local cluster:
+Remova o cluster local completo:
 
 ```bash
 make cluster-delete
 ```
 
-## Notes
+## Notas
 
-- The chart version is pinned in the Makefile through `AIRFLOW_CHART_VERSION`.
-- Stage 05 validates Airflow pod launching only.
-- Stage 12 adds the `open_lakehouse_lab_daily` DAG for dbt workloads running in
-  Kubernetes pods. See `docs/runbooks/airflow-dbt-orchestration.md`.
+- A versao do chart e fixada no Makefile por `AIRFLOW_CHART_VERSION`.
+- A etapa 05 valida apenas a criacao de pods pelo Airflow.
+- A etapa 12 adiciona a DAG `open_lakehouse_lab_daily` para workloads dbt
+  rodando em pods Kubernetes. Veja `docs/runbooks/airflow-dbt-orchestration.md`.

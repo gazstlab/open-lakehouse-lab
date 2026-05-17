@@ -1,54 +1,54 @@
-# MinIO object storage
+# Armazenamento de objetos MinIO
 
-This runbook describes the Stage 03 MinIO deployment for the local lakehouse.
+Este runbook descreve o deploy do MinIO da etapa 03 para o lakehouse local.
 
-## Prerequisites
+## Pre-requisitos
 
-- Stage 02 local kind cluster created with `make cluster-create`.
-- `kubectl` configured for the `kind-open-lakehouse-lab` context.
+- Cluster kind local da etapa 02 criado com `make cluster-create`.
+- `kubectl` configurado para o contexto `kind-open-lakehouse-lab`.
 
-## Deploy MinIO
+## Subir MinIO
 
-From the repository root:
+A partir da raiz do repositorio:
 
 ```bash
 make deploy-minio
 ```
 
-The command deploys MinIO in the `data-platform` namespace and runs a bootstrap
-job that creates the `lakehouse` bucket.
+O comando sobe MinIO no namespace `data-platform` e executa um job de bootstrap
+que cria o bucket `lakehouse`.
 
-## Check status
+## Verificar status
 
 ```bash
 make minio-status
 kubectl -n data-platform logs job/minio-create-bucket
 ```
 
-## Access MinIO locally
+## Acessar MinIO localmente
 
-Start a local port-forward:
+Inicie um port-forward local:
 
 ```bash
 make port-forward-minio
 ```
 
-Local endpoints:
+Endpoints locais:
 
 - S3 API: `http://localhost:9000`
 - Console: `http://localhost:9001`
 
-Local lab credentials:
+Credenciais locais do laboratorio:
 
-- User: `minioadmin`
-- Password: `minioadmin123`
+- Usuario: `minioadmin`
+- Senha: `minioadmin123`
 
-These credentials are only for local development inside this educational lab.
-Do not reuse them outside the local kind cluster.
+Essas credenciais sao apenas para desenvolvimento local neste laboratorio
+educacional. Nao reutilize fora do cluster kind local.
 
-## Lakehouse paths
+## Caminhos do lakehouse
 
-The `lakehouse` bucket is initialized with these base prefixes:
+O bucket `lakehouse` e inicializado com estes prefixos base:
 
 ```text
 s3://lakehouse/raw/
@@ -56,26 +56,26 @@ s3://lakehouse/warehouse/
 s3://lakehouse/metadata/
 ```
 
-Path responsibilities:
+Responsabilidades dos caminhos:
 
-- `raw/`: original public API payloads.
-- `warehouse/`: future Iceberg table warehouse data.
-- `metadata/`: pipeline, catalog, freshness and quality artifacts.
+- `raw/`: payloads originais de APIs publicas.
+- `warehouse/`: dados futuros do warehouse de tabelas Iceberg.
+- `metadata/`: artefatos de pipeline, catalogo, freshness e qualidade.
 
-## Delete MinIO
+## Remover MinIO
 
 ```bash
 make delete-minio
 ```
 
-To remove the whole local cluster:
+Para remover o cluster local inteiro:
 
 ```bash
 make cluster-delete
 ```
 
-## Scope
+## Escopo
 
-Stage 03 only deploys local object storage and initializes the base bucket.
-Polaris, Iceberg tables, dbt integration and Airflow workloads are introduced in
-later stages.
+A etapa 03 apenas sobe armazenamento de objetos local e inicializa o bucket base. Polaris,
+tabelas Iceberg, integracao dbt e workloads Airflow entram em stages
+posteriores.

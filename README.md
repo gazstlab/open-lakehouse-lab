@@ -1,10 +1,11 @@
 # open-lakehouse-lab
 
-Open Lakehouse Lab is a 100% open source study project for modern data lakehouse engineering.
+Open Lakehouse Lab e um projeto de estudo 100% open source para engenharia de
+dados lakehouse moderna, com foco na comunidade brasileira.
 
-## Fast Path
+## Caminho Rapido
 
-Use o Fast Path para subir o caminho padrao do laboratorio em um ambiente local.
+Use o Caminho Rapido para subir o caminho padrao do laboratorio em um ambiente local.
 O comando imprime o objetivo, o motivo, os comandos executados e as inspecoes
 recomendadas para cada etapa.
 
@@ -16,13 +17,13 @@ Esse caminho cria o cluster kind, sobe MinIO, Polaris e Airflow, publica uma
 fixture Raw em Parquet, dispara a DAG principal e valida a coluna dorsal:
 
 ```text
-MinIO Raw Parquet -> dbt + DuckDB -> Polaris/Iceberg -> Airflow Kubernetes pods
+MinIO Raw Parquet -> dbt + DuckDB -> Polaris/Iceberg -> pods Kubernetes no Airflow
 ```
 
-## Learning Path
+## Trilha de Aprendizado
 
-Use o Learning Path para estudar cada camada passo a passo antes de customizar o
-pipeline.
+Use a Trilha de Aprendizado para estudar cada camada passo a passo antes de
+customizar o pipeline.
 
 ```bash
 make lab-learning-path
@@ -30,7 +31,7 @@ make lab-learning-path
 
 Documentacao principal:
 
-- `docs/learning-path.md`: trilha guiada, Fast Path, Learning Path e interfaces;
+- `docs/learning-path.md`: trilha guiada, Caminho Rapido, Trilha de Aprendizado e interfaces;
 - `docs/user-customization-guide.md`: como criar pipelines proprios;
 - `docs/troubleshooting/guided-troubleshooting.md`: erros comuns e recuperacao;
 - `docs/lessons/`: licoes incrementais do cluster ao pipeline ponta a ponta.
@@ -45,100 +46,105 @@ make explain-deploy-airflow
 make explain-dbt-orchestration
 ```
 
-## Project structure
+## Estrutura do Projeto
 
-The Stage 01 layout separates the local lakehouse into explicit implementation areas:
+A organizacao da etapa 01 separa o lakehouse local em areas explicitas de
+implementacao:
 
 ```text
-airflow/              Astro CLI Airflow project scaffold.
-airflow/dags/         Airflow DAG definitions.
-ingestion/common/     Shared ingestion utilities.
-ingestion/open_meteo/ Open-Meteo extractor code.
-ingestion/usgs/       USGS earthquake extractor code.
-ingestion/bcb/        Banco Central do Brasil SGS extractor code.
-dbt/                  dbt Core project initialized with dbt init.
-dbt/models/           Raw source, staging, Silver, intermediate and marts models.
-docker/               Local runtime Dockerfiles.
-k8s/                  kind, MinIO, Polaris, Airflow, monitoring and RBAC manifests.
-metadata/             Pipeline, quality, catalog, Iceberg and freshness artifacts.
-docs/adr/             Architecture decision records.
-docs/runbooks/        Operational runbooks.
-docs/architecture/    Architecture documentation.
-docs/lessons/         Guided learning lessons.
-docs/troubleshooting/ Guided troubleshooting docs.
+airflow/              Scaffold Airflow criado com Astro CLI.
+airflow/dags/         Definicoes de DAGs do Airflow.
+ingestion/common/     Utilitarios compartilhados de ingestao.
+ingestion/open_meteo/ Codigo do extractor Open-Meteo.
+ingestion/usgs/       Codigo do extractor de terremotos USGS.
+ingestion/bcb/        Codigo do extractor Banco Central do Brasil SGS.
+dbt/                  Projeto dbt Core inicializado com dbt init.
+dbt/models/           Modelos Raw source, staging, Silver, intermediate e marts.
+docker/               Dockerfiles dos ambientes de execucao locais.
+k8s/                  Manifests kind, MinIO, Polaris, Airflow, monitoramento e RBAC.
+metadata/             Artefatos de pipeline, qualidade, catalogo, Iceberg e freshness.
+docs/adr/             Registros de decisoes de arquitetura.
+docs/runbooks/        Runbooks operacionais.
+docs/architecture/    Documentacao de arquitetura.
+docs/lessons/         Licoes guiadas.
+docs/troubleshooting/ Documentacao de troubleshooting.
 ```
 
-The Airflow scaffold is managed with Astro CLI. The Airflow runtime requirements include Astronomer Cosmos with the dbt DuckDB extra so later stages can orchestrate dbt models from Airflow without hand-wiring each model as a custom task.
+O scaffold do Airflow e gerenciado com Astro CLI. As dependencias do ambiente de
+execucao Airflow incluem Astronomer Cosmos com o extra dbt DuckDB para que etapas
+posteriores possam orquestrar modelos dbt a partir do Airflow sem ligar cada
+modelo manualmente como uma task customizada.
 
-## Implementation order
+## Ordem de Implementacao
 
-The lakehouse foundation is intentionally implemented before concrete source
-adapters. The current architectural order is:
+A fundacao lakehouse e implementada antes dos adapters concretos de fonte. A
+ordem arquitetural atual e:
 
 ```text
 MinIO -> Polaris -> Airflow -> dbt + DuckDB + Polaris -> Raw contract
-  -> generic source adapters -> public API adapters -> Silver -> Gold
+  -> adapters genericos de fonte -> adapters de APIs publicas -> Silver -> Gold
 ```
 
-This keeps the core lakehouse independent from Open-Meteo, USGS, Banco Central
-or any other specific source. Source adapters write to a generic Raw contract
-that dbt can consume, and the dbt foundation must compile with local fixtures
-before real ingestion is required.
+Isso mantem o core lakehouse independente de Open-Meteo, USGS, Banco Central ou
+qualquer outra fonte especifica. Adapters de fonte escrevem em um contrato Raw
+generico consumido pelo dbt, e a fundacao dbt deve compilar com fixtures locais
+antes de exigir ingestao real.
 
-## Local Kubernetes cluster
+## Cluster Kubernetes Local
 
-Stage 02 provisions a local kind cluster and the base `data-platform` namespace.
-See `docs/runbooks/local-kind-cluster.md` for prerequisites, lifecycle commands
-and validation steps.
+A etapa 02 provisiona um cluster kind local e o namespace base `data-platform`.
+Veja `docs/runbooks/local-kind-cluster.md` para pre-requisitos, comandos de
+ciclo de vida e passos de validacao.
 
-## Local Object Storage
+## Armazenamento de Objetos Local
 
-Stage 03 deploys MinIO in the local Kubernetes cluster and initializes the
-`lakehouse` bucket. See `docs/runbooks/minio-object-storage.md` for deployment,
-port-forward and path conventions.
+A etapa 03 sobe MinIO no cluster Kubernetes local e inicializa o bucket
+`lakehouse`. Veja `docs/runbooks/minio-object-storage.md` para deploy,
+port-forward e convencoes de path.
 
-## Local Iceberg REST Catalog
+## Catalogo REST Iceberg Local
 
-Stage 04 deploys Apache Polaris as the local Iceberg REST Catalog and bootstraps
-the `lakehouse` catalog backed by the MinIO warehouse path.
-See `docs/runbooks/polaris-rest-catalog.md` for credentials, deployment,
-health checks and endpoint conventions.
+A etapa 04 sobe Apache Polaris como Iceberg REST Catalog local e inicializa o
+catalogo `lakehouse` apoiado no path de warehouse do MinIO. Veja
+`docs/runbooks/polaris-rest-catalog.md` para credenciais, deploy, checks de saude
+e convencoes de endpoint.
 
-## Local Airflow Orchestration
+## Orquestracao Local com Airflow
 
-Stage 05 deploys Airflow with the Apache Airflow Helm chart and validates
-`KubernetesPodOperator` pod launching in the local `data-platform` namespace.
-See `docs/runbooks/airflow-kubernetes-pod-operator.md` for image build, deploy,
-UI access and smoke DAG validation steps.
+A etapa 05 sobe Airflow com o Helm chart do Apache Airflow e valida a criacao de
+pods via `KubernetesPodOperator` no namespace local `data-platform`. Veja
+`docs/runbooks/airflow-kubernetes-pod-operator.md` para build de imagem, deploy,
+acesso a UI e validacao da DAG de teste de smoke.
 
-Stage 12 adds the main `open_lakehouse_lab_daily` DAG. It runs dbt workloads in
-ephemeral Kubernetes pods using the local `dbt + duckdb` image and keeps the
-DuckDB target state in a small local PVC. See
-`docs/runbooks/airflow-dbt-orchestration.md` for the full local test flow.
+A etapa 12 adiciona a DAG principal `open_lakehouse_lab_daily`. Ela executa
+workloads dbt em pods Kubernetes efemeros usando a imagem local `dbt + duckdb` e
+mantem o estado do target DuckDB em um PVC local pequeno. Veja
+`docs/runbooks/airflow-dbt-orchestration.md` para o fluxo de teste local.
 
-Stage 14 adds didactic DAGs named `airflow/dags/lab_*.py` so users can explore
-Airflow features such as `KubernetesPodOperator`, params and retries without
-changing the stable example DAG.
+A etapa 14 adiciona DAGs didaticas chamadas `airflow/dags/lab_*.py` para que
+usuarios explorem funcionalidades do Airflow, como `KubernetesPodOperator`,
+params e retries, sem alterar a DAG estavel de exemplo.
 
-## dbt + DuckDB foundation
+## Fundacao dbt + DuckDB
 
-Stage 08 configures dbt with DuckDB and prepares integration points for Apache
-Polaris and Apache Iceberg without depending on public API ingestion. See
-`docs/runbooks/dbt-duckdb-polaris.md` for the generic Raw contract, dbt commands,
-Docker runtime and known limitations.
+A etapa 08 configura dbt com DuckDB e prepara pontos de integracao com Apache
+Polaris e Apache Iceberg sem depender de ingestao de APIs publicas. Veja
+`docs/runbooks/dbt-duckdb-polaris.md` para contrato Raw generico, comandos dbt,
+ambiente de execucao Docker e limitacoes conhecidas.
 
-## Silver layer
+## Camada Silver
 
-Stage 10 builds generic Silver dbt models from the canonical staging contract.
-The Silver layer currently provides deduplicated source events, metric
-observations and dataset freshness metrics without depending on public API
-adapters. See `docs/runbooks/silver-layer.md` for execution and validation.
+A etapa 10 cria modelos dbt Silver genericos a partir do contrato canonico de
+staging. A camada Silver atualmente fornece eventos de fonte deduplicados,
+observacoes de metricas e metricas de freshness por dataset sem depender de
+adapters de APIs publicas. Veja `docs/runbooks/silver-layer.md` para execucao e
+validacao.
 
-Stage 13 connects the dbt/DuckDB backbone to MinIO and Polaris so the example
-path can read Raw Parquet and publish Iceberg tables locally. Stage 14 explains
-that path through guided docs and explainable shortcuts.
+A etapa 13 conecta a coluna dorsal dbt/DuckDB ao MinIO e Polaris para que o
+caminho de exemplo leia Raw Parquet e publique tabelas Iceberg localmente. A
+etapa 14 explica esse caminho com documentacao guiada e atalhos explicaveis.
 
-## Local interfaces
+## Interfaces Locais
 
 MinIO:
 
@@ -146,7 +152,7 @@ MinIO:
 make port-forward-minio
 ```
 
-Open `http://localhost:9001` with `minioadmin / minioadmin123`.
+Abra `http://localhost:9001` com `minioadmin / minioadmin123`.
 
 Airflow:
 
@@ -154,57 +160,57 @@ Airflow:
 make port-forward-airflow
 ```
 
-Open `http://localhost:8080` with `admin / admin`.
+Abra `http://localhost:8080` com `admin / admin`.
 
-Polaris health API:
+API de saude do Polaris:
 
 ```bash
 make port-forward-polaris
 curl -fsS http://localhost:8182/q/health/ready
 ```
 
-dbt is used through the CLI and Airflow logs. DuckDB can be opened with:
+dbt e usado pela CLI e pelos logs do Airflow. DuckDB pode ser aberto com:
 
 ```bash
 duckdb dbt/target/open_lakehouse_lab.duckdb
 ```
 
-## Development quality checks
+## Verificacoes de Qualidade para Desenvolvimento
 
-Install development dependencies:
+Instale as dependencias de desenvolvimento:
 
 ```bash
 python -m pip install --upgrade pip
 pip install -r requirements-dev.txt
 ```
 
-Install Git hooks:
+Instale os hooks do Git:
 
 ```bash
 pre-commit install --install-hooks
 pre-commit install --hook-type pre-push
 ```
 
-Run the same checks used by GitHub Actions:
+Rode os mesmos checks usados pelo GitHub Actions:
 
 ```bash
 make ci-pr
 ```
 
-Run the pre-push check manually:
+Rode o check de pre-push manualmente:
 
 ```bash
 make pre-push
 ```
 
-The initial quality gate includes:
+O gate inicial de qualidade inclui:
 
-- Python lint with Ruff;
-- Python tests with pytest, when `tests/` exists;
-- YAML lint with yamllint;
-- dbt/SQL checks with SQLFluff, when `dbt/` exists;
-- dbt parse and compile, when `dbt/` exists;
-- Kubernetes manifest validation with kubeconform, when `k8s/` exists;
-- Dockerfile lint with Hadolint, when Dockerfiles exist;
-- security checks with Bandit and optional Trivy;
-- documentation structure check.
+- lint Python com Ruff;
+- testes Python com pytest, quando `tests/` existir;
+- lint YAML com yamllint;
+- checks dbt/SQL com SQLFluff, quando `dbt/` existir;
+- parse e compile do dbt, quando `dbt/` existir;
+- validacao de manifests Kubernetes com kubeconform, quando `k8s/` existir;
+- lint de Dockerfile com Hadolint, quando Dockerfiles existirem;
+- checks de seguranca com Bandit e Trivy opcional;
+- check de estrutura da documentacao.

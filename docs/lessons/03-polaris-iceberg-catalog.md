@@ -1,10 +1,10 @@
-# Lesson 03 - Polaris Iceberg catalog
+# Licao 03 - Catalogo Iceberg com Polaris
 
-## Goal
+## Objetivo
 
 Subir Apache Polaris como REST Catalog Iceberg apontando para o warehouse no MinIO.
 
-## Shortcut
+## Atalho
 
 ```bash
 make deploy-polaris
@@ -16,7 +16,7 @@ Para estudar o atalho:
 make explain-deploy-polaris
 ```
 
-## Manual Commands
+## Comandos Manuais
 
 O Makefile define credenciais locais padrao, mas voce pode exportar explicitamente:
 
@@ -45,13 +45,13 @@ kubectl apply -f k8s/polaris/catalog-bootstrap-job.yaml
 kubectl -n data-platform wait --for=condition=complete job/polaris-bootstrap-catalog --timeout=240s
 ```
 
-## What Happens
+## O Que Acontece
 
 - Polaris sobe como catalogo REST para tabelas Apache Iceberg.
 - O job de bootstrap cria o catalogo `lakehouse`.
-- O warehouse do catalogo aponta para o storage local em MinIO.
+- O warehouse do catalogo aponta para o armazenamento local em MinIO.
 
-## Inspect
+## Inspecao
 
 ```bash
 make polaris-status
@@ -66,7 +66,7 @@ make port-forward-polaris
 curl -fsS http://localhost:8182/q/health/ready
 ```
 
-## Customize
+## Customizacao
 
 Os arquivos principais sao:
 
@@ -78,4 +78,3 @@ Os arquivos principais sao:
 
 Altere catalogo, endpoint ou warehouse somente quando estiver estudando a
 integracao dbt/DuckDB/Polaris.
-

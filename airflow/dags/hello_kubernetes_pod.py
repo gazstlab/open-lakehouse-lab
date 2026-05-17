@@ -1,4 +1,4 @@
-"""Stage 05 smoke DAG for KubernetesPodOperator pod launching."""
+"""DAG de teste de smoke da etapa 05 para criacao de pods com KubernetesPodOperator."""
 
 # ruff: noqa: I001
 
@@ -14,7 +14,7 @@ from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperato
 
 with DAG(
     dag_id="hello_kubernetes_pod",
-    description="Validate that Airflow can create and remove an ephemeral pod.",
+    description="Valida que o Airflow consegue criar e remover um pod efemero.",
     start_date=pendulum.datetime(2026, 1, 1, tz="UTC"),
     schedule=None,
     catchup=False,

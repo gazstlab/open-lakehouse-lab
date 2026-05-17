@@ -1,10 +1,10 @@
-# Lesson 01 - Local Kubernetes with kind
+# Licao 01 - Kubernetes local com kind
 
-## Goal
+## Objetivo
 
 Criar o cluster Kubernetes local que recebe todos os servicos do laboratorio.
 
-## Shortcut
+## Atalho
 
 ```bash
 make cluster-create
@@ -16,20 +16,20 @@ Para ver o que o atalho faz antes de executar:
 make explain-cluster
 ```
 
-## Manual Commands
+## Comandos Manuais
 
 ```bash
 kind create cluster --name open-lakehouse-lab --config k8s/kind/kind-config.yaml
 kubectl apply -f k8s/namespaces/data-platform.yaml
 ```
 
-## What Happens
+## O Que Acontece
 
 - `kind` cria um cluster Kubernetes dentro do Docker local.
 - `k8s/kind/kind-config.yaml` define a configuracao do cluster.
 - `data-platform` e o namespace usado por MinIO, Polaris, Airflow e workloads dbt.
 
-## Inspect
+## Inspecao
 
 ```bash
 kubectl get nodes
@@ -37,14 +37,13 @@ kubectl get namespace data-platform
 kubectl cluster-info --context kind-open-lakehouse-lab
 ```
 
-## Customize
+## Customizacao
 
 Edite `k8s/kind/kind-config.yaml` somente quando quiser estudar configuracoes do
 cluster local, como portas expostas, versao da imagem do node ou mounts.
 
-## Cleanup
+## Limpeza
 
 ```bash
 make cluster-delete
 ```
-

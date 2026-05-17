@@ -47,7 +47,7 @@ export POLARIS_MINIO_ACCESS_KEY
 export POLARIS_MINIO_SECRET_KEY
 
 help:
-	@echo "Open Lakehouse Lab commands"
+	@echo "Comandos do Open Lakehouse Lab"
 	@echo "  make lab-fast-path | lab-learning-path"
 	@echo "  make explain-cluster | explain-deploy-minio | explain-deploy-polaris"
 	@echo "  make explain-deploy-airflow | explain-dbt-orchestration"

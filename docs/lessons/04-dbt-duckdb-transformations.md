@@ -1,11 +1,11 @@
-# Lesson 04 - dbt and DuckDB transformations
+# Licao 04 - Transformacoes com dbt e DuckDB
 
-## Goal
+## Objetivo
 
 Entender como dbt usa DuckDB para ler Raw Parquet, transformar dados e publicar
 tabelas Iceberg Silver e Gold.
 
-## Shortcuts
+## Atalhos
 
 ```bash
 make dbt-parse
@@ -25,7 +25,7 @@ make explain-publish-raw-fixture
 make publish-raw-fixture-parquet
 ```
 
-## Manual Commands
+## Comandos Manuais
 
 ```bash
 cd dbt
@@ -40,7 +40,7 @@ DBT_ENABLE_POLARIS_ATTACH=true DBT_THREADS=1 dbt run --no-populate-cache --selec
 DBT_ENABLE_POLARIS_ATTACH=true DBT_THREADS=1 dbt test --no-populate-cache --select marts --profiles-dir .
 ```
 
-## What Happens
+## O Que Acontece
 
 - `raw_sources` le arquivos Parquet com `read_parquet`.
 - `staging` normaliza nomes, tipos e campos estruturados.
@@ -48,7 +48,7 @@ DBT_ENABLE_POLARIS_ATTACH=true DBT_THREADS=1 dbt test --no-populate-cache --sele
 - `intermediate` prepara agregacoes reutilizaveis.
 - `marts` publica tabelas Gold para analise.
 
-## Inspect with DuckDB
+## Inspecao com DuckDB
 
 Abra o arquivo local:
 
@@ -71,9 +71,8 @@ catalogo retornado por `show schemas`, por exemplo:
 select * from lab.main_raw_sources.generic_raw_contract limit 10;
 ```
 
-## Customize
+## Customizacao
 
 Crie novos modelos nas pastas `dbt/models/staging`, `dbt/models/silver`,
 `dbt/models/intermediate` e `dbt/models/marts`. Documente colunas e testes nos
 respectivos `schema.yml`.
-

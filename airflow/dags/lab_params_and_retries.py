@@ -1,4 +1,4 @@
-"""Educational DAG showing Airflow params and retries."""
+"""DAG didatica com params e retries do Airflow."""
 
 # ruff: noqa: I001
 
@@ -20,7 +20,7 @@ except ImportError:  # pragma: no cover - Airflow 2 compatibility.
 
 with DAG(
     dag_id="lab_params_and_retries",
-    description="Study DAG params, task retries and templated commands.",
+    description="Estuda params de DAG, retries de task e comandos com templates.",
     start_date=pendulum.datetime(2026, 1, 1, tz="UTC"),
     schedule=None,
     catchup=False,
@@ -34,11 +34,11 @@ with DAG(
     BashOperator(
         task_id="print_runtime_params",
         bash_command=(
-            "echo '[goal] inspect runtime params'; "
+            "echo '[goal] inspecionar parametros de execucao'; "
             "echo 'source={{ params.source }}'; "
             "echo 'dataset={{ params.dataset }}'; "
             "echo 'ingestion_date={{ params.ingestion_date }}'; "
-            "echo '[why] params let the same DAG run with different inputs'"
+            "echo '[why] params permitem rodar a mesma DAG com entradas diferentes'"
         ),
         retries=2,
         retry_delay=timedelta(minutes=1),

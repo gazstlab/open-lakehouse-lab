@@ -1,10 +1,10 @@
-# Lesson 02 - MinIO Raw storage
+# Licao 02 - Storage Raw com MinIO
 
-## Goal
+## Objetivo
 
-Subir o object storage local e entender onde a Raw Parquet fica armazenada.
+Subir o armazenamento de objetos local e entender onde a Raw Parquet fica armazenada.
 
-## Shortcut
+## Atalho
 
 ```bash
 make deploy-minio
@@ -16,7 +16,7 @@ Para estudar o atalho:
 make explain-deploy-minio
 ```
 
-## Manual Commands
+## Comandos Manuais
 
 ```bash
 kubectl apply -f k8s/minio/secret.yaml
@@ -28,14 +28,14 @@ kubectl apply -f k8s/minio/job-create-bucket.yaml
 kubectl -n data-platform wait --for=condition=complete job/minio-create-bucket --timeout=180s
 ```
 
-## What Happens
+## O Que Acontece
 
 - O `Secret` cria credenciais locais de desenvolvimento.
 - O `Deployment` inicia o servidor MinIO.
 - O `Service` expoe as portas internas `9000` e `9001`.
 - O job `minio-create-bucket` cria o bucket `lakehouse`.
 
-## Inspect
+## Inspecao
 
 ```bash
 make minio-status
@@ -50,7 +50,7 @@ make port-forward-minio
 
 Use `http://localhost:9001` com `minioadmin / minioadmin123`.
 
-## Raw Path
+## Path Raw
 
 O contrato Raw canonico inicial usa:
 
@@ -72,8 +72,7 @@ kubectl -n data-platform run minio-list --rm -i --restart=Never \
   -- sh -c 'mc alias set local http://minio:9000 minioadmin minioadmin123 && mc find local/lakehouse/raw'
 ```
 
-## Customize
+## Customizacao
 
 Para estudar novos dados, grave Parquet sob `lakehouse/raw/` seguindo o contrato
-de paths e colunas descrito em `docs/user-customization-guide.md`.
-
+de caminhos e colunas descrito em `docs/user-customization-guide.md`.

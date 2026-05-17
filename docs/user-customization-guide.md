@@ -1,4 +1,4 @@
-# User customization guide
+# Guia de customizacao do usuario
 
 Este guia explica como usar o Open Lakehouse Lab para criar um pipeline proprio
 sem perder o caminho padrao como referencia.
@@ -93,11 +93,11 @@ Arquivos principais:
 | Criar tabelas Iceberg Silver | `dbt/models/silver/*.sql` |
 | Criar modelos intermediarios | `dbt/models/intermediate/*.sql` |
 | Criar tabelas Gold | `dbt/models/marts/*.sql` |
-| Configurar paths e catalogo | `dbt/dbt_project.yml` e `dbt/profiles.yml` |
+| Configurar caminhos e catalogo | `dbt/dbt_project.yml` e `dbt/profiles.yml` |
 
 Para um novo dataset, o caminho mais simples e:
 
-1. gravar Parquet na Raw seguindo o path canonico;
+1. gravar Parquet na Raw seguindo o caminho canonico;
 2. criar ou ajustar um modelo em `dbt/models/staging/`;
 3. criar um modelo Silver em `dbt/models/silver/`;
 4. criar marts em `dbt/models/marts/` se precisar de tabelas finais;
@@ -124,13 +124,13 @@ Nao edite `airflow/dags/open_lakehouse_lab_daily.py` quando:
 
 Edite a DAG principal ou crie uma DAG propria quando:
 
-- precisar de uma nova task antes do dbt, como um source adapter;
+- precisar de uma nova task antes do dbt, como um adapter de fonte;
 - quiser alterar schedule, retries ou limites de concorrencia;
 - precisar passar parametros para uma execucao;
 - quiser dividir o pipeline em grupos ou DAGs menores;
 - quiser estudar operadores do Airflow sem afetar o exemplo padrao.
 
-Para experimentos, prefira criar DAGs `airflow/dags/lab_*.py`. A Stage 14 inclui
+Para experimentos, prefira criar DAGs `airflow/dags/lab_*.py`. A etapa 14 inclui
 exemplos pequenos que podem ser ativados e disparados pela UI do Airflow.
 
 ## Parametros Importantes
@@ -207,4 +207,3 @@ make ci-pr
   fazem parte do caminho padrao desta etapa.
 - O projeto e um laboratorio local, nao uma plataforma de producao.
 - Credenciais padrao sao apenas para desenvolvimento local.
-

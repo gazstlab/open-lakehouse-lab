@@ -1,4 +1,4 @@
-"""Print educational explanations for Open Lakehouse Lab shortcuts."""
+"""Imprime explicacoes didaticas para atalhos do Open Lakehouse Lab."""
 
 from __future__ import annotations
 
@@ -18,10 +18,11 @@ class LabStep:
 
 STEPS: dict[str, LabStep] = {
     "cluster-create": LabStep(
-        goal="Create the local kind Kubernetes cluster and the data-platform namespace.",
+        goal="Criar o cluster Kubernetes local com kind e o namespace data-platform.",
         why=(
-            "The lab runs MinIO, Polaris, Airflow and dbt workloads as local "
-            "Kubernetes resources, so every later step needs this cluster."
+            "O laboratorio executa MinIO, Polaris, Airflow e workloads dbt como "
+            "recursos Kubernetes locais, entao todos os proximos passos dependem "
+            "desse cluster."
         ),
         run=(
             "kind create cluster --name open-lakehouse-lab --config k8s/kind/kind-config.yaml",
@@ -32,13 +33,13 @@ STEPS: dict[str, LabStep] = {
             "kubectl get namespace data-platform",
             "kubectl cluster-info --context kind-open-lakehouse-lab",
         ),
-        next_step="Deploy MinIO with make deploy-minio.",
+        next_step="Suba o MinIO com make deploy-minio.",
     ),
     "deploy-minio": LabStep(
-        goal="Deploy MinIO and create the local lakehouse bucket.",
+        goal="Subir o MinIO e criar o bucket local lakehouse.",
         why=(
-            "MinIO is the local S3-compatible object store. The Raw Parquet files "
-            "and Iceberg warehouse data are written under the lakehouse bucket."
+            "MinIO e o armazenamento de objetos local compativel com S3. Os arquivos Raw "
+            "em Parquet e os dados do warehouse Iceberg ficam no bucket lakehouse."
         ),
         run=(
             "kubectl apply -f k8s/minio/secret.yaml",
@@ -49,41 +50,42 @@ STEPS: dict[str, LabStep] = {
         inspect=(
             "make minio-status",
             "make port-forward-minio",
-            "open http://localhost:9001 and login with minioadmin / minioadmin123",
+            "abra http://localhost:9001 e entre com minioadmin / minioadmin123",
         ),
-        next_step="Build and load the dbt image, then deploy Polaris.",
+        next_step="Construa e carregue a imagem dbt, depois suba o Polaris.",
     ),
     "build-dbt-image": LabStep(
-        goal="Build the dbt + DuckDB image used by Kubernetes workloads.",
+        goal="Construir a imagem dbt + DuckDB usada pelos workloads Kubernetes.",
         why=(
-            "Airflow and fixture jobs run dbt in ephemeral pods, so kind must have "
-            "a local image with dbt, dbt-duckdb and required DuckDB extensions."
+            "Airflow e jobs de fixture executam dbt em pods efemeros, entao o "
+            "kind precisa de uma imagem local com dbt, dbt-duckdb e extensoes "
+            "DuckDB necessarias."
         ),
         run=(
             "docker build -f docker/dbt-duckdb-polaris.Dockerfile "
             "-t open-lakehouse-lab-dbt-duckdb-polaris:local .",
         ),
         inspect=("docker images open-lakehouse-lab-dbt-duckdb-polaris:local",),
-        next_step="Load the image into kind with make load-dbt-image.",
+        next_step="Carregue a imagem no kind com make load-dbt-image.",
     ),
     "load-dbt-image": LabStep(
-        goal="Load the local dbt image into the kind node.",
+        goal="Carregar a imagem dbt local no node do kind.",
         why=(
-            "kind runs its own container runtime. Loading the image lets pods use "
-            "imagePullPolicy=Never without pulling from a registry."
+            "O kind usa seu proprio ambiente de execucao de containers. Carregar a imagem "
+            "permite usar imagePullPolicy=Never sem depender de registry."
         ),
         run=(
             "kind load docker-image open-lakehouse-lab-dbt-duckdb-polaris:local "
             "--name open-lakehouse-lab",
         ),
         inspect=("docker exec open-lakehouse-lab-control-plane crictl images | grep dbt",),
-        next_step="Deploy Polaris with make deploy-polaris.",
+        next_step="Suba o Polaris com make deploy-polaris.",
     ),
     "deploy-polaris": LabStep(
-        goal="Deploy Apache Polaris and bootstrap the lakehouse Iceberg catalog.",
+        goal="Subir Apache Polaris e inicializar o catalogo Iceberg lakehouse.",
         why=(
-            "Polaris is the Iceberg REST Catalog. dbt + DuckDB uses it to publish "
-            "Silver and Gold Iceberg tables backed by MinIO."
+            "Polaris e o Iceberg REST Catalog. dbt + DuckDB usa esse catalogo "
+            "para publicar tabelas Iceberg Silver e Gold apoiadas no MinIO."
         ),
         run=(
             "export POLARIS_ROOT_CLIENT_ID=root",
@@ -99,13 +101,13 @@ STEPS: dict[str, LabStep] = {
             "make polaris-health",
             "make port-forward-polaris",
         ),
-        next_step="Publish the Raw fixture and deploy Airflow.",
+        next_step="Publique a fixture Raw e depois suba o Airflow.",
     ),
     "publish-raw-fixture-parquet": LabStep(
-        goal="Publish deterministic Raw Parquet fixture files to MinIO.",
+        goal="Publicar arquivos Raw Parquet deterministicos no MinIO.",
         why=(
-            "The fixture gives dbt a stable Raw dataset before real source adapters "
-            "exist, keeping the backbone testable without external APIs."
+            "A fixture entrega ao dbt um dataset Raw estavel antes dos adapters "
+            "reais existirem, mantendo a coluna dorsal testavel sem APIs externas."
         ),
         run=(
             "kubectl apply -f k8s/dbt/publish-raw-fixture-job.yaml",
@@ -118,13 +120,13 @@ STEPS: dict[str, LabStep] = {
             "'mc alias set local http://minio:9000 minioadmin minioadmin123 "
             "&& mc find local/lakehouse/raw'",
         ),
-        next_step="Run dbt locally or trigger the Airflow dbt DAG.",
+        next_step="Rode dbt localmente ou dispare a DAG dbt pelo Airflow.",
     ),
     "deploy-airflow": LabStep(
-        goal="Deploy Airflow in Kubernetes with permissions to launch workload pods.",
+        goal="Subir Airflow no Kubernetes com permissao para criar pods de workload.",
         why=(
-            "Airflow is the orchestration surface. It schedules the example dbt "
-            "pipeline and lets users study KubernetesPodOperator behavior."
+            "Airflow e a camada de orquestracao. Ele agenda o pipeline dbt de "
+            "exemplo e permite estudar o comportamento do KubernetesPodOperator."
         ),
         run=(
             "helm repo add apache-airflow https://airflow.apache.org --force-update",
@@ -136,15 +138,16 @@ STEPS: dict[str, LabStep] = {
         inspect=(
             "make airflow-status",
             "make port-forward-airflow",
-            "open http://localhost:8080 and login with admin / admin",
+            "abra http://localhost:8080 e entre com admin / admin",
         ),
-        next_step="Trigger open_lakehouse_lab_daily with make trigger-airflow-dbt.",
+        next_step="Dispare open_lakehouse_lab_daily com make trigger-airflow-dbt.",
     ),
     "trigger-airflow-dbt": LabStep(
-        goal="Trigger the standard end-to-end dbt pipeline through Airflow.",
+        goal="Disparar o pipeline dbt padrao ponta a ponta pelo Airflow.",
         why=(
-            "This validates the backbone: Airflow creates dbt pods, dbt reads Raw "
-            "Parquet from MinIO, DuckDB transforms data, and Polaris catalogs Iceberg tables."
+            "Isso valida a coluna dorsal: Airflow cria pods dbt, dbt le Raw "
+            "Parquet no MinIO, DuckDB transforma dados e Polaris cataloga "
+            "tabelas Iceberg."
         ),
         run=(
             "kubectl -n data-platform exec deployment/airflow-scheduler -- "
@@ -156,13 +159,13 @@ STEPS: dict[str, LabStep] = {
             "kubectl -n data-platform get pods -l app.kubernetes.io/component=dbt-workload",
             "kubectl -n data-platform logs job/dbt-publish-raw-fixture",
         ),
-        next_step="Inspect Airflow, MinIO, Polaris and DuckDB outputs.",
+        next_step="Inspecione os resultados em Airflow, MinIO, Polaris e DuckDB.",
     ),
     "lab-fast-path": LabStep(
-        goal="Run the executable reference path for the whole local lab.",
+        goal="Executar o caminho de referencia do laboratorio local completo.",
         why=(
-            "This is the fastest way to prove the standard example works before "
-            "studying or customizing individual layers."
+            "Esse e o jeito mais rapido de provar que o exemplo padrao funciona "
+            "antes de estudar ou customizar camadas individuais."
         ),
         run=(
             "make cluster-create",
@@ -182,13 +185,13 @@ STEPS: dict[str, LabStep] = {
             "make airflow-status",
             "make airflow-dbt-pods",
         ),
-        next_step="Open docs/learning-path.md and repeat each lesson manually.",
+        next_step="Abra docs/learning-path.md e repita cada licao manualmente.",
     ),
     "lab-learning-path": LabStep(
-        goal="Follow the guided learning path one layer at a time.",
+        goal="Seguir a trilha de aprendizado guiada, uma camada por vez.",
         why=(
-            "The learning path shows the same architecture as lessons, including "
-            "manual commands, shortcut equivalents, validation and troubleshooting."
+            "A trilha mostra a mesma arquitetura em formato de licoes, com "
+            "comandos manuais, atalhos equivalentes, validacao e troubleshooting."
         ),
         run=(
             "docs/lessons/01-local-kubernetes-kind.md",
@@ -205,7 +208,7 @@ STEPS: dict[str, LabStep] = {
             "make explain-deploy-airflow",
             "make explain-dbt-orchestration",
         ),
-        next_step="Use docs/user-customization-guide.md to build your own pipeline.",
+        next_step="Use docs/user-customization-guide.md para criar seu proprio pipeline.",
     ),
 }
 
@@ -231,14 +234,14 @@ def print_index() -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Explain Open Lakehouse Lab shortcuts with educational logs."
+        description="Explica atalhos do Open Lakehouse Lab com logs didaticos."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    explain = subparsers.add_parser("explain", help="print the explanation for one lab step")
+    explain = subparsers.add_parser("explain", help="imprime a explicacao de um passo")
     explain.add_argument("step", choices=sorted(STEPS))
 
-    subparsers.add_parser("list", help="list available lab steps")
+    subparsers.add_parser("list", help="lista os passos disponiveis")
     return parser
 
 

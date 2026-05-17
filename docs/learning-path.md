@@ -1,11 +1,11 @@
-# Guided learning path
+# Trilha de aprendizado guiada
 
 Open Lakehouse Lab tem dois modos de uso complementares.
 
-## Fast Path
+## Caminho Rapido
 
-Use o Fast Path quando quiser subir o exemplo padrao rapidamente e validar se a
-coluna dorsal do laboratorio funciona.
+Use o Caminho Rapido quando quiser subir o exemplo padrao rapidamente e validar
+se a coluna dorsal do laboratorio funciona.
 
 ```bash
 make lab-fast-path
@@ -32,7 +32,7 @@ Cada etapa imprime logs no formato:
 [next] proximo passo recomendado
 ```
 
-O Fast Path usa credenciais locais padrao para Polaris e MinIO:
+O Caminho Rapido usa credenciais locais padrao para Polaris e MinIO:
 
 ```text
 POLARIS_ROOT_CLIENT_ID=root
@@ -44,10 +44,10 @@ POLARIS_MINIO_SECRET_KEY=minioadmin123
 Esses valores sao apenas para desenvolvimento local. Voce pode sobrescreve-los
 no shell antes de executar `make deploy-polaris`.
 
-## Learning Path
+## Trilha de Aprendizado
 
-Use o Learning Path quando quiser entender e reproduzir manualmente o que cada
-atalho faz.
+Use a Trilha de Aprendizado quando quiser entender e reproduzir manualmente o
+que cada atalho faz.
 
 ```bash
 make lab-learning-path
@@ -72,7 +72,7 @@ Cada licao mostra:
 - quais telas podem ser abertas;
 - quais arquivos editar para experimentar.
 
-## Explain Commands
+## Comandos de Explicacao
 
 Os comandos `explain-*` nao alteram o ambiente. Eles mostram o objetivo, a razao
 e os comandos relacionados a uma etapa.
@@ -119,8 +119,8 @@ usuario: admin
 senha: admin
 ```
 
-Polaris nao tem uma interface web usada pelo laboratorio neste stage. Valide a
-API de health:
+Polaris nao tem uma interface web usada pelo laboratorio nesta etapa. Valide a
+API de saude:
 
 ```bash
 make port-forward-polaris

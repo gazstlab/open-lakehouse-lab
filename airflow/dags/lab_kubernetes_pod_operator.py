@@ -1,4 +1,4 @@
-"""Educational DAG showing a minimal KubernetesPodOperator task."""
+"""DAG didatica com uma task minima usando KubernetesPodOperator."""
 
 # ruff: noqa: I001
 
@@ -16,7 +16,7 @@ from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperato
 
 with DAG(
     dag_id="lab_kubernetes_pod_operator",
-    description="Study how Airflow launches an ephemeral Kubernetes pod.",
+    description="Estuda como o Airflow cria um pod efemero no Kubernetes.",
     start_date=pendulum.datetime(2026, 1, 1, tz="UTC"),
     schedule=None,
     catchup=False,
@@ -29,8 +29,8 @@ with DAG(
         image="busybox:1.37.0",
         cmds=["/bin/sh", "-ec"],
         arguments=[
-            "echo '[goal] run a short command in a Kubernetes pod'; "
-            "echo '[why] Airflow should launch work outside the scheduler'; "
+            "echo '[goal] executar um comando curto em um pod Kubernetes'; "
+            "echo '[why] Airflow deve criar workloads fora do scheduler'; "
             "echo '[inspect] kubectl -n data-platform get pods'; "
             "echo \"pod_name=$HOSTNAME\""
         ],

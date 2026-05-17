@@ -1,11 +1,11 @@
-# Lesson 06 - End-to-end pipeline
+# Licao 06 - Pipeline ponta a ponta
 
-## Goal
+## Objetivo
 
 Executar o caminho completo do laboratorio: Raw Parquet no MinIO, dbt + DuckDB,
 Iceberg via Polaris e orquestracao pelo Airflow.
 
-## Fast Path
+## Caminho Rapido
 
 ```bash
 make lab-fast-path
@@ -13,7 +13,7 @@ make lab-fast-path
 
 Esse comando e ideal para uma primeira validacao em um ambiente limpo.
 
-## Step-by-Step Path
+## Caminho Passo a Passo
 
 ```bash
 make cluster-create
@@ -29,7 +29,7 @@ make deploy-airflow
 make trigger-airflow-dbt
 ```
 
-## Inspect
+## Inspecao
 
 Kubernetes:
 
@@ -80,7 +80,7 @@ select count(*) from main_raw_sources.generic_raw_contract;
 select count(*) from main_staging.stg_raw_source_events;
 ```
 
-## Customize
+## Customizacao
 
 Depois que o exemplo funcionar:
 
@@ -89,4 +89,3 @@ Depois que o exemplo funcionar:
 3. crie marts quando precisar de tabelas finais;
 4. rode `make dbt-compile` e testes dbt;
 5. use Airflow apenas para orquestrar novas etapas ou mudar agenda.
-

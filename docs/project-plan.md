@@ -1,4 +1,4 @@
-# Open Lakehouse Lab - Project Plan
+# Open Lakehouse Lab - Plano do Projeto
 
 ## Visao geral
 
@@ -12,7 +12,7 @@ A proposta e criar um laboratorio compartilhavel para estudar engenharia de dado
 - Usar `kind` como cluster Kubernetes local.
 - Usar Airflow para orquestracao.
 - Executar tarefas em pods via `KubernetesPodOperator`.
-- Usar MinIO como object storage compativel com S3.
+- Usar MinIO como armazenamento de objetos compativel com S3.
 - Usar Apache Iceberg como formato das tabelas Silver e Gold.
 - Usar Apache Polaris como Iceberg REST Catalog.
 - Usar DuckDB como engine SQL local.
@@ -35,8 +35,8 @@ A proposta e criar um laboratorio compartilhavel para estudar engenharia de dado
 | Catalogo Iceberg | Apache Polaris |
 | Engine SQL | DuckDB |
 | Transformacao | dbt-duckdb |
-| Contrato Raw | Parquet canonico com paths e schemas genericos consumidos pelo dbt |
-| Ingestao | Source adapters Python plugaveis |
+| Contrato Raw | Parquet canonico com caminhos e schemas genericos consumidos pelo dbt |
+| Ingestao | Adapters de fonte Python plugaveis |
 | Metricas | Prometheus |
 | Observabilidade operacional | Grafana |
 | Estado do Kubernetes | kube-state-metrics |
@@ -47,8 +47,8 @@ A proposta e criar um laboratorio compartilhavel para estudar engenharia de dado
 ## Arquitetura
 
 ```text
-Source adapters
-  -> API HTTP, arquivo local, fixture, object storage ou futuras fontes batch/stream
+Adapters de fonte
+  -> API HTTP, arquivo local, fixture, armazenamento de objetos ou futuras fontes batch/stream
   -> Airflow DAG
   -> KubernetesPodOperator
   -> Source Adapter Pods
@@ -144,7 +144,7 @@ Responsabilidades:
 - testes dbt;
 - suporte a exploracao tecnica via DuckDB, Polaris e metadados Iceberg.
 
-## Source adapters
+## Adaptadores de fonte
 
 Adapters de fonte sao uma camada plugavel acima do contrato Raw.
 
@@ -153,7 +153,7 @@ Tipos de fonte previstos:
 - API HTTP;
 - arquivo local;
 - fixture deterministica para testes;
-- object storage;
+- armazenamento de objetos;
 - futuras fontes batch ou stream.
 
 As fontes publicas iniciais continuam fazendo parte do MVP, mas nao devem ser
@@ -165,7 +165,7 @@ pre-requisito para criar a fundacao dbt + DuckDB + Polaris.
 
 Dados de clima, temperatura, vento, chuva e previsao.
 
-### USGS Earthquakes
+### USGS Terremotos
 
 Dados de terremotos, magnitude, profundidade, latitude, longitude e horario do evento.
 
@@ -351,7 +351,7 @@ port-forward-grafana
 
 ## Documentacao obrigatoria
 
-### Learning Path
+### Trilha de aprendizado
 
 ```text
 learning-path.md
@@ -367,13 +367,13 @@ troubleshooting/guided-troubleshooting.md
 
 O projeto deve manter dois modos de uso:
 
-- Fast Path: atalhos `make` executam o caminho padrao rapidamente.
-- Learning Path: as mesmas etapas sao explicadas como licoes reproduziveis.
+- Caminho Rapido: atalhos `make` executam o caminho padrao rapidamente.
+- Trilha de Aprendizado: as mesmas etapas sao explicadas como licoes reproduziveis.
 
 Atalhos importantes devem imprimir objetivo, motivo, comandos executados,
 inspecoes recomendadas e proximo passo.
 
-### ADRs
+### Registros de decisao de arquitetura
 
 ```text
 001-open-source-stack.md
@@ -388,7 +388,7 @@ inspecoes recomendadas e proximo passo.
 010-operational-observability-with-prometheus-grafana.md
 ```
 
-### Runbooks
+### Runbooks operacionais
 
 ```text
 reprocess-a-date.md
@@ -426,9 +426,9 @@ investigate-airflow-metric-failure.md
 
 ### Fase 3 - Raw plugavel
 
-- Criar runtime generico de source adapters.
+- Criar ambiente de execucao generico de adapters de fonte.
 - Criar abstracoes comuns para adapters de fonte.
-- Criar adapter de fixture/local file para testes sem rede externa.
+- Criar adapter de fixture/arquivo local para testes sem rede externa.
 - Gravar dados brutos no MinIO seguindo o contrato Raw canonico em Parquet.
 - Registrar metadados de ingestao.
 
@@ -463,8 +463,8 @@ investigate-airflow-metric-failure.md
 
 ### Fase 8 - Plataforma de estudo guiado
 
-- Criar Fast Path para executar o exemplo padrao.
-- Criar Learning Path com licoes incrementais.
+- Criar Caminho Rapido para executar o exemplo padrao.
+- Criar Trilha de Aprendizado com licoes incrementais.
 - Tornar atalhos `make` explicativos.
 - Documentar comandos manuais equivalentes.
 - Documentar como customizar dados Raw, modelos dbt e DAGs Airflow.
@@ -504,7 +504,7 @@ investigate-airflow-metric-failure.md
 - O projeto e um laboratorio local, nao uma plataforma de producao.
 - O MVP usara full refresh, nao merge incremental.
 - Mudancas de schema serao tratadas por recriacao controlada da tabela.
-- MinIO sera usado como object storage local para estudo.
+- MinIO sera usado como armazenamento de objetos local para estudo.
 - Prometheus e Grafana serao usados para observabilidade operacional local.
 
 ## Evolucoes futuras
