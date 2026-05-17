@@ -1,4 +1,4 @@
-# Licao 02 - Storage Raw com MinIO
+# Lição 02 - Storage Raw com MinIO
 
 ## Objetivo
 
@@ -32,10 +32,10 @@ kubectl -n data-platform wait --for=condition=complete job/minio-create-bucket -
 
 - O `Secret` cria credenciais locais de desenvolvimento.
 - O `Deployment` inicia o servidor MinIO.
-- O `Service` expoe as portas internas `9000` e `9001`.
+- O `Service` expõe as portas internas `9000` e `9001`.
 - O job `minio-create-bucket` cria o bucket `lakehouse`.
 
-## Inspecao
+## Inspeção
 
 ```bash
 make minio-status
@@ -52,13 +52,13 @@ Use `http://localhost:9001` com `minioadmin / minioadmin123`.
 
 ## Path Raw
 
-O contrato Raw canonico inicial usa:
+O contrato Raw canônico inicial usa:
 
 ```text
 s3://lakehouse/raw/source=<source>/dataset=<dataset>/ingestion_date=YYYY-MM-DD/*.parquet
 ```
 
-Publique a fixture deterministica:
+Publique a fixture determinística:
 
 ```bash
 make publish-raw-fixture-parquet
@@ -72,7 +72,7 @@ kubectl -n data-platform run minio-list --rm -i --restart=Never \
   -- sh -c 'mc alias set local http://minio:9000 minioadmin minioadmin123 && mc find local/lakehouse/raw'
 ```
 
-## Customizacao
+## Customização
 
 Para estudar novos dados, grave Parquet sob `lakehouse/raw/` seguindo o contrato
 de caminhos e colunas descrito em `docs/user-customization-guide.md`.

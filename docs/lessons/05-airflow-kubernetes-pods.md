@@ -1,8 +1,8 @@
-# Licao 05 - Airflow e pods Kubernetes
+# Lição 05 - Airflow e pods Kubernetes
 
 ## Objetivo
 
-Estudar como Airflow orquestra workloads em pods efemeros no cluster kind.
+Estudar como Airflow orquestra workloads em pods efêmeros no cluster kind.
 
 ## Atalho
 
@@ -35,10 +35,10 @@ kubectl -n data-platform rollout status deployment/airflow-scheduler --timeout=3
 
 - Helm instala Airflow no namespace `data-platform`.
 - RBAC permite que o scheduler crie pods de workload.
-- O PVC `dbt-workload-target` preserva o diretorio `target` entre pods dbt.
-- As DAGs em `airflow/dags/` ficam disponiveis na UI.
+- O PVC `dbt-workload-target` preserva o diretório `target` entre pods dbt.
+- As DAGs em `airflow/dags/` ficam disponíveis na UI.
 
-## Inspecao
+## Inspeção
 
 ```bash
 make airflow-status
@@ -55,7 +55,7 @@ Use `http://localhost:8080` com `admin / admin`.
 
 ## DAGs de Estudo
 
-A etapa 14 inclui DAGs didaticas:
+A etapa 14 inclui DAGs didáticas:
 
 - `lab_kubernetes_pod_operator`;
 - `lab_params_and_retries`.
@@ -73,8 +73,8 @@ kubectl -n data-platform exec deployment/airflow-scheduler -- \
   airflow dags trigger lab_params_and_retries
 ```
 
-## Customizacao
+## Customização
 
-Edite ou crie DAGs `airflow/dags/lab_*.py` para estudar parametros, retries,
+Edite ou crie DAGs `airflow/dags/lab_*.py` para estudar parâmetros, retries,
 schedules e operadores. Mantenha `open_lakehouse_lab_daily.py` como caminho
-padrao estavel.
+padrão estável.

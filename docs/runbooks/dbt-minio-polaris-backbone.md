@@ -10,25 +10,25 @@ MinIO Raw Parquet
   -> pods dbt via KubernetesPodOperator no Airflow
 ```
 
-DuckDB e a engine SQL. Ele nao e a camada final de storage. Dados persistentes
+DuckDB é a engine SQL. Ele não é a camada final de storage. Dados persistentes
 ficam no MinIO, e o registro das tabelas Iceberg fica no Polaris.
 
 ## O que mudou
 
-A etapa 13 faz o caminho padrao usar MinIO e Polaris:
+A etapa 13 faz o caminho padrão usar MinIO e Polaris:
 
-- `generic_raw_contract` le arquivos Raw Parquet do MinIO com
+- `generic_raw_contract` lê arquivos Raw Parquet do MinIO com
   `read_parquet`.
-- `publish_raw_fixture_parquet` escreve uma fixture Raw deterministica no MinIO.
-- modelos Silver usam a materializacao customizada `iceberg_table`.
-- marts Gold sao criados a partir de modelos dbt intermediate e tambem usam
+- `publish_raw_fixture_parquet` escreve uma fixture Raw determinística no MinIO.
+- modelos Silver usam a materialização customizada `iceberg_table`.
+- marts Gold são criados a partir de modelos dbt intermediate e também usam
   `iceberg_table`.
 - Airflow publica a fixture Raw primeiro e depois executa a cadeia dbt Silver e
   Gold em pods Kubernetes.
 
 O arquivo de seed local permanece apenas como fallback de estudo.
 
-## Variaveis de ambiente de execucao
+## Variáveis de ambiente de execução
 
 Dentro do cluster kind, dbt usa:
 
@@ -42,25 +42,25 @@ DBT_RAW_FIXTURE_ROOT=s3://lakehouse/raw
 DBT_RAW_SOURCE_EVENTS_PATH=s3://lakehouse/raw/source=*/dataset=*/ingestion_date=*/*.parquet
 ```
 
-`DBT_POLARIS_WAREHOUSE` e o nome de catalogo/warehouse Polaris usado pelo attach
-Iceberg REST do DuckDB. A localizacao fisica de storage e configurada quando o
-catalogo Polaris e inicializado:
+`DBT_POLARIS_WAREHOUSE` e o nome de catálogo/warehouse Polaris usado pelo attach
+Iceberg REST do DuckDB. A localização física de storage é configurada quando o
+catálogo Polaris é inicializado:
 
 ```text
 s3://lakehouse/warehouse
 ```
 
-## Arquivos para alterar no seu proprio pipeline
+## Arquivos para alterar no seu próprio pipeline
 
 Para adicionar um novo dataset Raw Parquet:
 
-1. Escreva arquivos no layout canonico da Raw:
+1. Escreva arquivos no layout canônico da Raw:
 
    ```text
    s3://lakehouse/raw/source=<source>/dataset=<dataset>/ingestion_date=YYYY-MM-DD/*.parquet
    ```
 
-2. Mantenha as colunas tecnicas minimas:
+2. Mantenha as colunas técnicas mínimas:
 
    ```text
    loaded_at
@@ -68,9 +68,9 @@ Para adicionar um novo dataset Raw Parquet:
    raw_payload
    ```
 
-   `source`, `dataset` e `ingestion_date` podem vir das particoes Hive.
+   `source`, `dataset` e `ingestion_date` podem vir das partições Hive.
 
-3. Adicione campos estaveis da fonte como colunas Parquet quando possivel.
+3. Adicione campos estáveis da fonte como colunas Parquet quando possível.
 
 4. Atualize estes arquivos dbt:
 
@@ -90,9 +90,9 @@ Para adicionar um novo dataset Raw Parquet:
    export DBT_RAW_SOURCE_EVENTS_PATH="s3://lakehouse/raw/source=my_source/dataset=my_dataset/ingestion_date=*/*.parquet"
    ```
 
-## Validacao local completa
+## Validação local completa
 
-Crie o cluster local e os servicos da plataforma:
+Crie o cluster local e os serviços da plataforma:
 
 ```bash
 make cluster-create
@@ -153,7 +153,7 @@ make port-forward-airflow
 
 ```text
 http://localhost:8080
-usuario: admin
+usuário: admin
 senha: admin
 ```
 
@@ -165,7 +165,7 @@ make port-forward-minio
 
 ```text
 http://localhost:9001
-usuario: minioadmin
+usuário: minioadmin
 senha: minioadmin123
 ```
 
@@ -178,7 +178,7 @@ lakehouse/raw/source=fixture/dataset=macro_indicator_sample/ingestion_date=2026-
 lakehouse/warehouse/
 ```
 
-Polaris nao tem UI de projeto nesta etapa. Use o endpoint de saude:
+Polaris não tem UI de projeto nesta etapa. Use o endpoint de saúde:
 
 ```bash
 make port-forward-polaris
@@ -188,10 +188,10 @@ make port-forward-polaris
 http://localhost:8182/q/health/ready
 ```
 
-## Inspecao SQL
+## Inspeção SQL
 
-A validacao mais confiavel do caminho completo roda no cluster pelo Airflow.
-Para exploracao a partir do host, mantenha os port-forwards de MinIO e Polaris
+A validação mais confiável do caminho completo roda no cluster pelo Airflow.
+Para exploração a partir do host, mantenha os port-forwards de MinIO e Polaris
 rodando e use a CLI dbt local:
 
 ```bash
@@ -214,7 +214,7 @@ make dbt-test-silver
 make dbt-test-gold
 ```
 
-Depois use a CLI DuckDB para inspecao ad hoc:
+Depois use a CLI DuckDB para inspeção ad hoc:
 
 ```bash
 duckdb dbt/target/open_lakehouse_lab.duckdb
@@ -250,7 +250,7 @@ select * from iceberg_snapshots(lakehouse.main_silver.silver_source_events);
 Feche DuckDB CLI, DuckDB UI ou conexoes DuckDB do VS Code antes de rodar dbt
 novamente. DuckDB permite apenas um processo de escrita no mesmo arquivo de banco.
 
-## Verificacoes de qualidade
+## Verificações de qualidade
 
 Rode antes de abrir ou atualizar o PR:
 
@@ -258,12 +258,12 @@ Rode antes de abrir ou atualizar o PR:
 make ci-pr
 ```
 
-## Limitacoes conhecidas
+## Limitações conhecidas
 
-- A fixture e deterministica e pequena; adapters reais de fonte permanecem separados.
-- O MVP usa substituicao de tabelas em full-refresh e evita `MERGE`, `UPDATE`,
+- A fixture é determinística e pequena; adapters reais de fonte permanecem separados.
+- O MVP usa substituição de tabelas em full-refresh e evita `MERGE`, `UPDATE`,
   `DELETE` e `ALTER TABLE`.
   `DELETE` e `ALTER TABLE`.
-- A persistencia do Polaris ainda e a configuracao local em memoria da etapa 04.
+- A persistência do Polaris ainda é a configuração local em memória da etapa 04.
 - Escritas Iceberg a partir do host dependem de endpoints locais via
-  port-forward; o caminho no cluster e a validacao de referencia desta etapa.
+  port-forward; o caminho no cluster e a validação de referência desta etapa.

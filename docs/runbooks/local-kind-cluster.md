@@ -5,12 +5,12 @@ Este runbook descreve o bootstrap do cluster Kubernetes local da etapa 02.
 ## Pre-requisitos
 
 - Docker instalado e rodando.
-- `kind` instalado e disponivel no `PATH`.
-- `kubectl` instalado e disponivel no `PATH`.
+- `kind` instalado e disponível no `PATH`.
+- `kubectl` instalado e disponível no `PATH`.
 
 ## Criar o cluster
 
-A partir da raiz do repositorio:
+A partir da raiz do repositório:
 
 ```bash
 make cluster-create
@@ -42,5 +42,5 @@ make cluster-delete
 ## Escopo
 
 A etapa 02 provisiona apenas o cluster Kubernetes local e o namespace base.
-Storage, catalogo, Airflow, monitoramento e manifests de workload entram em
+Storage, catálogo, Airflow, monitoramento e manifests de workload entram em
 stages posteriores.

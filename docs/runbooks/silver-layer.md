@@ -1,13 +1,13 @@
 # Camada Silver
 
-Este runbook descreve a camada Silver generica da etapa 10 para o Open Lakehouse Lab.
+Este runbook descreve a camada Silver genérica da etapa 10 para o Open Lakehouse Lab.
 
 ## Escopo
 
-A etapa 10 cria modelos Silver genericos a partir do contrato canonico de
+A etapa 10 cria modelos Silver genéricos a partir do contrato canônico de
 staging criado na etapa 09.
 
-A camada Silver e intencionalmente agnostica de fonte. APIs publicas e adapters
+A camada Silver é intencionalmente agnóstica de fonte. APIs públicas e adapters
 futuros devem escrever no contrato Raw e passar por staging antes de chegar a
 esses modelos Silver.
 
@@ -45,33 +45,33 @@ Regras:
 - uma linha por `record_hash`;
 - o registro mais recente vence por `loaded_at desc, observed_at desc`;
 - preserva `raw_payload` para auditoria e replay;
-- permanece generica entre adapters de fonte.
+- permanece genérica entre adapters de fonte.
 
 ### `silver_metric_observations`
 
-Tabela analitica de observacoes numericas.
+Tabela analitica de observações numericas.
 
 Regras:
 
-- uma linha por `observation_id` estavel;
+- uma linha por `observation_id` estável;
 - exige `metric_name`, `metric_value` e `observed_at`;
-- mantem `record_hash` para rastreabilidade ate o evento de origem.
+- mantém `record_hash` para rastreabilidade até o evento de origem.
 
 ### `silver_dataset_freshness`
 
 Tabela de freshness e volume por dataset.
 
-Metricas:
+Métricas:
 
-- ultimo timestamp observado;
-- ultimo timestamp carregado;
-- primeira e ultima data de ingestao;
+- último timestamp observado;
+- último timestamp carregado;
+- primeira e última data de ingestão;
 - total de registros;
 - hashes de registros unicos.
 
 ## Rodar localmente
 
-A partir da raiz do repositorio, rode o caminho MinIO/Polaris da etapa 13:
+A partir da raiz do repositório, rode o caminho MinIO/Polaris da etapa 13:
 
 ```bash
 make dbt-publish-raw-fixture
@@ -81,7 +81,7 @@ make dbt-run-silver
 make dbt-test-silver
 ```
 
-Validacao geral:
+Validação geral:
 
 ```bash
 make lint-dbt
@@ -91,18 +91,18 @@ make dbt-test
 make ci-pr
 ```
 
-## Decisoes de design
+## Decisões de design
 
-- Silver e generica primeiro; modelos especificos de fonte ficam para quando
+- Silver é genérica primeiro; modelos específicos de fonte ficam para quando
   adapters reais existirem.
-- A deduplicacao usa `record_hash`, que e a chave tecnica estavel do contrato
+- A deduplicação usa `record_hash`, que é a chave técnica estável do contrato
   Raw/Staging.
-- A etapa 13 publica Silver como tabelas Iceberg pela materializacao customizada
+- A etapa 13 publica Silver como tabelas Iceberg pela materialização customizada
   `iceberg_table`.
 
-## Limitacoes conhecidas
+## Limitações conhecidas
 
-- A etapa 10 nao consome APIs publicas diretamente.
-- A etapa 10 nao exige imagens de execucao de adapters de fonte.
-- A etapa 10 nao validou tabelas dentro do Polaris como snapshots Iceberg
+- A etapa 10 não consome APIs públicas diretamente.
+- A etapa 10 não exige imagens de execução de adapters de fonte.
+- A etapa 10 não validou tabelas dentro do Polaris como snapshots Iceberg
   fisicos; a etapa 13 adiciona essa coluna dorsal.

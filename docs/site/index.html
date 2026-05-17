@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Open Lakehouse Lab - Documentacao</title>
+    <title>Open Lakehouse Lab - Documentação</title>
     <style>
       :root {
         color-scheme: light;
@@ -535,29 +535,29 @@
   </head>
   <body>
     <div class="layout">
-      <aside class="sidebar" aria-label="Navegacao principal">
+      <aside class="sidebar" aria-label="Navegação principal">
         <div class="brand">
           <strong>Open Lakehouse Lab</strong>
-          <span>Documentacao estatica em portugues para estudo local de lakehouse.</span>
+          <span>Documentação estática em português para estudo local de lakehouse.</span>
         </div>
         <nav>
           <div class="nav-group">
-            <h2>Comeco</h2>
-            <a href="#visao-geral">Visao geral</a>
+            <h2>INÍCIO</h2>
+            <a href="#visao-geral">Visão geral</a>
             <a href="#arquitetura">Arquitetura</a>
             <a href="#estrutura">Estrutura do projeto</a>
-            <a href="#caminho-rapido">Caminho Rapido</a>
+            <a href="#caminho-rapido">Caminho Rápido</a>
             <a href="#trilha">Trilha de Aprendizado</a>
           </div>
           <div class="nav-group">
             <h2>Uso local</h2>
             <a href="#interfaces">Interfaces locais</a>
             <a href="#sql">Consulta SQL</a>
-            <a href="#customizacao">Customizacao</a>
+            <a href="#customizacao">Customização</a>
             <a href="#airflow">Airflow</a>
           </div>
           <div class="nav-group">
-            <h2>Referencias</h2>
+            <h2>Referências</h2>
             <a href="#runbooks">Runbooks</a>
             <a href="#troubleshooting">Troubleshooting</a>
             <a href="#qualidade">Qualidade</a>
@@ -570,20 +570,20 @@
         <div class="topbar"><strong>Open Lakehouse Lab</strong></div>
         <div class="content">
           <header class="intro" id="visao-geral">
-            <p class="eyebrow">Laboratorio open source para engenharia de dados</p>
-            <h1>Documentacao do Open Lakehouse Lab</h1>
+            <p class="eyebrow">Laboratório open source para engenharia de dados</p>
+            <h1>Documentação do Open Lakehouse Lab</h1>
             <p class="lead">
-              Uma pagina estatica para estudar a arquitetura local com kind, Kubernetes,
+              Uma página estática para estudar a arquitetura local com kind, Kubernetes,
               Airflow, MinIO, Apache Iceberg, Apache Polaris, DuckDB, dbt, Prometheus e
-              Grafana. O projeto e educacional, reproduzivel localmente e focado na
+              Grafana. O projeto é educacional, reproduzível localmente e focado na
               comunidade brasileira de engenharia de dados.
             </p>
             <div class="actions">
-              <a class="button" href="#caminho-rapido">Executar caminho padrao</a>
-              <a class="button secondary" href="#trilha">Seguir licoes</a>
-              <a class="button secondary" href="#customizacao">Criar pipeline proprio</a>
+              <a class="button" href="#caminho-rapido">Executar caminho padrão</a>
+              <a class="button secondary" href="#trilha">Seguir lições</a>
+              <a class="button secondary" href="#customizacao">Criar pipeline próprio</a>
             </div>
-            <div class="mission-board" aria-label="Missoes de aprendizado">
+            <div class="mission-board" aria-label="Missões de aprendizado">
               <div class="mission">
                 <span class="mission-code">M1</span>
                 <b>Subir a plataforma</b>
@@ -602,7 +602,7 @@
               <div class="mission">
                 <span class="mission-code">M4</span>
                 <b>Orquestrar no Airflow</b>
-                <span>DAGs criando pods efemeros no cluster kind.</span>
+                <span>DAGs criando pods efêmeros no cluster kind.</span>
               </div>
             </div>
           </header>
@@ -610,8 +610,8 @@
           <section id="arquitetura">
             <h2>Arquitetura</h2>
             <p>
-              O caminho padrao valida a coluna dorsal do projeto antes de introduzir
-              adapters concretos de fonte. DuckDB e a engine SQL de processamento; MinIO
+              O caminho padrão valida a coluna dorsal do projeto antes de introduzir
+              adapters concretos de fonte. DuckDB é a engine SQL de processamento; MinIO
               armazena dados persistentes; Polaris registra tabelas Iceberg; Airflow
               orquestra workloads em pods Kubernetes.
             </p>
@@ -620,8 +620,8 @@
               <div class="node"><b>dbt</b><span>Modelagem Raw, staging, Silver e Gold.</span></div>
               <div class="node"><b>DuckDB</b><span>Engine SQL local e em pods.</span></div>
               <div class="node"><b>Iceberg</b><span>Tabelas Silver e Gold.</span></div>
-              <div class="node"><b>Polaris</b><span>Catalogo REST Iceberg.</span></div>
-              <div class="node"><b>Airflow</b><span>Orquestracao com KubernetesPodOperator.</span></div>
+              <div class="node"><b>Polaris</b><span>Catálogo REST Iceberg.</span></div>
+              <div class="node"><b>Airflow</b><span>Orquestração com KubernetesPodOperator.</span></div>
             </div>
 
             <div class="grid" style="margin-top: 18px">
@@ -643,13 +643,13 @@
           <section id="estrutura">
             <h2>Estrutura do projeto</h2>
             <p>
-              Cada diretorio representa uma parte do laboratorio. A ideia e que voce
-              consiga navegar pelo codigo como se fosse um mapa da plataforma.
+              Cada diretório representa uma parte do laboratório. A ideia é que você
+              consiga navegar pelo código como se fosse um mapa da plataforma.
             </p>
             <div class="project-map">
               <div class="dir-card">
                 <code>airflow/</code>
-                <p>Projeto Airflow criado com Astro CLI, DAGs principais e DAGs didaticas.</p>
+                <p>Projeto Airflow criado com Astro CLI, DAGs principais e DAGs didáticas.</p>
               </div>
               <div class="dir-card">
                 <code>dbt/</code>
@@ -665,39 +665,39 @@
               </div>
               <div class="dir-card">
                 <code>ingestion/</code>
-                <p>Espaco para adapters de fonte e utilitarios de ingestao plugaveis.</p>
+                <p>Espaço para adapters de fonte e utilitários de ingestão plugáveis.</p>
               </div>
               <div class="dir-card">
                 <code>metadata/</code>
-                <p>Artefatos previstos para catalogo, qualidade, freshness e execucoes.</p>
+                <p>Artefatos previstos para catálogo, qualidade, freshness e execuções.</p>
               </div>
               <div class="dir-card">
                 <code>docs/</code>
-                <p>Documentacao, runbooks, licoes, troubleshooting e esta pagina estatica.</p>
+                <p>Documentação, runbooks, lições, troubleshooting e esta página estática.</p>
               </div>
               <div class="dir-card">
                 <code>scripts/</code>
-                <p>Automacoes locais, validadores e explicacoes didaticas dos atalhos.</p>
+                <p>Automações locais, validadores e explicações didáticas dos atalhos.</p>
               </div>
               <div class="dir-card">
                 <code>.github/</code>
-                <p>Workflows de convencoes, qualidade e automacoes do GitHub Actions.</p>
+                <p>Workflows de convenções, qualidade e automações do GitHub Actions.</p>
               </div>
             </div>
             <p style="margin-top: 14px">
-              <a href="pages/doc.html?doc=overview">Abrir pagina de visao geral</a>
+              <a href="pages/doc.html?doc=overview">Abrir página de visão geral</a>
             </p>
           </section>
 
           <section id="caminho-rapido">
-            <h2>Caminho Rapido</h2>
+            <h2>Caminho Rápido</h2>
             <p>
-              Rode o laboratorio completo em um ambiente local limpo. Cada alvo imprime
-              secoes de objetivo, motivo, comandos, inspecoes e proximo passo.
+              Rode o laboratório completo em um ambiente local limpo. Cada alvo imprime
+              seções de objetivo, motivo, comandos, inspeções e próximo passo.
             </p>
             <pre><button class="copy" type="button">copiar</button><code>make lab-fast-path</code></pre>
 
-            <h3>Execucao passo a passo</h3>
+            <h3>Execução passo a passo</h3>
             <pre><button class="copy" type="button">copiar</button><code>make cluster-create
 make deploy-minio
 make build-dbt-image
@@ -711,18 +711,18 @@ make deploy-airflow
 make trigger-airflow-dbt</code></pre>
 
             <div class="note">
-              As credenciais padrao sao locais: MinIO usa <code>minioadmin</code> /
+              As credenciais padrão são locais: MinIO usa <code>minioadmin</code> /
               <code>minioadmin123</code>; Airflow usa <code>admin</code> /
-              <code>admin</code>; Polaris usa variaveis locais de desenvolvimento.
+              <code>admin</code>; Polaris usa variáveis locais de desenvolvimento.
             </div>
           </section>
 
           <section id="trilha">
             <h2>Trilha de Aprendizado</h2>
             <p>
-              A trilha mostra as mesmas etapas do caminho rapido como licoes
-              incrementais. Cada licao tem objetivo, comandos manuais, inspecao e
-              pontos de customizacao.
+              A trilha mostra as mesmas etapas do caminho rápido como lições
+              incrementais. Cada lição tem objetivo, comandos manuais, inspeção e
+              pontos de customização.
             </p>
             <pre><button class="copy" type="button">copiar</button><code>make lab-learning-path</code></pre>
 
@@ -732,7 +732,7 @@ make trigger-airflow-dbt</code></pre>
                 <div>
                   <b>Kubernetes local com kind</b>
                   <p>Cria o cluster local e o namespace <code>data-platform</code>.</p>
-                  <a href="pages/doc.html?doc=lesson-kind">Abrir pagina</a>
+                  <a href="pages/doc.html?doc=lesson-kind">Abrir página</a>
                 </div>
               </div>
               <div class="path-row">
@@ -740,23 +740,23 @@ make trigger-airflow-dbt</code></pre>
                 <div>
                   <b>Storage Raw com MinIO</b>
                   <p>Sobe MinIO, cria o bucket <code>lakehouse</code> e recebe Raw Parquet.</p>
-                  <a href="pages/doc.html?doc=lesson-minio">Abrir pagina</a>
+                  <a href="pages/doc.html?doc=lesson-minio">Abrir página</a>
                 </div>
               </div>
               <div class="path-row">
                 <span class="step-number">03</span>
                 <div>
-                  <b>Catalogo Iceberg com Polaris</b>
-                  <p>Inicializa o catalogo <code>lakehouse</code> apontando para MinIO.</p>
-                  <a href="pages/doc.html?doc=lesson-polaris">Abrir pagina</a>
+                  <b>Catálogo Iceberg com Polaris</b>
+                  <p>Inicializa o catálogo <code>lakehouse</code> apontando para MinIO.</p>
+                  <a href="pages/doc.html?doc=lesson-polaris">Abrir página</a>
                 </div>
               </div>
               <div class="path-row">
                 <span class="step-number">04</span>
                 <div>
-                  <b>Transformacoes com dbt e DuckDB</b>
+                  <b>Transformações com dbt e DuckDB</b>
                   <p>Compila, executa e testa modelos Raw, staging, Silver e Gold.</p>
-                  <a href="pages/doc.html?doc=lesson-dbt">Abrir pagina</a>
+                  <a href="pages/doc.html?doc=lesson-dbt">Abrir página</a>
                 </div>
               </div>
               <div class="path-row">
@@ -764,7 +764,7 @@ make trigger-airflow-dbt</code></pre>
                 <div>
                   <b>Airflow e pods Kubernetes</b>
                   <p>Explora KubernetesPodOperator, params e retries sem alterar a DAG principal.</p>
-                  <a href="pages/doc.html?doc=lesson-airflow">Abrir pagina</a>
+                  <a href="pages/doc.html?doc=lesson-airflow">Abrir página</a>
                 </div>
               </div>
               <div class="path-row">
@@ -772,7 +772,7 @@ make trigger-airflow-dbt</code></pre>
                 <div>
                   <b>Pipeline ponta a ponta</b>
                   <p>Valida MinIO, Polaris, dbt, DuckDB e Airflow juntos.</p>
-                  <a href="pages/doc.html?doc=lesson-e2e">Abrir pagina</a>
+                  <a href="pages/doc.html?doc=lesson-e2e">Abrir página</a>
                 </div>
               </div>
             </div>
@@ -795,7 +795,7 @@ make trigger-airflow-dbt</code></pre>
               </div>
               <div class="tile">
                 <h3>Polaris</h3>
-                <p>API de saude e catalogo REST usado pelo DuckDB Iceberg.</p>
+                <p>API de saúde e catálogo REST usado pelo DuckDB Iceberg.</p>
                 <pre><button class="copy" type="button">copiar</button><code>make port-forward-polaris
 curl -fsS http://localhost:8182/q/health/ready</code></pre>
               </div>
@@ -805,7 +805,7 @@ curl -fsS http://localhost:8182/q/health/ready</code></pre>
           <section id="sql">
             <h2>Consulta SQL com DuckDB</h2>
             <p>
-              dbt usa DuckDB como engine de transformacao. Para explorar o arquivo
+              dbt usa DuckDB como engine de transformação. Para explorar o arquivo
               local criado por dbt:
             </p>
             <pre><button class="copy" type="button">copiar</button><code>duckdb dbt/target/open_lakehouse_lab.duckdb</code></pre>
@@ -813,17 +813,17 @@ curl -fsS http://localhost:8182/q/health/ready</code></pre>
 select * from main_raw_sources.generic_raw_contract limit 10;
 select * from main_staging.stg_raw_source_events limit 10;</code></pre>
             <div class="note warn">
-              Feche DuckDB CLI, DuckDB UI ou extensoes do VS Code conectadas ao mesmo
+              Feche DuckDB CLI, DuckDB UI ou extensões do VS Code conectadas ao mesmo
               arquivo antes de rodar dbt. DuckDB permite apenas um processo de escrita
               por arquivo.
             </div>
           </section>
 
           <section id="customizacao">
-            <h2>Customizacao de pipelines</h2>
+            <h2>Customização de pipelines</h2>
             <p>
-              O usuario pode usar o exemplo padrao como referencia e criar o proprio
-              pipeline adicionando dados Raw, modelos dbt e, quando necessario, DAGs
+              O usuário pode usar o exemplo padrão como referência e criar o próprio
+              pipeline adicionando dados Raw, modelos dbt e, quando necessário, DAGs
               Airflow.
             </p>
             <table>
@@ -857,16 +857,16 @@ select * from main_staging.stg_raw_source_events limit 10;</code></pre>
               </tbody>
             </table>
 
-            <h3>Contrato Raw canonico</h3>
+            <h3>Contrato Raw canônico</h3>
             <pre><button class="copy" type="button">copiar</button><code>s3://lakehouse/raw/source=&lt;source&gt;/dataset=&lt;dataset&gt;/ingestion_date=YYYY-MM-DD/*.parquet</code></pre>
-            <p>Colunas tecnicas minimas:</p>
+            <p>Colunas técnicas mínimas:</p>
             <pre><button class="copy" type="button">copiar</button><code>source
 dataset
 ingestion_date
 loaded_at
 record_hash
 raw_payload</code></pre>
-            <p><a href="pages/doc.html?doc=customization">Abrir pagina de customizacao</a></p>
+            <p><a href="pages/doc.html?doc=customization">Abrir página de customização</a></p>
           </section>
 
           <section id="airflow">
@@ -875,7 +875,7 @@ raw_payload</code></pre>
               <div class="tile">
                 <h3>DAG principal</h3>
                 <p>
-                  <code>open_lakehouse_lab_daily</code> e o exemplo padrao estavel. Ela
+                  <code>open_lakehouse_lab_daily</code> e o exemplo padrão estável. Ela
                   publica fixture Raw, roda dbt para Raw/staging/Silver, testa Silver,
                   roda intermediate/marts e testa Gold.
                 </p>
@@ -884,7 +884,7 @@ kubectl -n data-platform exec deployment/airflow-scheduler -- \
   airflow dags list-runs open_lakehouse_lab_daily</code></pre>
               </div>
               <div class="tile">
-                <h3>DAGs didaticas</h3>
+                <h3>DAGs didáticas</h3>
                 <p>
                   <code>lab_kubernetes_pod_operator</code> e
                   <code>lab_params_and_retries</code> existem para estudar recursos do
@@ -901,28 +901,28 @@ kubectl -n data-platform exec deployment/airflow-scheduler -- \
 
           <section id="runbooks">
             <h2>Runbooks</h2>
-            <p>Os runbooks tambem estao disponiveis como paginas HTML internas.</p>
+            <p>Os runbooks também estão disponíveis como paginas HTML internas.</p>
             <ul class="file-list">
               <li><a href="pages/doc.html?doc=runbook-kind">Cluster kind local</a></li>
               <li><a href="pages/doc.html?doc=runbook-minio">Armazenamento MinIO</a></li>
-              <li><a href="pages/doc.html?doc=runbook-polaris">Catalogo Polaris</a></li>
+              <li><a href="pages/doc.html?doc=runbook-polaris">Catálogo Polaris</a></li>
               <li><a href="pages/doc.html?doc=runbook-airflow-kpo">Airflow com KubernetesPodOperator</a></li>
-              <li><a href="pages/doc.html?doc=runbook-dbt-foundation">Fundacao dbt + DuckDB + Polaris</a></li>
+              <li><a href="pages/doc.html?doc=runbook-dbt-foundation">Fundação dbt + DuckDB + Polaris</a></li>
               <li><a href="pages/doc.html?doc=runbook-raw-staging">Fontes Raw e staging</a></li>
               <li><a href="pages/doc.html?doc=runbook-silver">Camada Silver</a></li>
               <li><a href="pages/doc.html?doc=runbook-backbone">Coluna dorsal dbt MinIO Polaris</a></li>
-              <li><a href="pages/doc.html?doc=runbook-airflow-dbt">Orquestracao dbt com Airflow</a></li>
+              <li><a href="pages/doc.html?doc=runbook-airflow-dbt">Orquestração dbt com Airflow</a></li>
             </ul>
           </section>
 
           <section id="troubleshooting">
             <h2>Troubleshooting</h2>
             <details>
-              <summary>Cluster kind ja existe</summary>
+              <summary>Cluster kind já existe</summary>
               <div>
                 <pre><button class="copy" type="button">copiar</button><code>kind get clusters
 make cluster-status</code></pre>
-                <p>Se quiser recomecar do zero, rode <code>make cluster-delete</code> e depois <code>make cluster-create</code>.</p>
+                <p>Se quiser recomeçar do zero, rode <code>make cluster-delete</code> e depois <code>make cluster-create</code>.</p>
               </div>
             </details>
             <details>
@@ -931,58 +931,58 @@ make cluster-status</code></pre>
                 <pre><button class="copy" type="button">copiar</button><code>kubectl -n data-platform get pods -l job-name=dbt-publish-raw-fixture
 kubectl -n data-platform logs job/dbt-publish-raw-fixture
 kubectl -n data-platform describe job dbt-publish-raw-fixture</code></pre>
-                <p>Confirme que MinIO, Polaris e a imagem dbt local estao prontos.</p>
+                <p>Confirme que MinIO, Polaris e a imagem dbt local estão prontos.</p>
               </div>
             </details>
             <details>
               <summary>UI do Airflow retorna erro de CSRF</summary>
               <div>
-                <p>Feche o port-forward, limpe cookies de <code>localhost:8080</code> ou use janela anonima, e abra novamente.</p>
+                <p>Feche o port-forward, limpe cookies de <code>localhost:8080</code> ou use janela anônima, e abra novamente.</p>
                 <pre><button class="copy" type="button">copiar</button><code>make port-forward-airflow</code></pre>
               </div>
             </details>
             <details>
-              <summary>Banco DuckDB esta bloqueado</summary>
+              <summary>Banco DuckDB está bloqueado</summary>
               <div>
-                <p>Feche DuckDB CLI, DuckDB UI ou extensoes conectadas ao mesmo arquivo antes de rodar dbt.</p>
+                <p>Feche DuckDB CLI, DuckDB UI ou extensões conectadas ao mesmo arquivo antes de rodar dbt.</p>
               </div>
             </details>
             <p style="margin-top: 14px">
-              <a href="pages/doc.html?doc=troubleshooting">Abrir pagina de troubleshooting completo</a>
+              <a href="pages/doc.html?doc=troubleshooting">Abrir página de troubleshooting completo</a>
             </p>
           </section>
 
           <section id="qualidade">
-            <h2>Verificacoes de qualidade</h2>
+            <h2>Verificações de qualidade</h2>
             <p>Rode o gate completo antes de abrir ou atualizar PRs.</p>
             <pre><button class="copy" type="button">copiar</button><code>make ci-pr
 make pre-push</code></pre>
             <div class="grid">
-              <div class="tile"><b>Python</b><p>Ruff, pytest e Bandit quando aplicavel.</p></div>
+              <div class="tile"><b>Python</b><p>Ruff, pytest e Bandit quando aplicável.</p></div>
               <div class="tile"><b>dbt e SQL</b><p>SQLFluff, dbt parse, dbt compile e testes dbt.</p></div>
               <div class="tile"><b>Infra</b><p>YAML, Kubernetes, Dockerfile e scan opcional com Trivy.</p></div>
             </div>
           </section>
 
           <section id="arquivos">
-            <h2>Arquivos da documentacao</h2>
+            <h2>Arquivos da documentação</h2>
             <ul class="file-list">
-              <li><a href="pages/doc.html?doc=overview">Visao geral</a></li>
+              <li><a href="pages/doc.html?doc=overview">Visão geral</a></li>
               <li><a href="pages/doc.html?doc=project-plan">Plano do projeto</a></li>
               <li><a href="pages/doc.html?doc=learning-path">Trilha de aprendizado</a></li>
-              <li><a href="pages/doc.html?doc=customization">Guia de customizacao</a></li>
+              <li><a href="pages/doc.html?doc=customization">Guia de customização</a></li>
               <li><a href="pages/doc.html?doc=troubleshooting">Troubleshooting guiado</a></li>
-              <li><a href="pages/doc.html?doc=lesson-kind">Licao 01 - Kubernetes local</a></li>
-              <li><a href="pages/doc.html?doc=lesson-minio">Licao 02 - MinIO Raw</a></li>
-              <li><a href="pages/doc.html?doc=lesson-polaris">Licao 03 - Polaris</a></li>
-              <li><a href="pages/doc.html?doc=lesson-dbt">Licao 04 - dbt e DuckDB</a></li>
-              <li><a href="pages/doc.html?doc=lesson-airflow">Licao 05 - Airflow</a></li>
-              <li><a href="pages/doc.html?doc=lesson-e2e">Licao 06 - Pipeline ponta a ponta</a></li>
+              <li><a href="pages/doc.html?doc=lesson-kind">Lição 01 - Kubernetes local</a></li>
+              <li><a href="pages/doc.html?doc=lesson-minio">Lição 02 - MinIO Raw</a></li>
+              <li><a href="pages/doc.html?doc=lesson-polaris">Lição 03 - Polaris</a></li>
+              <li><a href="pages/doc.html?doc=lesson-dbt">Lição 04 - dbt e DuckDB</a></li>
+              <li><a href="pages/doc.html?doc=lesson-airflow">Lição 05 - Airflow</a></li>
+              <li><a href="pages/doc.html?doc=lesson-e2e">Lição 06 - Pipeline ponta a ponta</a></li>
             </ul>
           </section>
 
           <p class="footer">
-            Pagina estatica. Abra este arquivo diretamente no navegador:
+            Página estática. Abra este arquivo diretamente no navegador:
             <code>docs/site/index.html</code>.
           </p>
         </div>

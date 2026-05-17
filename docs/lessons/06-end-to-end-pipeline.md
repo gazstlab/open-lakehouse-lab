@@ -1,17 +1,17 @@
-# Licao 06 - Pipeline ponta a ponta
+# Lição 06 - Pipeline ponta a ponta
 
 ## Objetivo
 
-Executar o caminho completo do laboratorio: Raw Parquet no MinIO, dbt + DuckDB,
-Iceberg via Polaris e orquestracao pelo Airflow.
+Executar o caminho completo do laboratório: Raw Parquet no MinIO, dbt + DuckDB,
+Iceberg via Polaris e orquestração pelo Airflow.
 
-## Caminho Rapido
+## Caminho Rápido
 
 ```bash
 make lab-fast-path
 ```
 
-Esse comando e ideal para uma primeira validacao em um ambiente limpo.
+Esse comando é ideal para uma primeira validação em um ambiente limpo.
 
 ## Caminho Passo a Passo
 
@@ -29,7 +29,7 @@ make deploy-airflow
 make trigger-airflow-dbt
 ```
 
-## Inspecao
+## Inspeção
 
 Kubernetes:
 
@@ -80,7 +80,7 @@ select count(*) from main_raw_sources.generic_raw_contract;
 select count(*) from main_staging.stg_raw_source_events;
 ```
 
-## Customizacao
+## Customização
 
 Depois que o exemplo funcionar:
 

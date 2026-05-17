@@ -1,23 +1,23 @@
-# Fundacao dbt + DuckDB + Polaris
+# Fundação dbt + DuckDB + Polaris
 
-Este runbook descreve a fundacao dbt da etapa 08 para o Open Lakehouse Lab.
+Este runbook descreve a fundação dbt da etapa 08 para o Open Lakehouse Lab.
 
 ## Escopo
 
 A etapa 08 configura um projeto dbt que usa DuckDB como engine SQL local e
 Apache Polaris como alvo futuro de Iceberg REST Catalog.
 
-O objetivo e tornar a fundacao de transformacao lakehouse independente da
-ingestao. Adapters de fonte podem ser implementados depois, desde que escrevam
+O objetivo é tornar a fundação de transformação lakehouse independente da
+ingestão. Adapters de fonte podem ser implementados depois, desde que escrevam
 dados seguindo o contrato Raw.
 
-Esta etapa valida estrutura do projeto, configuracao e compilacao. Ela
-intencionalmente nao exige extractors de APIs publicas nem chamadas externas em
+Esta etapa valida estrutura do projeto, configuração e compilação. Ela
+intencionalmente não exige extractors de APIs públicas nem chamadas externas em
 tempo real.
 
 ## Contrato Raw
 
-O contrato Raw generico usa estas colunas tecnicas minimas:
+O contrato Raw genérico usa estas colunas técnicas mínimas:
 
 ```text
 source
@@ -34,10 +34,10 @@ Responsabilidades:
 - `dataset`: dataset produzido pelo adapter de fonte.
 - `ingestion_date`: particao de data associada ao evento landing da Raw.
 - `loaded_at`: timestamp em que o evento foi carregado.
-- `record_hash`: chave tecnica estavel do registro Raw.
-- `raw_payload`: payload original preservado quando for util para auditoria ou replay.
+- `record_hash`: chave técnica estável do registro Raw.
+- `raw_payload`: payload original preservado quando for útil para auditoria ou replay.
 
-O formato Raw canonico atual e Parquet. A etapa 13 escreve e le a fixture pelo
+O formato Raw canônico atual é Parquet. A etapa 13 escreve e lê a fixture pelo
 MinIO; o seed local permanece apenas como fallback de estudo.
 
 ## Arquivos
@@ -58,7 +58,7 @@ docker/dbt-duckdb-polaris.Dockerfile
 
 ## Ambiente local
 
-As configuracoes locais padrao assumem que MinIO e Polaris estao disponiveis a
+As configurações locais padrão assumem que MinIO e Polaris estão disponíveis a
 partir do host por port-forward:
 
 ```bash
@@ -69,19 +69,19 @@ export DBT_POLARIS_WAREHOUSE="lakehouse"
 export AWS_REGION="us-east-1"
 ```
 
-Para uma configuracao educacional local, as credenciais do MinIO podem ser fornecidas
-por variaveis de ambiente:
+Para uma configuração educacional local, as credenciais do MinIO podem ser fornecidas
+por variáveis de ambiente:
 
 ```bash
 export AWS_ACCESS_KEY_ID="<local-minio-access-key>"
 export AWS_SECRET_ACCESS_KEY="<local-minio-secret-key>"
 ```
 
-Nao commite credenciais reais.
+Não commite credenciais reais.
 
 ## Validar o projeto dbt
 
-A partir da raiz do repositorio:
+A partir da raiz do repositório:
 
 ```bash
 make dbt-parse
@@ -95,7 +95,7 @@ make dbt-publish-raw-fixture
 make dbt-run-foundation
 ```
 
-## Construir a imagem de execucao do dbt
+## Construir a imagem de execução do dbt
 
 ```bash
 make build-dbt-image
@@ -109,7 +109,7 @@ make load-dbt-image
 
 ## Macro Polaris
 
-A macro `attach_polaris_catalog` e intencionalmente isolada. Ela pode ser
+A macro `attach_polaris_catalog` é intencionalmente isolada. Ela pode ser
 reutilizada por stages futuras a partir de:
 
 - `dbt run-operation`;
@@ -118,11 +118,11 @@ reutilizada por stages futuras a partir de:
 - tasks Airflow executando dbt no Kubernetes.
 
 DuckDB espera o endpoint do Polaris REST Catalog, incluindo `/api/catalog`, e o
-nome do catalogo Polaris como valor de warehouse.
+nome do catálogo Polaris como valor de warehouse.
 
-## Materializacao Iceberg
+## Materialização Iceberg
 
-A materializacao inicial `iceberg_table` e deliberadamente conservadora:
+A materialização inicial `iceberg_table` é deliberadamente conservadora:
 
 - orientada a full-refresh;
 - sem `MERGE INTO`;
@@ -130,16 +130,16 @@ A materializacao inicial `iceberg_table` e deliberadamente conservadora:
 - sem `DELETE`;
 - sem `ALTER TABLE`.
 
-Isso mantem o MVP facil de entender. Stages posteriores podem evoluir esse
-comportamento quando existirem saude de tabelas, coleta de metadados e estrategias
-de compactacao.
+Isso mantém o MVP facil de entender. Stages posteriores podem evoluir esse
+comportamento quando existirem saúde de tabelas, coleta de metadados e estratégias
+de compactação.
 
-## Limitacoes conhecidas
+## Limitações conhecidas
 
-- A etapa 08 valida a fundacao dbt e o contrato Raw, mas nao exige APIs
-  publicas.
-- Adapters concretos de fonte sao implementados depois.
-- A etapa 13 completa o caminho de execucao MinIO + Polaris. Veja
+- A etapa 08 valida a fundação dbt e o contrato Raw, mas não exige APIs
+  públicas.
+- Adapters concretos de fonte são implementados depois.
+- A etapa 13 completa o caminho de execução MinIO + Polaris. Veja
   `docs/runbooks/dbt-minio-polaris-backbone.md`.
-- Rodar contra um catalogo Polaris ativo exige que os servicos da etapa 04
-  estejam disponiveis.
+- Rodar contra um catálogo Polaris ativo exige que os serviços da etapa 04
+  estejam disponíveis.

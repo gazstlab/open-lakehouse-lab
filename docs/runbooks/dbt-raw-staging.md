@@ -1,27 +1,27 @@
 # Fontes Raw e staging no dbt
 
-Este runbook descreve a fundacao de fonte Raw e staging da etapa 09.
+Este runbook descreve a fundação de fonte Raw e staging da etapa 09.
 
 ## Escopo
 
-A etapa 09 faz o dbt ler um contrato Raw generico e criar um modelo inicial de
-staging sem depender de APIs publicas, DAGs de ingestao no Airflow ou chamadas
+A etapa 09 faz o dbt ler um contrato Raw genérico e criar um modelo inicial de
+staging sem depender de APIs públicas, DAGs de ingestão no Airflow ou chamadas
 externas de rede.
 
-O formato Raw canonico atual e Parquet. A etapa 13 faz o caminho padrao de
-validacao publicar e ler uma fixture Raw Parquet deterministica no MinIO. A
+O formato Raw canônico atual é Parquet. A etapa 13 faz o caminho padrão de
+validação publicar e ler uma fixture Raw Parquet determinística no MinIO. A
 fixture de seed do dbt permanece apenas como fallback local de estudo.
 
-## Layout Raw canonico
+## Layout Raw canônico
 
-Adapters futuros devem escrever registros Raw no MinIO usando esta convencao de
+Adapters futuros devem escrever registros Raw no MinIO usando esta convenção de
 path:
 
 ```text
 s3://lakehouse/raw/source=<source>/dataset=<dataset>/ingestion_date=YYYY-MM-DD/*.parquet
 ```
 
-Colunas tecnicas obrigatorias:
+Colunas técnicas obrigatorias:
 
 ```text
 source
@@ -38,18 +38,18 @@ Responsabilidades:
 - `dataset`: dataset logico produzido pelo adapter de fonte.
 - `ingestion_date`: data da particao Raw.
 - `loaded_at`: timestamp em que o registro foi carregado na Raw.
-- `record_hash`: chave tecnica estavel para deduplicacao e rastreabilidade.
-- `raw_payload`: payload original preservado quando for util para auditoria ou replay.
+- `record_hash`: chave técnica estável para deduplicação e rastreabilidade.
+- `raw_payload`: payload original preservado quando for útil para auditoria ou replay.
 
-Campos conhecidos e estaveis da fonte devem ser expandidos em colunas Parquet
-quando possivel. Outros formatos, como CSV e JSON, podem ser adicionados depois
-por adapters de fonte ou macros de leitura DuckDB, mas nao fazem parte do
-contrato canonico atual.
+Campos conhecidos e estáveis da fonte devem ser expandidos em colunas Parquet
+quando possível. Outros formatos, como CSV e JSON, podem ser adicionados depois
+por adapters de fonte ou macros de leitura DuckDB, mas não fazem parte do
+contrato canônico atual.
 
 ## Fixture Raw
 
 A macro `publish_raw_fixture_parquet` escreve arquivos Raw Parquet
-deterministicos com campos de exemplo controlados:
+determinísticos com campos de exemplo controlados:
 
 ```text
 observed_at
@@ -76,12 +76,12 @@ Convencao de nomes:
 
 - modelos de contrato Raw ficam em `models/raw_sources/`;
 - modelos de staging usam o prefixo `stg_`;
-- modelos de staging devem normalizar tipos e nomes, mas nao criar tabelas de
+- modelos de staging devem normalizar tipos e nomes, mas não criar tabelas de
   negocio Silver.
 
 ## Validar localmente
 
-A partir da raiz do repositorio:
+A partir da raiz do repositório:
 
 ```bash
 make dbt-publish-raw-fixture
@@ -92,15 +92,15 @@ make dbt-parse
 make dbt-compile
 ```
 
-Validacao completa de PR:
+Validação completa de PR:
 
 ```bash
 make ci-pr
 ```
 
-## Limitacoes conhecidas
+## Limitações conhecidas
 
-- Adapters de fontes publicas ainda sao implementados depois.
-- Esta etapa nao implementa adapters Python de fonte.
-- Esta etapa nao consome Open-Meteo, USGS nem BCB.
-- Tabelas Iceberg Silver e Gold sao cobertas pela coluna dorsal da etapa 13.
+- Adapters de fontes públicas ainda são implementados depois.
+- Esta etapa não implementa adapters Python de fonte.
+- Esta etapa não consome Open-Meteo, USGS nem BCB.
+- Tabelas Iceberg Silver e Gold são cobertas pela coluna dorsal da etapa 13.

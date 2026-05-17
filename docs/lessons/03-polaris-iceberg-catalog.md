@@ -1,4 +1,4 @@
-# Licao 03 - Catalogo Iceberg com Polaris
+# Lição 03 - Catálogo Iceberg com Polaris
 
 ## Objetivo
 
@@ -18,7 +18,7 @@ make explain-deploy-polaris
 
 ## Comandos Manuais
 
-O Makefile define credenciais locais padrao, mas voce pode exportar explicitamente:
+O Makefile define credenciais locais padrão, mas você pode exportar explicitamente:
 
 ```bash
 export POLARIS_ROOT_CLIENT_ID="root"
@@ -47,11 +47,11 @@ kubectl -n data-platform wait --for=condition=complete job/polaris-bootstrap-cat
 
 ## O Que Acontece
 
-- Polaris sobe como catalogo REST para tabelas Apache Iceberg.
-- O job de bootstrap cria o catalogo `lakehouse`.
-- O warehouse do catalogo aponta para o armazenamento local em MinIO.
+- Polaris sobe como catálogo REST para tabelas Apache Iceberg.
+- O job de bootstrap cria o catálogo `lakehouse`.
+- O warehouse do catálogo aponta para o armazenamento local em MinIO.
 
-## Inspecao
+## Inspeção
 
 ```bash
 make polaris-status
@@ -66,9 +66,9 @@ make port-forward-polaris
 curl -fsS http://localhost:8182/q/health/ready
 ```
 
-## Customizacao
+## Customização
 
-Os arquivos principais sao:
+Os arquivos principais são:
 
 - `k8s/polaris/deployment.yaml`;
 - `k8s/polaris/service.yaml`;
@@ -76,5 +76,5 @@ Os arquivos principais sao:
 - `dbt/dbt_project.yml`;
 - `dbt/profiles.yml`.
 
-Altere catalogo, endpoint ou warehouse somente quando estiver estudando a
-integracao dbt/DuckDB/Polaris.
+Altere catálogo, endpoint ou warehouse somente quando estiver estudando a
+integração dbt/DuckDB/Polaris.

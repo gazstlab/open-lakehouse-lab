@@ -1,9 +1,9 @@
 # Troubleshooting guiado
 
-Use este guia quando o caminho padrao falhar. A primeira regra e sempre
+Use este guia quando o caminho padrão falhar. A primeira regra é sempre
 inspecionar o recurso que acabou de ser criado antes de avancar.
 
-## Cluster kind ja existe
+## Cluster kind já existe
 
 Sintoma:
 
@@ -24,14 +24,14 @@ Recupere:
 make cluster-status
 ```
 
-Se quiser recomecar do zero:
+Se quiser recomeçar do zero:
 
 ```bash
 make cluster-delete
 make cluster-create
 ```
 
-## Docker nao esta rodando
+## Docker não está rodando
 
 Sintoma:
 
@@ -51,7 +51,7 @@ Recupere:
 2. rode novamente o comando que falhou;
 3. valide com `make cluster-status`.
 
-## UI do MinIO nao abre
+## UI do MinIO não abre
 
 Sintoma:
 
@@ -92,9 +92,9 @@ kubectl -n data-platform describe job dbt-publish-raw-fixture
 
 Causas provaveis:
 
-- a imagem dbt nao foi carregada no kind;
-- MinIO ou Polaris ainda nao esta pronto;
-- credenciais locais nao batem com o secret esperado;
+- a imagem dbt não foi carregada no kind;
+- MinIO ou Polaris ainda não está pronto;
+- credenciais locais não batem com o secret esperado;
 - alguma extensao DuckDB tentou escrever em um filesystem somente leitura.
 
 Recupere:
@@ -107,7 +107,7 @@ make polaris-health
 make publish-raw-fixture-parquet
 ```
 
-## Health do Polaris esta indisponivel
+## Health do Polaris está indisponível
 
 Sintoma:
 
@@ -130,8 +130,8 @@ make deploy-polaris
 make polaris-health
 ```
 
-O erro HTTP `409` no job de bootstrap pode ser aceitavel quando o catalogo
-`lakehouse` ja existe.
+O erro HTTP `409` no job de bootstrap pode ser aceitável quando o catálogo
+`lakehouse` já existe.
 
 ## UI do Airflow retorna erro de CSRF
 
@@ -150,11 +150,11 @@ make airflow-status
 Recupere:
 
 1. pare o `make port-forward-airflow`;
-2. limpe cookies/sessao de `localhost:8080` ou use janela anonima;
+2. limpe cookies/sessão de `localhost:8080` ou use janela anônima;
 3. rode `make port-forward-airflow`;
 4. acesse `http://localhost:8080` novamente.
 
-## Execucao da DAG do Airflow falhou
+## Execução da DAG do Airflow falhou
 
 Verifique as DAG runs:
 
@@ -186,7 +186,7 @@ make deploy-airflow
 make trigger-airflow-dbt
 ```
 
-## Banco DuckDB esta bloqueado
+## Banco DuckDB está bloqueado
 
 Sintoma:
 
@@ -196,15 +196,15 @@ Could not set lock on file dbt/target/open_lakehouse_lab.duckdb
 
 Causa:
 
-Outro processo DuckDB CLI, DuckDB UI ou dbt esta usando o mesmo arquivo.
+Outro processo DuckDB CLI, DuckDB UI ou dbt está usando o mesmo arquivo.
 
 Recupere:
 
-1. feche a aba DuckDB CLI/UI que esta usando o banco;
+1. feche a aba DuckDB CLI/UI que está usando o banco;
 2. rode novamente o comando dbt;
 3. se precisar inspecionar enquanto o dbt roda, abra uma copia do arquivo.
 
-## Schema DuckDB nao existe
+## Schema DuckDB não existe
 
 Sintoma:
 

@@ -9,7 +9,7 @@ Este runbook descreve o deploy do MinIO da etapa 03 para o lakehouse local.
 
 ## Subir MinIO
 
-A partir da raiz do repositorio:
+A partir da raiz do repositório:
 
 ```bash
 make deploy-minio
@@ -38,17 +38,17 @@ Endpoints locais:
 - S3 API: `http://localhost:9000`
 - Console: `http://localhost:9001`
 
-Credenciais locais do laboratorio:
+Credenciais locais do laboratório:
 
-- Usuario: `minioadmin`
+- Usuário: `minioadmin`
 - Senha: `minioadmin123`
 
-Essas credenciais sao apenas para desenvolvimento local neste laboratorio
-educacional. Nao reutilize fora do cluster kind local.
+Essas credenciais são apenas para desenvolvimento local neste laboratório
+educacional. Não reutilize fora do cluster kind local.
 
 ## Caminhos do lakehouse
 
-O bucket `lakehouse` e inicializado com estes prefixos base:
+O bucket `lakehouse` é inicializado com estes prefixos base:
 
 ```text
 s3://lakehouse/raw/
@@ -58,9 +58,9 @@ s3://lakehouse/metadata/
 
 Responsabilidades dos caminhos:
 
-- `raw/`: payloads originais de APIs publicas.
+- `raw/`: payloads originais de APIs públicas.
 - `warehouse/`: dados futuros do warehouse de tabelas Iceberg.
-- `metadata/`: artefatos de pipeline, catalogo, freshness e qualidade.
+- `metadata/`: artefatos de pipeline, catálogo, freshness e qualidade.
 
 ## Remover MinIO
 
@@ -77,5 +77,5 @@ make cluster-delete
 ## Escopo
 
 A etapa 03 apenas sobe armazenamento de objetos local e inicializa o bucket base. Polaris,
-tabelas Iceberg, integracao dbt e workloads Airflow entram em stages
+tabelas Iceberg, integração dbt e workloads Airflow entram em stages
 posteriores.

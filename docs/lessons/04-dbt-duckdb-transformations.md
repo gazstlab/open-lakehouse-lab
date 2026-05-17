@@ -1,4 +1,4 @@
-# Licao 04 - Transformacoes com dbt e DuckDB
+# Lição 04 - Transformações com dbt e DuckDB
 
 ## Objetivo
 
@@ -42,13 +42,13 @@ DBT_ENABLE_POLARIS_ATTACH=true DBT_THREADS=1 dbt test --no-populate-cache --sele
 
 ## O Que Acontece
 
-- `raw_sources` le arquivos Parquet com `read_parquet`.
+- `raw_sources` lê arquivos Parquet com `read_parquet`.
 - `staging` normaliza nomes, tipos e campos estruturados.
 - `silver` publica tabelas Iceberg limpas.
 - `intermediate` prepara agregacoes reutilizaveis.
-- `marts` publica tabelas Gold para analise.
+- `marts` publica tabelas Gold para análise.
 
-## Inspecao com DuckDB
+## Inspeção com DuckDB
 
 Abra o arquivo local:
 
@@ -64,14 +64,14 @@ select * from main_raw_sources.generic_raw_contract limit 10;
 select * from main_staging.stg_raw_source_events limit 10;
 ```
 
-Se voce anexar o arquivo a partir de outro banco, qualifique com o nome do
-catalogo retornado por `show schemas`, por exemplo:
+Se você anexar o arquivo a partir de outro banco, qualifique com o nome do
+catálogo retornado por `show schemas`, por exemplo:
 
 ```sql
 select * from lab.main_raw_sources.generic_raw_contract limit 10;
 ```
 
-## Customizacao
+## Customização
 
 Crie novos modelos nas pastas `dbt/models/staging`, `dbt/models/silver`,
 `dbt/models/intermediate` e `dbt/models/marts`. Documente colunas e testes nos

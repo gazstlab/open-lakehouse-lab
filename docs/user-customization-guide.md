@@ -1,9 +1,9 @@
-# Guia de customizacao do usuario
+# Guia de customização do usuário
 
-Este guia explica como usar o Open Lakehouse Lab para criar um pipeline proprio
-sem perder o caminho padrao como referencia.
+Este guia explica como usar o Open Lakehouse Lab para criar um pipeline próprio
+sem perder o caminho padrão como referência.
 
-## O que e plataforma, exemplo e experimento
+## O que é plataforma, exemplo e experimento
 
 Plataforma:
 
@@ -12,28 +12,28 @@ Plataforma:
 - imagens em `docker/` e `airflow/Dockerfile`;
 - comandos do `Makefile`.
 
-Exemplo padrao:
+Exemplo padrão:
 
 - fixture Raw em Parquet;
 - modelos dbt em `dbt/models/`;
 - DAG `airflow/dags/open_lakehouse_lab_daily.py`.
 
-Experimentos do usuario:
+Experimentos do usuário:
 
 - novos arquivos Raw em MinIO;
 - novos modelos dbt;
-- DAGs didaticas ou DAGs proprias em `airflow/dags/lab_*.py`;
-- ajustes de schedule, parametros e retries.
+- DAGs didáticas ou DAGs proprias em `airflow/dags/lab_*.py`;
+- ajustes de schedule, parâmetros e retries.
 
 ## Adicionar Dados Raw
 
-O contrato canonico inicial da Raw e Parquet:
+O contrato canônico inicial da Raw é Parquet:
 
 ```text
 s3://lakehouse/raw/source=<source>/dataset=<dataset>/ingestion_date=YYYY-MM-DD/*.parquet
 ```
 
-Colunas tecnicas minimas:
+Colunas técnicas mínimas:
 
 ```text
 source
@@ -45,7 +45,7 @@ raw_payload
 ```
 
 Campos conhecidos da fonte podem ser gravados como colunas adicionais no
-Parquet. O `raw_payload` preserva o registro original quando isso for util para
+Parquet. O `raw_payload` preserva o registro original quando isso for útil para
 auditoria ou reprocessamento.
 
 Para estudar sem criar um adapter, publique a fixture:
@@ -67,7 +67,7 @@ para:
 lakehouse/raw/source=*/dataset=*/ingestion_date=*/*.parquet
 ```
 
-Tambem e possivel listar por pod:
+Também é possível listar por pod:
 
 ```bash
 kubectl -n data-platform run minio-list --rm -i --restart=Never \
@@ -93,19 +93,19 @@ Arquivos principais:
 | Criar tabelas Iceberg Silver | `dbt/models/silver/*.sql` |
 | Criar modelos intermediarios | `dbt/models/intermediate/*.sql` |
 | Criar tabelas Gold | `dbt/models/marts/*.sql` |
-| Configurar caminhos e catalogo | `dbt/dbt_project.yml` e `dbt/profiles.yml` |
+| Configurar caminhos e catálogo | `dbt/dbt_project.yml` e `dbt/profiles.yml` |
 
-Para um novo dataset, o caminho mais simples e:
+Para um novo dataset, o caminho mais simples é:
 
-1. gravar Parquet na Raw seguindo o caminho canonico;
+1. gravar Parquet na Raw seguindo o caminho canônico;
 2. criar ou ajustar um modelo em `dbt/models/staging/`;
 3. criar um modelo Silver em `dbt/models/silver/`;
 4. criar marts em `dbt/models/marts/` se precisar de tabelas finais;
 5. documentar colunas e testes nos arquivos `schema.yml`;
 6. validar com `make dbt-parse`, `make dbt-compile` e testes dbt.
 
-Quando o novo modelo estiver dentro das pastas ja selecionadas pela DAG
-principal, normalmente nao e necessario editar Airflow. A DAG executa:
+Quando o novo modelo estiver dentro das pastas já selecionadas pela DAG
+principal, normalmente não é necessário editar Airflow. A DAG executa:
 
 ```text
 dbt run --select raw_sources staging silver
@@ -116,24 +116,24 @@ dbt test --select marts
 
 ## Quando Editar Airflow
 
-Nao edite `airflow/dags/open_lakehouse_lab_daily.py` quando:
+Não edite `airflow/dags/open_lakehouse_lab_daily.py` quando:
 
-- voce apenas adicionou modelos dbt nas pastas existentes;
-- voce alterou testes ou documentacao dbt;
-- voce mudou uma transformacao SQL que continua no fluxo Raw -> Silver -> Gold.
+- você apenas adicionou modelos dbt nas pastas existentes;
+- você alterou testes ou documentação dbt;
+- você mudou uma transformação SQL que continua no fluxo Raw -> Silver -> Gold.
 
-Edite a DAG principal ou crie uma DAG propria quando:
+Edite a DAG principal ou crie uma DAG própria quando:
 
 - precisar de uma nova task antes do dbt, como um adapter de fonte;
 - quiser alterar schedule, retries ou limites de concorrencia;
-- precisar passar parametros para uma execucao;
+- precisar passar parâmetros para uma execução;
 - quiser dividir o pipeline em grupos ou DAGs menores;
-- quiser estudar operadores do Airflow sem afetar o exemplo padrao.
+- quiser estudar operadores do Airflow sem afetar o exemplo padrão.
 
 Para experimentos, prefira criar DAGs `airflow/dags/lab_*.py`. A etapa 14 inclui
 exemplos pequenos que podem ser ativados e disparados pela UI do Airflow.
 
-## Parametros Importantes
+## Parâmetros Importantes
 
 dbt e DuckDB:
 
@@ -142,19 +142,19 @@ dbt e DuckDB:
 | `DBT_DUCKDB_PATH` | arquivo DuckDB local ou no pod |
 | `DBT_S3_ENDPOINT` | endpoint MinIO para DuckDB `httpfs` |
 | `DBT_RAW_SOURCE_EVENTS_PATH` | glob Parquet lido pela Raw |
-| `DBT_ENABLE_POLARIS_ATTACH` | habilita attach do catalogo Polaris |
+| `DBT_ENABLE_POLARIS_ATTACH` | habilita attach do catálogo Polaris |
 | `DBT_POLARIS_ENDPOINT` | endpoint REST Catalog |
-| `DBT_POLARIS_CATALOG_NAME` | nome do catalogo Iceberg |
-| `DBT_POLARIS_WAREHOUSE` | warehouse/caminho do catalogo |
+| `DBT_POLARIS_CATALOG_NAME` | nome do catálogo Iceberg |
+| `DBT_POLARIS_WAREHOUSE` | warehouse/caminho do catálogo |
 
 Airflow:
 
 | Arquivo | Uso |
 |---|---|
 | `airflow/dags/open_lakehouse_lab_daily.py` | DAG principal do exemplo |
-| `airflow/dags/lab_*.py` | DAGs didaticas e experimentos |
+| `airflow/dags/lab_*.py` | DAGs didáticas e experimentos |
 | `k8s/airflow/values.yaml` | valores Helm do Airflow |
-| `k8s/airflow/pod-launcher-rbac.yaml` | permissao para criar pods |
+| `k8s/airflow/pod-launcher-rbac.yaml` | permissão para criar pods |
 | `k8s/airflow/dbt-workload-pvc.yaml` | PVC usado pelo target dbt dos pods |
 
 ## Ciclo de Desenvolvimento Local
@@ -186,7 +186,7 @@ make dbt-run-gold
 make dbt-test-gold
 ```
 
-Valide pela orquestracao:
+Valide pela orquestração:
 
 ```bash
 make trigger-airflow-dbt
@@ -202,8 +202,8 @@ make ci-pr
 
 ## Limites Atuais
 
-- A Raw canonica inicial considera Parquet.
-- CSV e JSON podem ser estudados depois com adapters ou macros DuckDB, mas nao
-  fazem parte do caminho padrao desta etapa.
-- O projeto e um laboratorio local, nao uma plataforma de producao.
-- Credenciais padrao sao apenas para desenvolvimento local.
+- A Raw canônica inicial considera Parquet.
+- CSV e JSON podem ser estudados depois com adapters ou macros DuckDB, mas não
+  fazem parte do caminho padrão desta etapa.
+- O projeto é um laboratório local, não uma plataforma de produção.
+- Credenciais padrão são apenas para desenvolvimento local.
